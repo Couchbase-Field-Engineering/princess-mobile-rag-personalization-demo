@@ -1,12 +1,12 @@
-"""RCI Guest Concierge - the agent behind the app's Concierge tab.
+"""Princess Guest Concierge - the agent behind the app's Concierge tab.
 
 One turn:
 
 1. **Classify** the question into an intent, and decide whether it is
    *personal* (needs this guest's data) or a *playbook* question anyone
-   could ask ("what's in The Key?").
+   could ask ("what's in Princess Premier?").
 2. **Playbook questions -> AOM RAG Application.** One call to
-   `/v1/agent/rag/rci-guest-concierge/query`. The app is scoped to today's
+   `/v1/agent/rag/princess-guest-concierge/query`. The app is scoped to today's
    Guest Services Playbook document; AOM runs retrieval behind its Context
    Cache and generation behind its LLM Cache, and counts the query on its
    RAG Applications page. If the app isn't registered (or AOM predates RAG
@@ -14,7 +14,7 @@ One turn:
    data.
 3. **Personal questions -> Context Caching.** Look the context up in AOM's
    Context Cache (`/v1/context/get`, namespace
-   `rag:rci-guest-concierge:guest-context`), then in the Couchbase
+   `rag:princess-guest-concierge:guest-context`), then in the Couchbase
    `ctx::<guest>::<intent>` document. On a miss, assemble it: AOM Knowledge
    Base retrieval scoped to this guest's profile document and to the
    playbook, plus live facts from the governed MCP tools (upgrade
@@ -27,7 +27,7 @@ One turn:
 4. **Memory** - recall what this guest told the concierge before (AOM agent
    memory), live every turn.
 5. **LLM Caching** - complete through AOM `/v1/llm/complete` in the
-   `rag:rci-guest-concierge:personal` namespace (the `rag:<app>:` prefix is
+   `rag:princess-guest-concierge:personal` namespace (the `rag:<app>:` prefix is
    how AOM attributes the activity to the RAG application).
 6. Suggest one-tap actions; the app turns a tap into an offline-first
    `requests` document.
@@ -40,13 +40,13 @@ import time
 import uuid
 
 from . import catalog as C
-from . import config, knowledge, rag_app, tool_gateway
+from . import config, knowledge, metrics, rag_app, tool_gateway
 from .aom_client import AOMError, aom, current_trace
 from .docs import (STATE, chat_id, ctx_id, days_to_sail, guest_channel, now_iso,
                    profile_id)
 from .store import store
 
-log = logging.getLogger("rccl.concierge")
+log = logging.getLogger("pcl.concierge")
 
 INTENTS = ["upgrade", "excursion", "dining", "package", "spa", "checkin", "itinerary", "service_recovery", "general"]
 # Context-cache keys: personal context per intent, plus a playbook-only
@@ -56,15 +56,15 @@ CONTEXT_KEYS = INTENTS + [f"playbook_{i}" for i in INTENTS]
 KEYWORDS = {
     "service_recovery": ["noisy", "noise", "broken", "dirty", "complain", "disappointed", "upset", "terrible", "awful",
                          "not working", "problem with my room", "problem with our room", "leak", "smell"],
-    "upgrade": ["upgrade", "suite", "royalup", "royal up", "bid", "balcony", "bigger room", "bigger cabin", "stateroom",
+    "upgrade": ["upgrade", "suite", "princess upgrade", "upgrade bid", "bid", "balcony", "bigger room", "bigger cabin", "stateroom",
                 "cabin", "ocean view", "loft"],
-    "excursion": ["excursion", "shore", "snorkel", "tour", "cococay", "beach", "things to do", "port", "zipline",
+    "excursion": ["excursion", "shore", "snorkel", "tour", "princess cays", "beach", "things to do", "port", "zipline",
                   "ruins", "waterpark", "kids do"],
-    "dining": ["dinner", "dining", "restaurant", "eat", "chops", "steak", "sushi", "italian", "chef's table", "table for",
+    "dining": ["dinner", "dining", "restaurant", "eat", "crown grill", "steak", "sushi", "italian", "chef's table", "table for",
                "anniversary dinner"],
-    "package": ["drink", "beverage", "wifi", "wi-fi", "internet", "voom", "the key", "package", "cocktail", "soda"],
+    "package": ["drink", "beverage", "wifi", "wi-fi", "internet", "medallionnet", "medallion", "premier", "princess plus", "package", "cocktail", "soda"],
     "spa": ["spa", "massage", "facial", "relax", "thermal", "wellness"],
-    "checkin": ["check-in", "check in", "checkin", "arrival time", "boarding", "setsail", "set sail", "documents", "terminal"],
+    "checkin": ["check-in", "check in", "checkin", "arrival time", "boarding", "oceanready", "ocean ready", "medallion", "documents", "terminal"],
     "itinerary": ["itinerary", "schedule", "what day", "which day", "when do we", "ports", "port times", "sea day", "my trip",
                   "my cruise", "where are we"],
 }
@@ -75,18 +75,18 @@ PERSONAL_INTENTS = {"upgrade", "itinerary", "service_recovery"}
 # it is retrieved with a stable query rather than the wording of whichever
 # question happened to miss the cache first.
 INTENT_QUERY = {
-    "upgrade": "stateroom category upgrade RoyalUp bid suite perks",
+    "upgrade": "stateroom category upgrade Princess Upgrade bid suite perks",
     "excursion": "shore excursions ports itinerary interests",
     "dining": "specialty dining restaurants celebration dietary",
-    "package": "beverage package internet VOOM The Key dining package",
-    "spa": "Vitality Spa treatments massage port day",
-    "checkin": "online check-in arrival time SetSail Pass documents",
+    "package": "beverage package internet MedallionNet Princess Premier dining package",
+    "spa": "Lotus Spa treatments massage port day",
+    "checkin": "OceanReady online check-in arrival group Medallion boarding pass documents",
     "itinerary": "itinerary ports days sailing schedule",
     "service_recovery": "stateroom issue service recovery goodwill upgrade",
     "general": "frequently asked questions policy",
 }
 
-PERSONA = ("You are the Royal Caribbean Guest Concierge in the guest's mobile app. Be warm, concise (under 120 words) "
+PERSONA = ("You are the Princess Cruises Guest Concierge in the guest's mobile app. Be warm, concise (under 120 words) "
            "and specific. Use only the facts in CONTEXT. Never invent prices, availability or bookings. Never say a "
            "booking is done - the guest confirms actions with the buttons shown under your reply.")
 
@@ -100,7 +100,7 @@ def classify(message: str) -> tuple[str, bool]:
     personal = bool(PERSONAL_RE.search(message)) or intent in PERSONAL_INTENTS
     if intent == "general" and not personal:
         return "general", False
-    # A product/policy question phrased generically ("how does RoyalUp work?")
+    # A product/policy question phrased generically ("how does Princess Upgrade work?")
     # stays on the shared playbook path even though its intent is personal-capable.
     if not PERSONAL_RE.search(message) and re.match(r"\s*(how|what|is|are|can|do|does|who)\b", m) and intent not in ("service_recovery",):
         return intent, False
@@ -285,7 +285,7 @@ async def _aom_context_set(aom_key: str, doc: dict, build_ms) -> None:
 # --------------------------------------------------------------------------
 def _guest_summary(p: dict) -> str:
     r = p["reservation"]
-    return (f"{p['first_name']} {p['last_name']}, Crown & Anchor {p['loyalty']['tier']}. Sailing {r['ship_name']} "
+    return (f"{p['first_name']} {p['last_name']}, Captain's Circle {p['loyalty']['tier']}. Sailing {r['ship_name']} "
             f"({r['itinerary_name']}) from {r['embark_port']} on {r['embark_date']}, {days_to_sail(p)} days away. "
             f"Party of {r['party_size']}. Stateroom {r['stateroom']['stateroom_number']} "
             f"({r['stateroom']['category_name']}). Check-in: {r['checkin_status']}. Celebrating: "
@@ -297,7 +297,7 @@ def _facts_text(facts: dict) -> str:
     d = facts.get("data") or {}
     if facts.get("tool") == "get_upgrade_offers":
         rows = [f"{o['category_name']} ({o['category_code']}): {o['available']} left, instant ${o['instant_price_ppn']}"
-                f"/person/night (total ${o['instant_total_usd']:,}), RoyalUp min bid ${o['royalup_min_bid_ppn']}"
+                f"/person/night (total ${o['instant_total_usd']:,}), Princess Upgrade min bid ${o['upgrade_bid_min_ppn']}"
                 + (f", suggested bid ${o['recommended_bid_ppn']}" if o.get("recommended_bid_ppn") else "")
                 for o in d.get("offers", [])]
         return "Upgrade options: " + "; ".join(rows)
@@ -368,9 +368,9 @@ def compose_fallback(intent: str, personal: bool, message: str, ctx: dict, profi
         left = (f"there's only 1 {rec['category_name']} left" if rec["available"] == 1
                 else f"there are {rec['available']} {rec['category_name']}s left")
         return (f"Great news, {first} - {left} on {r['ship_name']}"
-                + (f", perfect for your {cel}" if cel else "") + f". You can bid with RoyalUp from "
-                f"${rec['royalup_min_bid_ppn']}/person/night (we'd suggest "
-                f"${rec.get('recommended_bid_ppn') or rec['royalup_min_bid_ppn']}) or upgrade instantly for "
+                + (f", perfect for your {cel}" if cel else "") + f". You can bid with Princess Upgrade from "
+                f"${rec['upgrade_bid_min_ppn']}/person/night (we'd suggest "
+                f"${rec.get('recommended_bid_ppn') or rec['upgrade_bid_min_ppn']}) or upgrade instantly for "
                 f"${rec['instant_price_ppn']}/person/night (${rec['instant_total_usd']:,} for your stateroom).")
     if intent == "excursion":
         ex = d.get("excursions", [])[:3]
@@ -382,7 +382,7 @@ def compose_fallback(intent: str, personal: bool, message: str, ctx: dict, profi
         if r["checkin_status"] == "complete":
             return f"You're all checked in, {first}! Arrival time {r.get('arrival_slot')} on {r['embark_date']}."
         return (f"You haven't checked in yet, {first}. It takes about 5 minutes - pick an arrival time for "
-                f"{r['embark_date']} and your SetSail Pass will be ready.")
+                f"{r['embark_date']} and your Medallion boarding pass will be ready.")
     if intent == "itinerary":
         stops = ", ".join(f"{p['date'][5:]} {p['port'].split(',')[0]}" for p in r["ports"])
         return f"Here's your {r['itinerary_name']} on {r['ship_name']}: {stops}."
@@ -394,7 +394,7 @@ def compose_fallback(intent: str, personal: bool, message: str, ctx: dict, profi
         return (f"For {r['ship_name']}, I'd suggest {pick['name']}" + (f" for your {cel}" if cel else "")
                 + ". Pick a night and time and I'll pass along your dietary notes.")
     if intent == "spa":
-        return "Vitality Spa treatments are 20% off on port days - a great way to unwind while others go ashore."
+        return "Lotus Spa treatments are 20% off on port days - a great way to unwind while others go ashore."
     if intent == "package":
         return "Based on your past sailings, a package could save you money - see the options below."
     return "Here's what I found for your sailing."
@@ -408,8 +408,8 @@ def suggest_actions(intent: str, ctx: dict, profile: dict, message: str) -> list
         offers = d.get("offers", [])
         rec = next((o for o in offers if o.get("recommended")), offers[0] if offers else None)
         if rec and rec["available"] > 0:
-            bid = rec.get("recommended_bid_ppn") or rec["royalup_min_bid_ppn"]
-            acts.append({"label": f"Bid ${bid}/night · {rec['category_name']}", "tool": "place_royalup_bid",
+            bid = rec.get("recommended_bid_ppn") or rec["upgrade_bid_min_ppn"]
+            acts.append({"label": f"Bid ${bid}/night · {rec['category_name']}", "tool": "place_upgrade_bid",
                          "args": {"category_code": rec["category_code"], "bid_per_night_usd": bid}})
             acts.append({"label": f"Upgrade now · ${rec['instant_total_usd']:,}", "tool": "purchase_cabin_upgrade",
                          "args": {"category_code": rec["category_code"]}})
@@ -454,7 +454,7 @@ async def _remember(guest_id: str, message: str, reply: str, intent: str, sessio
         return
     try:
         await aom.memory_add(guest_id, f"Guest said ({intent}): {message.strip()[:500]}", session_id=session_id,
-                             metadata={"intent": intent, "app": "rccl-mobile"})
+                             metadata={"intent": intent, "app": "pcl-mobile"})
     except AOMError as exc:
         log.info("memory add skipped: %s", exc)
 
@@ -527,6 +527,7 @@ async def ask(guest_id: str, message: str, session_id: str | None = None) -> dic
                     "llm": via_rag["llm"], "trace_id": via_rag["trace_id"] or trace_id, "governed": True,
                     "total_ms": round((time.perf_counter() - t0) * 1000, 1), "export_date": STATE.get("export_date"),
                 }
+                metrics.concierge(result)
                 await _append_chat(guest_id, message, result)
                 return result
         ctx = await get_context(guest_id, intent, profile, personal)
@@ -568,6 +569,7 @@ async def ask(guest_id: str, message: str, session_id: str | None = None) -> dic
             "governed": aom.enabled, "total_ms": round((time.perf_counter() - t0) * 1000, 1),
             "export_date": STATE.get("export_date"),
         }
+        metrics.concierge(result)
         await _append_chat(guest_id, message, result)
         await _remember(guest_id, message, reply, intent, session_id)
         return result

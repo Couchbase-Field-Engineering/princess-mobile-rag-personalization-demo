@@ -163,11 +163,11 @@ async def get_upgrade_offers(guest_id: str) -> dict:
             continue
         left = inv["available"].get(cat["code"], 0)
         ppn = C.upgrade_price_ppn(cur, cat["code"])
-        min_bid = C.royalup_min_bid(cur, cat["code"])
+        min_bid = C.upgrade_bid_min(cur, cat["code"])
         offers.append({
             "category_code": cat["code"], "category_name": cat["name"], "available": left,
             "instant_price_ppn": ppn, "instant_total_usd": ppn * r["nights"] * r["party_size"],
-            "royalup_min_bid_ppn": min_bid, "perks": C.CATEGORY_PERKS.get(cat["code"], []),
+            "upgrade_bid_min_ppn": min_bid, "perks": C.CATEGORY_PERKS.get(cat["code"], []),
             "recommended": cat["code"] == p["ml_scores"].get("recommended_upgrade_category"),
             "recommended_bid_ppn": p["ml_scores"].get("recommended_bid_per_night_usd")
             if cat["code"] == p["ml_scores"].get("recommended_upgrade_category") else None,
@@ -187,15 +187,15 @@ def _validate_upgrade(p, to_code):
     return cur
 
 
-async def place_royalup_bid(guest_id: str, category_code: str, bid_per_night_usd: float) -> dict:
+async def place_upgrade_bid(guest_id: str, category_code: str, bid_per_night_usd: float) -> dict:
     p = await load_profile(guest_id)
     cur = _validate_upgrade(p, category_code)
     r = p["reservation"]
-    min_bid = C.royalup_min_bid(cur, category_code)
+    min_bid = C.upgrade_bid_min(cur, category_code)
     list_ppn = C.upgrade_price_ppn(cur, category_code)
     bid = float(bid_per_night_usd)
     if bid < min_bid:
-        raise ToolError(f"Minimum RoyalUp bid for {C.CATEGORY_BY_CODE[category_code]['name']} is {money(min_bid)} per person per night")
+        raise ToolError(f"Minimum Princess Upgrade bid for {C.CATEGORY_BY_CODE[category_code]['name']} is {money(min_bid)} per person per night")
     if bid > list_ppn:
         raise ToolError(f"That bid is above the instant upgrade price ({money(list_ppn)}) - buy it instantly instead")
     # The revenue team's clearing price for this sailing/category (deterministic per sailing).
@@ -204,11 +204,11 @@ async def place_royalup_bid(guest_id: str, category_code: str, bid_per_night_usd
     total = round(bid * r["nights"] * r["party_size"], 2)
     if bid >= clearing:
         await take_inventory(r["sailing_id"], category_code)
-        item = await _reassign(p, category_code, "royalup", total, {"bid_ppn": bid})
+        item = await _reassign(p, category_code, "upgrade_bid", total, {"bid_ppn": bid})
         return {"ok": True, "status": "accepted", "charge_usd": total, "item": item,
-                "summary": f"RoyalUp bid accepted! You're now in {item['stateroom']['category_name']} "
+                "summary": f"Princess Upgrade bid accepted! You're now in {item['stateroom']['category_name']} "
                            f"stateroom {item['stateroom']['stateroom_number']}. {money(total)} charged to your card on file."}
-    item = _item("royalup_bid", f"RoyalUp bid · {C.CATEGORY_BY_CODE[category_code]['name']}",
+    item = _item("upgrade_bid", f"Princess Upgrade bid · {C.CATEGORY_BY_CODE[category_code]['name']}",
                  status="submitted", to_category=category_code, bid_ppn=bid, potential_charge_usd=total,
                  date=r["embark_date"])
     await record_booking([guest_id], item)
@@ -334,9 +334,9 @@ async def purchase_package(guest_id: str, package_code: str) -> dict:
         raise ToolError(f"Unknown package '{package_code}'")
     if package_code in p.get("purchased_for_sailing", {}).get("packages", []):
         raise ToolError(f"You already have the {pkg['name']}")
-    if package_code == "DELUXE_BEV" and p["age_band"] in ("0-2", "3-5", "6-11", "12-17"):
-        raise ToolError("The Deluxe Beverage Package is for guests 21 and over")
-    qty = 1 if pkg["per"].startswith("device") else (adults(p) if package_code in ("DELUXE_BEV", "REFRESH") else 1)
+    if package_code == "PLUS" and p["age_band"] in ("0-2", "3-5", "6-11", "12-17"):
+        raise ToolError("The Princess Plus is for guests 21 and over")
+    qty = 1 if pkg["per"].startswith("device") else (adults(p) if package_code in ("PLUS", "ZERO_ALC") else 1)
     total = pkg["price_per_day"] * r["nights"] * qty
     p.setdefault("purchased_for_sailing", {}).setdefault("packages", []).append(package_code)
     await save_profiles({guest_id: p})
@@ -384,19 +384,19 @@ async def complete_online_checkin(guest_id: str, arrival_slot: str) -> dict:
             gp["reservation"]["arrival_slot"] = arrival_slot
             updates[gid] = gp
     await save_profiles(updates)
-    item = _item("checkin", f"SetSail Pass · arrival {arrival_slot}", arrival_slot=arrival_slot,
+    item = _item("checkin", f"OceanReady · arrival {arrival_slot}", arrival_slot=arrival_slot,
                  date=p["reservation"]["embark_date"], time=arrival_slot, charge_usd=0)
     await record_booking(party, item)
     await after_change(party)
     return {"ok": True, "status": "confirmed", "charge_usd": 0, "item": item,
             "summary": f"You're checked in! {len(updates)} guest{'s' if len(updates) > 1 else ''} arriving at "
-                       f"{arrival_slot} on {p['reservation']['embark_date']}. Your SetSail Pass is in My Cruise."}
+                       f"{arrival_slot} on {p['reservation']['embark_date']}. Your Medallion boarding pass is in My Cruise."}
 
 
 TOOLS = {
     "get_guest_context": get_guest_context,
     "get_upgrade_offers": get_upgrade_offers,
-    "place_royalup_bid": place_royalup_bid,
+    "place_upgrade_bid": place_upgrade_bid,
     "purchase_cabin_upgrade": purchase_cabin_upgrade,
     "apply_goodwill_upgrade": apply_goodwill_upgrade,
     "search_shore_excursions": search_shore_excursions,

@@ -12,8 +12,8 @@ const PROMPTS = [
   'Can we upgrade to a suite?',
   'What should we do in port?',
   'Book us a nice dinner',
-  'How does RoyalUp work?',
-  "What's included in The Key?",
+  'How does Princess Upgrade work?',
+  "What's included in Princess Premier?",
   'Our room is noisy and the AC is broken',
 ];
 
@@ -55,7 +55,7 @@ export default function Concierge() {
           <View style={styles.bot}><Ionicons name="sparkles" size={18} color={theme.color.navy} /></View>
           <View style={{ flex: 1 }}>
             <Text style={styles.title}>Concierge</Text>
-            <Text style={styles.subtitle}>RCI Guest Concierge agent · governed by Couchbase AOM</Text>
+            <Text style={styles.subtitle}>Princess Guest Concierge agent · governed by Couchbase AOM</Text>
           </View>
         </View>
         <View style={{ marginTop: 10 }}><SyncBadge sync={sync} dark /></View>
@@ -74,7 +74,7 @@ export default function Concierge() {
         {messages.map((m) => <Bubble key={m.id} m={m} />)}
         {thinking ? (
           <View style={[styles.bubble, styles.botBubble, { flexDirection: 'row', gap: 8, alignItems: 'center' }]}>
-            <ActivityIndicator color={theme.color.royal} />
+            <ActivityIndicator color={theme.color.princess} />
             <Text style={{ color: theme.color.muted }}>Checking your context cache…</Text>
           </View>
         ) : null}
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   introTitle: { fontWeight: '900', fontSize: theme.type.lg, color: theme.color.navy },
   introBody: { color: theme.color.muted, lineHeight: 20 },
   bubble: { padding: 13, borderRadius: 18, maxWidth: '88%' },
-  meBubble: { backgroundColor: theme.color.royal, alignSelf: 'flex-end', borderBottomRightRadius: 6 },
+  meBubble: { backgroundColor: theme.color.princess, alignSelf: 'flex-end', borderBottomRightRadius: 6 },
   botBubble: { backgroundColor: theme.color.surface, alignSelf: 'flex-start', borderBottomLeftRadius: 6, ...theme.shadow.card },
   action: { flexDirection: 'row', gap: 6, alignItems: 'center', backgroundColor: theme.color.gold, borderRadius: 999, paddingVertical: 9, paddingHorizontal: 14, alignSelf: 'flex-start' },
   actionText: { color: theme.color.navy, fontWeight: '800', fontSize: theme.type.sm },
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   sourceText: { fontSize: theme.type.xs, color: theme.color.muted },
   chips: { gap: 8, paddingHorizontal: 12, paddingVertical: 8 },
   chip: { backgroundColor: theme.color.surface, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: theme.color.border },
-  chipText: { color: theme.color.royal, fontWeight: '700', fontSize: theme.type.sm },
+  chipText: { color: theme.color.princess, fontWeight: '700', fontSize: theme.type.sm },
   inputRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 12, alignItems: 'center' },
   input: { flex: 1, backgroundColor: theme.color.surface, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 12, fontSize: theme.type.md, borderWidth: 1, borderColor: theme.color.border, color: theme.color.text },
   send: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.color.gold, alignItems: 'center', justifyContent: 'center' },

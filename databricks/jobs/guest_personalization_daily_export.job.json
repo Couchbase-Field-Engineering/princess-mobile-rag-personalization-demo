@@ -1,6 +1,6 @@
 {
   "name": "guest_personalization_daily_export",
-  "description": "Daily export of passenger reservation personalization data (Guest 360 + model scores) for the Royal Caribbean mobile app. Output is picked up by the demo backend, loaded into Couchbase (synced to Couchbase Lite) and published to the Couchbase Agent Operations Manager Knowledge Base.",
+  "description": "Daily export of passenger reservation personalization data (Guest 360 + model scores) for the Princess Cruises mobile app. Output is picked up by the demo backend, loaded into Couchbase (synced to Couchbase Lite) and published to the Couchbase Agent Operations Manager Knowledge Base.",
   "schedule": {
     "quartz_cron_expression": "0 0 5 * * ?",
     "timezone_id": "America/New_York",
@@ -15,11 +15,11 @@
     {
       "task_key": "export_guest_personalization",
       "notebook_task": {
-        "notebook_path": "/Repos/rccl/royal-caribbean-mobile-rag-personalization-demo/databricks/notebooks/guest_personalization_daily_export",
+        "notebook_path": "/Repos/pcl/princess-mobile-rag-personalization-demo/databricks/notebooks/guest_personalization_daily_export",
         "base_parameters": {
-          "catalog": "rccl_prod",
+          "catalog": "pcl_prod",
           "schema": "guest360",
-          "export_volume": "/Volumes/rccl_prod/guest360/exports/passenger_reservation_personalization",
+          "export_volume": "/Volumes/pcl_prod/guest360/exports/passenger_reservation_personalization",
           "horizon_days": "150",
           "num_files": "4"
         },
@@ -44,7 +44,7 @@
   ],
   "tags": {
     "team": "guest-data-platform",
-    "consumer": "rccl-mobile-app",
+    "consumer": "pcl-mobile-app",
     "demo": "couchbase-aom"
   }
 }

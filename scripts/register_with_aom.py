@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
-"""Register the Royal Caribbean demo with the Couchbase Agent Operations Manager.
+"""Register the Princess Cruises demo with the Couchbase Agent Operations Manager.
 
 Idempotent. Standard library only. Does five things through AOM's API, signed
 in as an AOM dashboard admin:
 
-  1. Registers this backend's MCP server `rccl-guest-services` as a trusted
+  1. Registers this backend's MCP server `pcl-guest-services` as a trusted
      server (POST /v1/servers) - or re-ingests it if it is already registered -
      so AOM pulls its 11 tools into the vetted catalog, open to the
      `support_agent` and `admin` roles.
-  2. Issues the agent identity **RCI Guest Concierge** (POST /v1/agents, role
+  2. Issues the agent identity **Princess Guest Concierge** (POST /v1/agents, role
      `support_agent`, scoped to exactly those 11 tools) and writes its API key
      into ../.env as AOM_AGENT_API_KEY. With --rotate, rotates the key of an
      existing agent instead.
-  3. Turns on AOM's human-approval tier for `rccl-guest-services::apply_goodwill_upgrade`
+  3. Turns on AOM's human-approval tier for `pcl-guest-services::apply_goodwill_upgrade`
      (complimentary upgrades wait for a supervisor), leaving every other
      approval setting as it was.
-  4. Registers the concierge as the RAG Application `rci-guest-concierge`
+  4. Registers the concierge as the RAG Application `princess-guest-concierge`
      (POST /v1/rag/apps, or PUT if it exists), queryable by the
      `support_agent` and `admin` roles and scoped to the Guest Services
      Playbook document. Its activity (queries, LLM cache hits, Context Cache
@@ -40,16 +40,16 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ENV_PATH = os.path.join(HERE, "..", ".env")
-SERVER_ID = "rccl-guest-services"
-AGENT_NAME = "RCI Guest Concierge"
-TOOLS = ["get_guest_context", "get_upgrade_offers", "place_royalup_bid", "purchase_cabin_upgrade",
+SERVER_ID = "pcl-guest-services"
+AGENT_NAME = "Princess Guest Concierge"
+TOOLS = ["get_guest_context", "get_upgrade_offers", "place_upgrade_bid", "purchase_cabin_upgrade",
          "apply_goodwill_upgrade", "search_shore_excursions", "book_shore_excursion", "reserve_specialty_dining",
          "purchase_package", "book_spa_treatment", "complete_online_checkin"]
 APPROVAL_TOOLS = [f"{SERVER_ID}::apply_goodwill_upgrade"]
-RAG_APP_ID = "rci-guest-concierge"
+RAG_APP_ID = "princess-guest-concierge"
 # Keep in step with backend/app/rag_app.py, which owns the definition at runtime.
 RAG_SYSTEM_PROMPT = (
-    "You are the Royal Caribbean Guest Concierge in the guest's mobile app. Answer the guest's question "
+    "You are the Princess Cruises Guest Concierge in the guest's mobile app. Answer the guest's question "
     "warmly and concisely (under 120 words) using only the numbered Guest Services Playbook passages. Never "
     "invent prices, availability or bookings. Cite the passages you used as [1], [2]. If the passages do not "
     "answer the question, say you'll connect the guest with Guest Services."
@@ -59,11 +59,11 @@ RAG_SYSTEM_PROMPT = (
 def rag_app_definition(playbook_id):
     return {
         "app_id": RAG_APP_ID,
-        "name": "RCI Guest Concierge (mobile)",
-        "description": ("Royal Caribbean mobile app concierge. Playbook questions are answered here from the "
+        "name": "Princess Guest Concierge (mobile)",
+        "description": ("Princess Cruises mobile app concierge. Playbook questions are answered here from the "
                         "daily Guest Services Playbook. Personal answers use the guest's own profile from the "
                         "Databricks dump, cached in the guest-context namespace."),
-        "owner": "RCI Digital Guest Experience",
+        "owner": "Princess Digital Guest Experience",
         # Never enabled without a document scope: unscoped, a support_agent
         # query could retrieve any guest's profile.
         "enabled": bool(playbook_id),
@@ -132,7 +132,7 @@ def main():
                     help="AOM as reachable from THIS machine")
     ap.add_argument("--admin-user", default=os.getenv("AOM_ADMIN_USERNAME", "admin"))
     ap.add_argument("--admin-password", default=os.getenv("AOM_ADMIN_PASSWORD"))
-    ap.add_argument("--mcp-url", default="http://host.docker.internal:8200/rccl/mcp",
+    ap.add_argument("--mcp-url", default="http://host.docker.internal:8200/pcl/mcp",
                     help="this backend's MCP endpoint as reachable FROM the AOM container")
     ap.add_argument("--aom-url-for-backend", default="https://host.docker.internal:8090",
                     help="AOM as reachable from the demo backend container (written to .env)")
@@ -152,8 +152,8 @@ def main():
     # 1. MCP server ----------------------------------------------------------
     print(f"→ Registering MCP server '{SERVER_ID}' at {args.mcp_url}")
     st, body = api.call("POST", "/v1/servers", {
-        "server_id": SERVER_ID, "label": "Royal Caribbean Guest Services",
-        "owner": "RCI Digital Guest Experience", "mcp_url": args.mcp_url, "trust_status": "trusted",
+        "server_id": SERVER_ID, "label": "Princess Cruises Guest Services",
+        "owner": "Princess Digital Guest Experience", "mcp_url": args.mcp_url, "trust_status": "trusted",
         "default_allowed_roles": ["support_agent", "admin"],
     })
     if st == 409:
@@ -186,8 +186,8 @@ def main():
     else:
         print(f"→ Issuing agent identity '{AGENT_NAME}' (role support_agent, {len(TOOLS)} scoped tools)")
         st, body = api.call("POST", "/v1/agents", {
-            "name": AGENT_NAME, "role": "support_agent", "owner": "RCI Digital Guest Experience",
-            "description": "Royal Caribbean mobile app concierge: personalization, RAG over the daily Databricks guest "
+            "name": AGENT_NAME, "role": "support_agent", "owner": "Princess Digital Guest Experience",
+            "description": "Princess Cruises mobile app concierge: personalization, RAG over the daily Databricks guest "
                            "profiles, and guest-service actions (upgrades, excursions, dining, packages, check-in).",
             "allowed_tools": [f"{SERVER_ID}::{t}" for t in TOOLS],
         })

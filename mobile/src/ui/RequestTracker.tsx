@@ -17,7 +17,7 @@ export function RequestTracker({ id, onRetry, retryLabel = 'Try again' }: { id: 
   const waiting = q._local || q.status === 'pending' || q.status === 'processing';
   const steps = [
     { label: 'Saved in Couchbase Lite on your phone', done: true },
-    { label: sync.status === 'paused' || sync.status === 'offline' ? 'Waiting for a connection…' : 'Synced to Royal Caribbean', done: !q._local },
+    { label: sync.status === 'paused' || sync.status === 'offline' ? 'Waiting for a connection…' : 'Synced to Princess Cruises', done: !q._local },
     { label: q.governed === false ? 'Processed by guest services (AOM not configured - ungoverned)' : 'Run by the Concierge agent through Couchbase AOM', done: !waiting },
     { label: q.status === 'awaiting_approval' ? 'Waiting for a Guest Services supervisor' : 'Result synced back to your phone', done: !waiting && q.status !== 'awaiting_approval' },
   ];
@@ -32,7 +32,7 @@ export function RequestTracker({ id, onRetry, retryLabel = 'Try again' }: { id: 
           {s.done ? (
             <Ionicons name="checkmark-circle" size={18} color={theme.color.ok} />
           ) : i === steps.findIndex((x) => !x.done) && sync.status !== 'paused' ? (
-            <ActivityIndicator size="small" color={theme.color.royal} />
+            <ActivityIndicator size="small" color={theme.color.princess} />
           ) : (
             <Ionicons name="ellipse-outline" size={18} color={theme.color.faint} />
           )}

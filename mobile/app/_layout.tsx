@@ -26,7 +26,7 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="upgrade" options={{ title: 'Upgrade your stateroom', presentation: 'modal' }} />
               <Stack.Screen name="dining" options={{ title: 'Specialty dining', presentation: 'modal' }} />
-              <Stack.Screen name="spa" options={{ title: 'Vitality Spa', presentation: 'modal' }} />
+              <Stack.Screen name="spa" options={{ title: 'Lotus Spa', presentation: 'modal' }} />
               <Stack.Screen name="checkin" options={{ title: 'Online check-in', presentation: 'modal' }} />
               <Stack.Screen name="confirm" options={{ title: 'Review & confirm', presentation: 'modal' }} />
             </Stack>

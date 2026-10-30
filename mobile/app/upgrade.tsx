@@ -18,19 +18,19 @@ export default function Upgrade() {
   const [code, setCode] = useState(initial?.category_code);
   const sel = options.find((o) => o.category_code === code);
   const [mode, setMode] = useState<'bid' | 'instant'>('bid');
-  const [bid, setBid] = useState<number>(Number(params.bid) || sel?.recommended_bid_ppn || sel?.royalup_min_bid_ppn || 50);
+  const [bid, setBid] = useState<number>(Number(params.bid) || sel?.recommended_bid_ppn || sel?.upgrade_bid_min_ppn || 50);
   const [reqId, setReqId] = useState<string | null>(null);
 
   if (!p) return null;
   if (!options.length) return <Empty icon="bed-outline" title="No upgrades available" body="You're in our best available stateroom for this sailing - or upgrade inventory has sold out." />;
   const r = p.reservation;
   const n = r.nights * r.party_size;
-  const clampBid = (v: number) => Math.max(sel?.royalup_min_bid_ppn ?? 0, Math.min((sel?.instant_price_ppn ?? v) - 5, v));
+  const clampBid = (v: number) => Math.max(sel?.upgrade_bid_min_ppn ?? 0, Math.min((sel?.instant_price_ppn ?? v) - 5, v));
 
   const submit = async () => {
     if (!sel) return;
     const req = mode === 'bid'
-      ? await request('place_royalup_bid', { category_code: sel.category_code, bid_per_night_usd: clampBid(bid) }, `RoyalUp bid · ${sel.category_name} · $${clampBid(bid)}/night`)
+      ? await request('place_upgrade_bid', { category_code: sel.category_code, bid_per_night_usd: clampBid(bid) }, `Princess Upgrade bid · ${sel.category_name} · $${clampBid(bid)}/night`)
       : await request('purchase_cabin_upgrade', { category_code: sel.category_code }, `Upgrade to ${sel.category_name}`);
     setReqId(req._id);
   };
@@ -49,7 +49,7 @@ export default function Upgrade() {
         <>
           <SectionTitle title="Choose your upgrade" />
           {options.map((o) => (
-            <Pressable key={o.category_code} onPress={() => { setCode(o.category_code); setBid(o.recommended_bid_ppn ?? o.royalup_min_bid_ppn); }} disabled={o.available <= 0}>
+            <Pressable key={o.category_code} onPress={() => { setCode(o.category_code); setBid(o.recommended_bid_ppn ?? o.upgrade_bid_min_ppn); }} disabled={o.available <= 0}>
               <Card style={[styles.opt, code === o.category_code && styles.optSel, o.available <= 0 && { opacity: 0.45 }]}>
                 <View style={{ flex: 1, gap: 4 }}>
                   <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -58,9 +58,9 @@ export default function Upgrade() {
                     <Pill label={o.available > 0 ? `${o.available} left` : 'Sold out'} tone={o.available <= 2 ? 'warn' : 'neutral'} />
                   </View>
                   <Text style={styles.meta}>{o.perks.join(' · ')}</Text>
-                  <Text style={styles.meta}>Bid from {money(o.royalup_min_bid_ppn)} · or {money(o.instant_price_ppn)}/person/night instantly</Text>
+                  <Text style={styles.meta}>Bid from {money(o.upgrade_bid_min_ppn)} · or {money(o.instant_price_ppn)}/person/night instantly</Text>
                 </View>
-                <Ionicons name={code === o.category_code ? 'radio-button-on' : 'radio-button-off'} size={22} color={theme.color.royal} />
+                <Ionicons name={code === o.category_code ? 'radio-button-on' : 'radio-button-off'} size={22} color={theme.color.princess} />
               </Card>
             </Pressable>
           ))}
@@ -70,7 +70,7 @@ export default function Upgrade() {
               <View style={styles.seg}>
                 {(['bid', 'instant'] as const).map((m) => (
                   <Pressable key={m} onPress={() => setMode(m)} style={[styles.segBtn, mode === m && styles.segOn]}>
-                    <Text style={[styles.segText, mode === m && { color: theme.color.navy }]}>{m === 'bid' ? 'RoyalUp bid' : 'Upgrade now'}</Text>
+                    <Text style={[styles.segText, mode === m && { color: theme.color.navy }]}>{m === 'bid' ? 'Princess Upgrade bid' : 'Upgrade now'}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -84,7 +84,7 @@ export default function Upgrade() {
                       <Pressable onPress={() => setBid((b) => clampBid(b + 5))} style={styles.step}><Ionicons name="add" size={22} color={theme.color.navy} /></Pressable>
                     </View>
                     <Text style={[styles.meta, { textAlign: 'center' }]}>
-                      Total if accepted: {money(clampBid(bid) * n)} · min {money(sel.royalup_min_bid_ppn)}
+                      Total if accepted: {money(clampBid(bid) * n)} · min {money(sel.upgrade_bid_min_ppn)}
                       {sel.recommended_bid_ppn ? ` · suggested ${money(sel.recommended_bid_ppn)}` : ''}
                     </Text>
                   </>

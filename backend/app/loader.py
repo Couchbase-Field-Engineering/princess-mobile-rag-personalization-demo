@@ -37,7 +37,7 @@ from .aom_client import AOMError, aom
 from .docs import CATALOG_CHANNEL, CATALOG_ID, STATE, guest_channel, now_iso, profile_id
 from .store import store
 
-log = logging.getLogger("rccl.loader")
+log = logging.getLogger("pcl.loader")
 PERSONAS = ["G00000101", "G00000201", "G00000301"]
 LIVE_FIELDS_RES = ("stateroom", "checkin_status", "arrival_slot", "upgrade_history")
 STATUS = {"state": "idle"}

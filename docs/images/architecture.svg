@@ -52,7 +52,7 @@
   <path d="M135,514 V550" stroke="#F5B800" stroke-width="2" fill="none" marker-end="url(#ahg)" marker-start="url(#ahg)"/>
   <rect x="40" y="556" width="190" height="186" rx="12" fill="#FFFFFF"/>
   <text x="54" y="580" class="t">Couchbase Lite</text>
-  <text x="54" y="598" class="s">scope rccl (same as server)</text>
+  <text x="54" y="598" class="s">scope pcl (same as server)</text>
   <text x="54" y="622" class="s">profiles · offers · bookings</text>
   <text x="54" y="638" class="s">requests (created here)</text>
   <text x="54" y="654" class="s">concierge · context_cache</text>
@@ -80,16 +80,16 @@
   <text x="350" y="282" class="s">polls approvals · writes results</text>
   <rect x="588" y="222" width="236" height="74" rx="9" class="box"/>
   <text x="602" y="248" class="t">MCP server</text>
-  <text x="602" y="266" class="s">rccl-guest-services · 11 tools</text>
+  <text x="602" y="266" class="s">pcl-guest-services · 11 tools</text>
   <text x="602" y="282" class="s">upgrades · excursions · dining …</text>
   <rect x="336" y="334" width="488" height="58" rx="9" class="box"/>
   <text x="350" y="358" class="t">/api</text>
   <text x="380" y="358" class="s">sign-in (mints Sync Gateway session) · concierge · status</text>
-  <text x="350" y="378" class="s">/rccl/mcp  ← called only by AOM</text>
+  <text x="350" y="378" class="s">/pcl/mcp  ← called only by AOM</text>
 
   <rect x="318" y="460" width="340" height="170" rx="12" fill="#FFFFFF" stroke="#E2504C" stroke-width="1.4"/>
   <text x="334" y="484" class="t">Couchbase Server EE</text>
-  <text x="334" y="502" class="s">bucket royal · scope rccl</text>
+  <text x="334" y="502" class="s">bucket princess · scope pcl</text>
   <g font-size="10.5" fill="#0B1530">
     <rect x="334" y="514" width="70" height="20" rx="10" fill="#FDECEC"/><text x="344" y="528">profiles</text>
     <rect x="410" y="514" width="60" height="20" rx="10" fill="#FDECEC"/><text x="421" y="528">offers</text>
@@ -112,7 +112,7 @@
   <rect x="900" y="50" width="320" height="540" rx="14" fill="#F1ECFB" stroke="#B9A6E4"/>
   <text x="916" y="74" class="h">AGENT OPERATIONS MANAGER</text>
   <rect x="918" y="90" width="284" height="62" rx="9" class="box"/>
-  <text x="932" y="114" class="t">Agent identity: RCI Guest Concierge</text>
+  <text x="932" y="114" class="t">Agent identity: Princess Guest Concierge</text>
   <text x="932" y="132" class="s">role support_agent · 11 scoped tools</text>
   <rect x="918" y="168" width="284" height="66" rx="9" class="box"/>
   <text x="932" y="192" class="t">Knowledge Base</text>

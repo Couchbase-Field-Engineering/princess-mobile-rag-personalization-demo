@@ -46,7 +46,7 @@ export default function ForYou() {
               </View>
             </View>
             <View style={[styles.row, { marginTop: 14, justifyContent: 'flex-start', gap: 8, flexWrap: 'wrap' }]}>
-              <Pill label={`${p.loyalty.tier} · Crown & Anchor`} tone="gold" icon="star" />
+              <Pill label={`${p.loyalty.tier} · Captain's Circle`} tone="gold" icon="star" />
               <Pill label={`${r.stateroom.category_name} ${r.stateroom.stateroom_number}`} tone="dark" icon="bed-outline" />
               <Pill label={`Party of ${r.party_size}`} tone="dark" icon="people-outline" />
             </View>
@@ -65,7 +65,7 @@ export default function ForYou() {
                 const ui = STATUS_UI[q.status] ?? STATUS_UI.pending;
                 return (
                   <View key={q._id} style={[styles.req, i > 0 && styles.reqBorder]}>
-                    <Ionicons name={ui.icon} size={20} color={theme.color.royal} />
+                    <Ionicons name={ui.icon} size={20} color={theme.color.princess} />
                     <View style={{ flex: 1 }}>
                       <Text style={styles.reqTitle}>{q.title}</Text>
                       <Text style={styles.reqSub} numberOfLines={2}>
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   reqBorder: { borderTopWidth: 1, borderTopColor: theme.color.border },
   reqTitle: { fontWeight: '800', color: theme.color.text },
   reqSub: { color: theme.color.muted, fontSize: theme.type.sm },
-  prov: { color: theme.color.royal, fontSize: theme.type.xs, fontWeight: '700' },
+  prov: { color: theme.color.princess, fontSize: theme.type.xs, fontWeight: '700' },
   offerTitle: { color: theme.color.onDark, fontSize: theme.type.xl, fontWeight: '900' },
   offerSub: { color: theme.color.text, fontSize: theme.type.md },
   reason: { color: theme.color.ocean, fontSize: theme.type.sm, fontWeight: '700', flex: 1 },

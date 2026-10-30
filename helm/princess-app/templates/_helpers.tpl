@@ -1,37 +1,37 @@
-{{- define "royal.labels" -}}
-app.kubernetes.io/part-of: royal-app
+{{- define "princess.labels" -}}
+app.kubernetes.io/part-of: princess-app
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 {{- end -}}
 
-{{- define "royal.selector" -}}
-app.kubernetes.io/part-of: royal-app
+{{- define "princess.selector" -}}
+app.kubernetes.io/part-of: princess-app
 app.kubernetes.io/component: {{ . }}
 {{- end -}}
 
-{{- define "royal.image" -}}
+{{- define "princess.image" -}}
 {{- $reg := .root.Values.global.imageRegistry -}}
 {{- if $reg -}}{{ printf "%s/%s:%s" $reg .image.repository (toString .image.tag) }}{{- else -}}{{ printf "%s:%s" .image.repository (toString .image.tag) }}{{- end -}}
 {{- end -}}
 
 {{/* A secret value: the explicit value, else the one already stored, else random. */}}
-{{- define "royal.secretValue" -}}
-{{- $existing := lookup "v1" "Secret" .root.Release.Namespace "royal-app-secrets" -}}
+{{- define "princess.secretValue" -}}
+{{- $existing := lookup "v1" "Secret" .root.Release.Namespace "princess-app-secrets" -}}
 {{- if .value -}}{{ .value }}
 {{- else if and $existing (index $existing.data .key) -}}{{ index $existing.data .key | b64dec }}
 {{- else -}}{{ randAlphaNum 24 }}{{- end -}}
 {{- end -}}
 
 {{/* Init container: wait until couchbase-init has created the bucket, collections and indexes. */}}
-{{- define "royal.waitForCouchbase" -}}
+{{- define "princess.waitForCouchbase" -}}
 - name: wait-for-couchbase
   image: {{ .Values.curlImage }}
   env:
     - name: CB_USERNAME
-      valueFrom: { secretKeyRef: { name: royal-app-secrets, key: COUCHBASE_USERNAME } }
+      valueFrom: { secretKeyRef: { name: princess-app-secrets, key: COUCHBASE_USERNAME } }
     - name: CB_PASSWORD
-      valueFrom: { secretKeyRef: { name: royal-app-secrets, key: COUCHBASE_PASSWORD } }
+      valueFrom: { secretKeyRef: { name: princess-app-secrets, key: COUCHBASE_PASSWORD } }
   command:
     - sh
     - -c

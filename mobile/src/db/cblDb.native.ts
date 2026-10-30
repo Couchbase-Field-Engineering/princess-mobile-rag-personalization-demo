@@ -1,7 +1,7 @@
 /**
  * Couchbase Lite on the device (iOS / Android development build).
  *
- * One database per guest (`rccl-<guest_id>`), scope `rccl`, the same
+ * One database per guest (`pcl-<guest_id>`), scope `pcl`, the same
  * collections as the server. A continuous PUSH_AND_PULL replicator talks to
  * Sync Gateway with a session minted by the backend at sign-in
  * (SessionAuthenticator, same pattern as mobile_field_service). The guest's
@@ -81,7 +81,7 @@ export class CblDb implements LocalDb {
     this.guestId = guestId;
     const config = new DatabaseConfiguration();
     config.setDirectory(await new FileSystem().getDefaultPath());
-    this.db = new Database(`rccl-${guestId.toLowerCase()}`, config);
+    this.db = new Database(`pcl-${guestId.toLowerCase()}`, config);
     await this.db.open();
     for (const name of COLLECTIONS) {
       this.cols.set(name, await this.db.createCollection(name, SCOPE));

@@ -14,12 +14,12 @@ import type { Snapshot } from '../../db/localDb';
 
 const KEYWORDS: Record<string, string[]> = {
   service_recovery: ['noisy', 'noise', 'broken', 'dirty', 'complain', 'disappointed', 'upset', 'not working', 'leak'],
-  upgrade: ['upgrade', 'suite', 'royalup', 'royal up', 'bid', 'balcony', 'bigger room', 'stateroom', 'cabin', 'ocean view'],
-  excursion: ['excursion', 'shore', 'snorkel', 'tour', 'cococay', 'beach', 'things to do', 'port', 'zipline', 'waterpark'],
-  dining: ['dinner', 'dining', 'restaurant', 'eat', 'chops', 'steak', 'sushi', 'italian', "chef's table"],
-  package: ['drink', 'beverage', 'wifi', 'wi-fi', 'internet', 'voom', 'the key', 'package'],
+  upgrade: ['upgrade', 'suite', 'princess upgrade', 'upgrade bid', 'bid', 'balcony', 'bigger room', 'stateroom', 'cabin', 'ocean view'],
+  excursion: ['excursion', 'shore', 'snorkel', 'tour', 'princess cays', 'beach', 'things to do', 'port', 'zipline', 'waterpark'],
+  dining: ['dinner', 'dining', 'restaurant', 'eat', 'crown grill', 'steak', 'sushi', 'italian', "chef's table"],
+  package: ['drink', 'beverage', 'wifi', 'wi-fi', 'internet', 'medallionnet', 'medallion', 'premier', 'princess plus', 'package'],
   spa: ['spa', 'massage', 'facial', 'relax', 'thermal', 'wellness'],
-  checkin: ['check-in', 'check in', 'checkin', 'arrival time', 'boarding', 'setsail', 'documents', 'terminal'],
+  checkin: ['check-in', 'check in', 'checkin', 'arrival time', 'boarding', 'oceanready', 'medallion', 'documents', 'terminal'],
   itinerary: ['itinerary', 'schedule', 'what day', 'which day', 'ports', 'sea day', 'my trip', 'my cruise'],
 };
 
@@ -60,7 +60,7 @@ export function answerOffline(q: string, snap: Snapshot): Omit<ChatMessage, 'id'
     const opts = (snap.offers?.offers.find((o) => o.kind === 'upgrade')?.options ?? ctx?.facts?.data?.offers ?? []) as any[];
     const rec = opts.find((o) => o.recommended) ?? opts[0];
     if (rec) {
-      text = `You're offline, but I have your upgrade options on this device: ${rec.category_name} has ${rec.available} left - RoyalUp bids start at $${rec.royalup_min_bid_ppn}/person/night, or upgrade instantly for $${rec.instant_price_ppn}/night. Tap below and I'll send it the moment you're back online.`;
+      text = `You're offline, but I have your upgrade options on this device: ${rec.category_name} has ${rec.available} left - Princess Upgrade bids start at $${rec.upgrade_bid_min_ppn}/person/night, or upgrade instantly for $${rec.instant_price_ppn}/night. Tap below and I'll send it the moment you're back online.`;
       actions.push({ label: 'See upgrade options', screen: 'upgrade' });
     }
   } else if (p && intent === 'itinerary') {

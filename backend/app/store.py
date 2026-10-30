@@ -1,4 +1,4 @@
-"""Operational store: Couchbase Server (bucket `royal`, scope `rccl`) or an
+"""Operational store: Couchbase Server (bucket `princess`, scope `pcl`) or an
 in-process memory store with the same interface for dependency-free runs.
 
 Collections
@@ -30,7 +30,7 @@ from datetime import timedelta
 
 from . import config
 
-log = logging.getLogger("rccl.store")
+log = logging.getLogger("pcl.store")
 
 SYNCED_COLLECTIONS = ["profiles", "offers", "bookings", "requests", "concierge", "context_cache", "catalog"]
 SERVER_COLLECTIONS = ["inventory", "lookups"]

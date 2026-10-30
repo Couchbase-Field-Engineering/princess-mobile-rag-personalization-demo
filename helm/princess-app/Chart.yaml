@@ -1,9 +1,9 @@
 apiVersion: v2
-name: royal-app
+name: princess-app
 description: >-
-  Royal Caribbean mobile personalization demo on Kubernetes: Couchbase Server
+  Princess Cruises mobile personalization demo on Kubernetes: Couchbase Server
   (guest data from the daily Databricks dump), Sync Gateway (Couchbase Lite
-  replication for phones), the backend (FastAPI + the rccl-guest-services MCP
+  replication for phones), the backend (FastAPI + the pcl-guest-services MCP
   server, which registers itself with the Couchbase Agent Operations Manager),
   the app in a browser, and a daily CronJob that drops a new mock Databricks
   export.

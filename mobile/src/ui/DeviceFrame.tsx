@@ -13,7 +13,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { usePathname } from 'expo-router';
 import { type ReactNode, useEffect, useState } from 'react';
-import { Platform, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaFrameContext, SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { API_URL } from '../config';
 import { useData } from '../data/DataContext';
@@ -82,7 +82,7 @@ function StatusBarOverlay({ dark, offline, background }: { dark: boolean; offlin
 function SidePanel() {
   return (
     <View style={styles.panel}>
-      <Text style={styles.kicker}>ROYAL CARIBBEAN · DEMO</Text>
+      <Text style={styles.kicker}>PRINCESS CRUISES · DEMO</Text>
       <Text style={styles.panelTitle}>Personalized guest app</Text>
       <Text style={styles.panelBody}>
         Every screen renders from the guest's on-device database, synced from a daily Databricks dump. The concierge is
@@ -101,6 +101,10 @@ function SidePanel() {
           </View>
         </View>
       ))}
+      <Pressable onPress={() => window.location.assign('/story')} style={styles.storyBtn}>
+        <Ionicons name="book-outline" size={16} color={theme.color.navy} />
+        <Text style={styles.storyText}>The story: why Couchbase, not Redis</Text>
+      </Pressable>
       <Text style={styles.panelFoot}>
         Try Profile → "At sea - no signal", then book something.{'\n'}Backend: {API_URL.replace(/^https?:\/\//, '')} ·
         full-width view: add ?frame=0
@@ -190,11 +194,13 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   panel: { width: 340, gap: 14 },
-  kicker: { color: theme.color.royal, fontSize: 12, fontWeight: '800', letterSpacing: 2 },
+  kicker: { color: theme.color.princess, fontSize: 12, fontWeight: '800', letterSpacing: 2 },
   panelTitle: { color: theme.color.navy, fontSize: 34, fontWeight: '900', lineHeight: 40 },
   panelBody: { color: theme.color.muted, fontSize: 15, lineHeight: 22, marginBottom: 6 },
   point: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', backgroundColor: '#FFFFFF', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: theme.color.border },
   pointTitle: { color: theme.color.text, fontWeight: '800', fontSize: 15 },
   pointBody: { color: theme.color.muted, fontSize: 13, lineHeight: 18, marginTop: 2 },
+  storyBtn: { flexDirection: 'row', gap: 8, alignItems: 'center', alignSelf: 'flex-start', backgroundColor: theme.color.gold, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10, marginTop: 4 },
+  storyText: { color: theme.color.navy, fontWeight: '800', fontSize: 14 },
   panelFoot: { color: theme.color.faint, fontSize: 12, lineHeight: 18, marginTop: 6 },
 });

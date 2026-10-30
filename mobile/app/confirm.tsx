@@ -9,7 +9,7 @@ import { RequestTracker } from '@/src/ui/RequestTracker';
 const TOOL_LABEL: Record<string, string> = {
   book_shore_excursion: 'Book shore excursion',
   purchase_package: 'Add package to your cruise',
-  place_royalup_bid: 'Place RoyalUp bid',
+  place_upgrade_bid: 'Place Princess Upgrade bid',
   purchase_cabin_upgrade: 'Upgrade stateroom',
   apply_goodwill_upgrade: 'Request a complimentary upgrade',
 };
@@ -48,6 +48,6 @@ export default function Confirm() {
 const styles = StyleSheet.create({
   body: { padding: 16, maxWidth: 640, width: '100%', alignSelf: 'center' },
   h2: { fontSize: theme.type.xl, fontWeight: '900', color: theme.color.navy },
-  price: { fontSize: theme.type.lg, fontWeight: '800', color: theme.color.royal },
+  price: { fontSize: theme.type.lg, fontWeight: '800', color: theme.color.princess },
   meta: { color: theme.color.muted, fontSize: theme.type.sm, lineHeight: 19 },
 });

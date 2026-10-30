@@ -1,4 +1,4 @@
-/** Document shapes replicated from Couchbase (scope `rccl`) into Couchbase Lite. */
+/** Document shapes replicated from Couchbase (scope `pcl`) into Couchbase Lite. */
 
 export type Port = {
   day: number;
@@ -65,7 +65,7 @@ export type UpgradeOption = {
   available: number;
   instant_price_ppn: number;
   instant_total_usd: number;
-  royalup_min_bid_ppn: number;
+  upgrade_bid_min_ppn: number;
   perks: string[];
   recommended: boolean;
   recommended_bid_ppn: number | null;

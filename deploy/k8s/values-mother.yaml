@@ -1,4 +1,4 @@
-# royal-app on "mother" (single-node K3s, managed by Rancher) at 192.168.111.4.
+# princess-app on "mother" (single-node K3s, managed by Rancher) at 192.168.111.4.
 # Secrets (the AOM admin password) are NOT kept here - deploy.sh writes them to
 # a mode-600 values file on mother instead.
 publicHost: "192.168.111.4"
@@ -9,6 +9,8 @@ aom:
   enabled: true
   # The agent-ops release (fullnameOverride: aom) in namespace agent-ops.
   url: https://aom-operations-manager.agent-ops.svc.cluster.local:8090
+  # Linked from the story page.
+  dashboardUrl: https://192.168.111.4:3111
 
 # K3s's ServiceLB (Klipper) binds each LoadBalancer port on the node's IP:
 #   8081 the app, 8200 the backend API, 4984 Sync Gateway (Couchbase Lite).

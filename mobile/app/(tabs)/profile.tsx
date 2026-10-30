@@ -98,7 +98,7 @@ export default function Profile() {
       <SectionTitle title="Agent Operations Manager" />
       <Card style={{ padding: 16, gap: 8 }}>
         <Text style={styles.meta}>
-          Every booking you make here becomes a request that the RCI Guest Concierge agent runs through Couchbase AOM: RBAC and tool scope,
+          Every booking you make here becomes a request that the Princess Guest Concierge agent runs through Couchbase AOM: RBAC and tool scope,
           human approval for goodwill upgrades, a trace and an audit entry. Concierge answers use AOM's Knowledge Base, memory and LLM cache.
         </Text>
         <Row icon="link-outline" label="Backend" value={API_URL} />
@@ -115,7 +115,7 @@ export default function Profile() {
 function Row({ icon, label, value }: { icon: IconName; label: string; value: string }) {
   return (
     <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
-      <Ionicons name={icon} size={16} color={theme.color.royal} style={{ marginTop: 1 }} />
+      <Ionicons name={icon} size={16} color={theme.color.princess} style={{ marginTop: 1 }} />
       <Text style={[styles.meta, { width: 120 }]}>{label}</Text>
       <Text style={{ flex: 1, color: theme.color.text, fontWeight: '600' }} selectable>{value}</Text>
     </View>

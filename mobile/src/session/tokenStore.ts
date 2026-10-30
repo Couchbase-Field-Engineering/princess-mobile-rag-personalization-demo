@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 /** Session persistence: Keychain/Keystore on device, localStorage in the browser preview. */
-const KEY = 'rccl.session.v1';
+const KEY = 'pcl.session.v1';
 
 export async function readSession(): Promise<string | null> {
   try {

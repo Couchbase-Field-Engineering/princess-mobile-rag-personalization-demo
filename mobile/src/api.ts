@@ -25,7 +25,7 @@ export async function api<T>(path: string, opts: { method?: string; body?: unkno
     return data as T;
   } catch (e) {
     if (e instanceof ApiError) throw e;
-    throw new ApiError("Can't reach Royal Caribbean right now - you're offline.", 0);
+    throw new ApiError("Can't reach Princess Cruises right now - you're offline.", 0);
   } finally {
     clearTimeout(timer);
   }

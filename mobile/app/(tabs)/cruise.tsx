@@ -7,7 +7,7 @@ import { theme } from '@/src/theme';
 import { Button, Card, Empty, fmtDate, GradientArt, Pill, SectionTitle, STATUS_UI, money, type IconName } from '@/src/ui/components';
 
 const ITEM_ICON: Record<string, IconName> = {
-  upgrade: 'bed', royalup_bid: 'trending-up', excursion: 'sunny', dining: 'restaurant', package: 'wine', spa: 'leaf', checkin: 'qr-code',
+  upgrade: 'bed', upgrade_bid: 'trending-up', excursion: 'sunny', dining: 'restaurant', package: 'wine', spa: 'leaf', checkin: 'qr-code',
 };
 
 export default function MyCruise() {
@@ -27,7 +27,7 @@ export default function MyCruise() {
 
       <Card style={{ marginTop: 16 }}>
         <GradientArt palette="deck" icon="qr-code" height={110}>
-          <Pill label="SetSail Pass" tone="dark" icon="qr-code-outline" />
+          <Pill label="OceanReady" tone="dark" icon="qr-code-outline" />
           <Text style={styles.passTitle}>{checked ? `Arrival ${r.arrival_slot} · ${fmtDate(r.embark_date)}` : 'Check-in not completed'}</Text>
         </GradientArt>
         <View style={{ padding: 14, gap: 10 }}>
@@ -70,7 +70,7 @@ export default function MyCruise() {
               </Text>
               {its.map((i) => (
                 <Card key={i.item_id} style={styles.item}>
-                  <Ionicons name={ITEM_ICON[i.kind] ?? 'checkmark'} size={18} color={theme.color.royal} />
+                  <Ionicons name={ITEM_ICON[i.kind] ?? 'checkmark'} size={18} color={theme.color.princess} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.itemTitle}>{i.title}</Text>
                     <Text style={styles.meta}>{[i.time, i.charge_usd ? money(i.charge_usd) : null].filter(Boolean).join(' · ')}</Text>
@@ -91,7 +91,7 @@ export default function MyCruise() {
           const ui = STATUS_UI[q.status] ?? STATUS_UI.pending;
           return (
             <Card key={q._id} style={[styles.item, { marginLeft: 0 }]}>
-              <Ionicons name={ui.icon} size={18} color={theme.color.royal} />
+              <Ionicons name={ui.icon} size={18} color={theme.color.princess} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.itemTitle}>{q.title}</Text>
                 {q.summary ? <Text style={styles.meta}>{q.summary}</Text> : null}
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   tiny: { color: theme.color.faint, fontSize: theme.type.xs, marginTop: 2 },
   day: { flexDirection: 'row', gap: 12 },
   dayRail: { alignItems: 'center', width: 26 },
-  dayDot: { width: 26, height: 26, borderRadius: 13, backgroundColor: theme.color.royal, alignItems: 'center', justifyContent: 'center' },
+  dayDot: { width: 26, height: 26, borderRadius: 13, backgroundColor: theme.color.princess, alignItems: 'center', justifyContent: 'center' },
   dayLine: { flex: 1, width: 2, backgroundColor: theme.color.border },
   dayTitle: { fontWeight: '800', color: theme.color.text, fontSize: theme.type.md, marginTop: 3 },
   item: { flexDirection: 'row', gap: 10, alignItems: 'center', padding: 12, marginTop: 8 },

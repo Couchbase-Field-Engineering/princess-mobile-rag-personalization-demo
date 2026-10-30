@@ -23,12 +23,12 @@ import logging
 from . import config
 from .aom_client import AOMError, aom
 
-log = logging.getLogger("rccl.rag_app")
+log = logging.getLogger("pcl.rag_app")
 
 STATUS: dict = {"state": "not_synced"}
 
 SYSTEM_PROMPT = (
-    "You are the Royal Caribbean Guest Concierge in the guest's mobile app. Answer the guest's question "
+    "You are the Princess Cruises Guest Concierge in the guest's mobile app. Answer the guest's question "
     "warmly and concisely (under 120 words) using only the numbered Guest Services Playbook passages. Never "
     "invent prices, availability or bookings. Cite the passages you used as [1], [2]. If the passages do not "
     "answer the question, say you'll connect the guest with Guest Services."
@@ -38,11 +38,11 @@ SYSTEM_PROMPT = (
 def definition(playbook_document_id: str | None) -> dict:
     return {
         "app_id": config.RAG_APP_ID,
-        "name": "RCI Guest Concierge (mobile)",
-        "description": ("Royal Caribbean mobile app concierge. Playbook questions are answered here from the "
+        "name": "Princess Guest Concierge (mobile)",
+        "description": ("Princess Cruises mobile app concierge. Playbook questions are answered here from the "
                         "daily Guest Services Playbook. Personal answers use the guest's own profile from the "
                         "Databricks dump, cached in the guest-context namespace."),
-        "owner": "RCI Digital Guest Experience",
+        "owner": "Princess Digital Guest Experience",
         "enabled": bool(playbook_document_id),
         "allowed_roles": ["support_agent", "admin"],
         "set_id": "default",

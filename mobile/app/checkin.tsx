@@ -33,7 +33,7 @@ export default function CheckIn() {
           <SectionTitle title="Terminal arrival time" />
           <ChoiceRow options={snap.catalog.arrival_slots.map((t) => ({ value: t, label: t }))} value={slot} onChange={setSlot} />
           <Pressable onPress={() => setDocs(!docs)} style={styles.check}>
-            <Ionicons name={docs ? 'checkbox' : 'square-outline'} size={22} color={theme.color.royal} />
+            <Ionicons name={docs ? 'checkbox' : 'square-outline'} size={22} color={theme.color.princess} />
             <Text style={{ flex: 1, color: theme.color.text }}>Everyone in my party has valid travel documents and I've reviewed the health & safety questions.</Text>
           </Pressable>
           <View style={{ marginTop: 16 }}>

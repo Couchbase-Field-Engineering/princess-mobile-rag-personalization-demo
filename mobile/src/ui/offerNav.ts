@@ -16,7 +16,7 @@ export const KIND_LABEL: Record<string, string> = {
   excursion: 'Shore excursion',
   dining: 'Specialty dining',
   package: 'Cruise package',
-  spa: 'Vitality Spa',
+  spa: 'Lotus Spa',
   checkin: 'Before you sail',
 };
 

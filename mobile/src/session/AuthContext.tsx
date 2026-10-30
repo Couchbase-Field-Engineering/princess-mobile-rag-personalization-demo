@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { api, type LoginResponse } from '../api';
 import { readSession, writeSession } from './tokenStore';
 
@@ -7,9 +7,16 @@ type Ctx = {
   session: LoginResponse | null;
   signIn: (bookingId: string, lastName: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Persist the token + Sync Gateway session from /api/auth/refresh (sliding expiry). */
+  renew: (patch: Partial<Pick<LoginResponse, 'token' | 'sync_gateway'>>) => Promise<void>;
+  /** The backend rejected the stored session: sign out and tell the guest why. */
+  expire: () => Promise<void>;
+  notice: string | null;
 };
 
-const AuthContext = createContext<Ctx>({ ready: false, session: null, signIn: async () => {}, signOut: async () => {} });
+const AuthContext = createContext<Ctx>({
+  ready: false, session: null, signIn: async () => {}, signOut: async () => {}, renew: async () => {}, expire: async () => {}, notice: null,
+});
 
 /**
  * Sign-in = booking number + last name (like the real app's "find my cruise").
@@ -20,13 +27,18 @@ const AuthContext = createContext<Ctx>({ ready: false, session: null, signIn: as
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [session, setSession] = useState<LoginResponse | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  // Latest persisted session, including renewed tokens. Renewing doesn't call
+  // setSession: that would restart the local database and sync for nothing.
+  const latest = useRef<LoginResponse | null>(null);
 
   useEffect(() => {
     void (async () => {
       const raw = await readSession();
       if (raw) {
         try {
-          setSession(JSON.parse(raw));
+          latest.current = JSON.parse(raw);
+          setSession(latest.current);
         } catch {
           /* corrupt - sign in again */
         }
@@ -38,15 +50,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = useCallback(async (bookingId: string, lastName: string) => {
     const res = await api<LoginResponse>('/api/auth/login', { body: { booking_id: bookingId.trim(), last_name: lastName.trim() } });
     await writeSession(JSON.stringify(res));
+    latest.current = res;
+    setNotice(null);
     setSession(res);
   }, []);
 
   const signOut = useCallback(async () => {
     await writeSession(null);
+    latest.current = null;
     setSession(null);
   }, []);
 
-  return <AuthContext.Provider value={{ ready, session, signIn, signOut }}>{children}</AuthContext.Provider>;
+  const renew = useCallback(async (patch: Partial<Pick<LoginResponse, 'token' | 'sync_gateway'>>) => {
+    if (!latest.current) return;
+    latest.current = { ...latest.current, ...Object.fromEntries(Object.entries(patch).filter(([, v]) => v != null)) };
+    await writeSession(JSON.stringify(latest.current));
+  }, []);
+
+  const expire = useCallback(async () => {
+    if (!latest.current) return;
+    await writeSession(null);
+    latest.current = null;
+    setNotice('Your session expired - sign in again to see your cruise.');
+    setSession(null);
+  }, []);
+
+  return <AuthContext.Provider value={{ ready, session, signIn, signOut, renew, expire, notice }}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => useContext(AuthContext);

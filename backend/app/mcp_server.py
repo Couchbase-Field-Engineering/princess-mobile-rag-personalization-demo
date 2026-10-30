@@ -1,6 +1,6 @@
-"""`rccl-guest-services` - the MCP server registered with AOM.
+"""`pcl-guest-services` - the MCP server registered with AOM.
 
-Streamable HTTP at /rccl/mcp/. AOM ingests these tool definitions into its
+Streamable HTTP at /pcl/mcp/. AOM ingests these tool definitions into its
 vetted catalog (embeddings for discovery, RBAC per role, drift detection)
 and is the only caller the demo expects: the app and concierge reach these
 tools through `POST /v1/tools/invoke`, never directly.
@@ -18,11 +18,11 @@ from mcp.server.transport_security import TransportSecuritySettings
 
 from . import actions
 
-log = logging.getLogger("rccl.mcp")
+log = logging.getLogger("pcl.mcp")
 
 mcp = FastMCP(
-    "rccl-guest-services",
-    instructions=("Royal Caribbean guest services for a guest's upcoming sailing: stateroom upgrades (RoyalUp bids, "
+    "pcl-guest-services",
+    instructions=("Princess Cruises guest services for a guest's upcoming sailing: stateroom upgrades (Princess Upgrade bids, "
                   "instant and goodwill upgrades), shore excursions, specialty dining, packages, spa and online check-in."),
     stateless_http=True,
     # Called by AOM over the Docker host gateway, so the Host header is not
@@ -47,14 +47,14 @@ async def get_guest_context(guest_id: str) -> dict:
 
 @mcp.tool()
 async def get_upgrade_offers(guest_id: str) -> dict:
-    """List stateroom upgrade options for a guest's sailing: categories above theirs, unsold inventory, instant upgrade price and RoyalUp minimum bid."""
+    """List stateroom upgrade options for a guest's sailing: categories above theirs, unsold inventory, instant upgrade price and Princess Upgrade minimum bid."""
     return await _run(actions.get_upgrade_offers, guest_id=guest_id)
 
 
 @mcp.tool()
-async def place_royalup_bid(guest_id: str, category_code: str, bid_per_night_usd: float) -> dict:
-    """Place a RoyalUp bid (per person per night, USD) to upgrade a guest's stateroom to a higher category (OV, BA, JS, GS, OS, RL). Charged only if accepted."""
-    return await _run(actions.place_royalup_bid, guest_id=guest_id, category_code=category_code,
+async def place_upgrade_bid(guest_id: str, category_code: str, bid_per_night_usd: float) -> dict:
+    """Place a Princess Upgrade bid (per person per night, USD) to upgrade a guest's stateroom to a higher category (OV, BA, MS, PS, OS, SK). Charged only if accepted."""
+    return await _run(actions.place_upgrade_bid, guest_id=guest_id, category_code=category_code,
                       bid_per_night_usd=bid_per_night_usd)
 
 
@@ -84,24 +84,24 @@ async def book_shore_excursion(guest_id: str, excursion_id: str, participants: i
 
 @mcp.tool()
 async def reserve_specialty_dining(guest_id: str, restaurant_id: str, date: str, time: str, party_size: int = 0) -> dict:
-    """Reserve a specialty restaurant table (e.g. CHOPS, GIOVANNI, IZUMI, CHEFSTABLE) on a night of the sailing. date is YYYY-MM-DD, time HH:MM."""
+    """Reserve a specialty restaurant table (e.g. CROWNGRILL, SABATINIS, KAISUSHI, CHEFSTABLE) on a night of the sailing. date is YYYY-MM-DD, time HH:MM."""
     return await _run(actions.reserve_specialty_dining, guest_id=guest_id, restaurant_id=restaurant_id, date=date,
                       time=time, party_size=party_size)
 
 
 @mcp.tool()
 async def purchase_package(guest_id: str, package_code: str) -> dict:
-    """Purchase a cruise package for the sailing: DELUXE_BEV, REFRESH, VOOM (internet), THE_KEY or ULT_DINING."""
+    """Purchase a cruise package for the sailing: PLUS, REFRESH, MEDALLIONNET (Wi-Fi), PREMIER or SPEC_DINING."""
     return await _run(actions.purchase_package, guest_id=guest_id, package_code=package_code)
 
 
 @mcp.tool()
 async def book_spa_treatment(guest_id: str, treatment_id: str, date: str, time: str = "10:00") -> dict:
-    """Book a Vitality Spa treatment (massage, facial, thermal suite) on a day of the sailing. Port days are discounted."""
+    """Book a Lotus Spa treatment (massage, facial, thermal suite) on a day of the sailing. Port days are discounted."""
     return await _run(actions.book_spa_treatment, guest_id=guest_id, treatment_id=treatment_id, date=date, time=time)
 
 
 @mcp.tool()
 async def complete_online_checkin(guest_id: str, arrival_slot: str) -> dict:
-    """Complete online check-in for a guest's stateroom party and reserve a terminal arrival time to get the SetSail Pass."""
+    """Complete online check-in for a guest's stateroom party and reserve a terminal arrival time to get the Medallion boarding pass."""
     return await _run(actions.complete_online_checkin, guest_id=guest_id, arrival_slot=arrival_slot)

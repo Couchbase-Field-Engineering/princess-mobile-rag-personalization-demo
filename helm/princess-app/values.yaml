@@ -1,9 +1,9 @@
-# Royal Caribbean mobile personalization demo.
+# Princess Cruises mobile personalization demo.
 #
 # Two images are built from this repository (see deploy/k8s/deploy.sh, which
 # builds them and imports them into K3s's containerd so no registry is needed):
-#   rccl-backend  <- ./backend
-#   rccl-web      <- ./web   (prebuilt Expo web export in web/dist.tgz)
+#   pcl-backend  <- ./backend
+#   pcl-web      <- ./web   (prebuilt Expo web export in web/dist.tgz)
 
 global:
   # Prefixed to the two custom image repositories if set (e.g. a registry host).
@@ -24,8 +24,8 @@ couchbase:
   username: Administrator
   # Blank = generated on first install and kept across upgrades.
   password: ""
-  bucket: royal
-  scope: rccl
+  bucket: princess
+  scope: pcl
   ramQuotaMB:
     data: 1280
     index: 512
@@ -39,9 +39,9 @@ couchbase:
 
 syncGateway:
   image: couchbase/sync-gateway:4.0.4-enterprise
-  database: royal
+  database: princess
   service:
-    # Phones replicate with ws://<publicHost>:<port>/royal
+    # Phones replicate with ws://<publicHost>:<port>/princess
     type: LoadBalancer
     port: 4984
   resources:
@@ -50,7 +50,7 @@ syncGateway:
 
 backend:
   image:
-    repository: rccl-backend
+    repository: pcl-backend
     tag: latest
     pullPolicy: IfNotPresent
   # Optional outside access to the API (native app builds, /api/status, /docs).
@@ -71,8 +71,8 @@ backend:
     limits: { cpu: "2", memory: 1536Mi }
 
 # The Couchbase Agent Operations Manager this backend registers with
-# (AOM_AUTO_REGISTER): its MCP server, the "RCI Guest Concierge" agent, the
-# approval tier for goodwill upgrades and the rci-guest-concierge RAG
+# (AOM_AUTO_REGISTER): its MCP server, the "Princess Guest Concierge" agent, the
+# approval tier for goodwill upgrades and the princess-guest-concierge RAG
 # application. On a fresh AOM, adminPassword becomes AOM's admin password.
 aom:
   enabled: true
@@ -81,6 +81,8 @@ aom:
   adminUsername: admin
   # Required when aom.enabled. AOM requires 12+ characters, not a common password.
   adminPassword: ""
+  # The AOM dashboard as a browser reaches it - linked from the story page (/story).
+  dashboardUrl: ""
   # Optional: a key for an agent you registered yourself; blank = self-register.
   agentApiKey: ""
   verifyTls: false
@@ -105,7 +107,7 @@ dump:
 
 web:
   image:
-    repository: rccl-web
+    repository: pcl-web
     tag: latest
     pullPolicy: IfNotPresent
   service:

@@ -17,7 +17,7 @@ import httpx
 from . import config
 from .docs import CATALOG_CHANNEL, guest_channel
 
-log = logging.getLogger("rccl.sgw")
+log = logging.getLogger("pcl.sgw")
 
 
 def enabled() -> bool:

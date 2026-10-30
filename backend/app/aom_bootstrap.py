@@ -7,9 +7,9 @@ the backend does on startup what the register script does by hand:
 1. Signs in as the AOM admin. On a fresh AOM, whose admin account has no
    password yet, it sets AOM_ADMIN_PASSWORD as that password through AOM's
    first-login endpoint (POST /v1/auth/bootstrap).
-2. Registers its own MCP server `rccl-guest-services` (or re-ingests it), at
+2. Registers its own MCP server `pcl-guest-services` (or re-ingests it), at
    AOM_MCP_PUBLIC_URL, the URL AOM uses to reach this backend.
-3. Issues the "RCI Guest Concierge" agent identity, scoped to the 11 tools,
+3. Issues the "Princess Guest Concierge" agent identity, scoped to the 11 tools,
    and keeps its API key in Couchbase (`lookups::aom_agent`) so a restart
    reuses it. If the agent already exists and its key isn't known here, the
    key is rotated.
@@ -29,10 +29,10 @@ from . import config, loader
 from .aom_client import AOMError, aom
 from .store import store
 
-log = logging.getLogger("rccl.aom_bootstrap")
+log = logging.getLogger("pcl.aom_bootstrap")
 
-AGENT_NAME = "RCI Guest Concierge"
-TOOLS = ["get_guest_context", "get_upgrade_offers", "place_royalup_bid", "purchase_cabin_upgrade",
+AGENT_NAME = "Princess Guest Concierge"
+TOOLS = ["get_guest_context", "get_upgrade_offers", "place_upgrade_bid", "purchase_cabin_upgrade",
          "apply_goodwill_upgrade", "search_shore_excursions", "book_shore_excursion", "reserve_specialty_dining",
          "purchase_package", "book_spa_treatment", "complete_online_checkin"]
 APPROVAL_TOOLS = ["apply_goodwill_upgrade"]
@@ -63,7 +63,7 @@ async def _register_server():
     server = config.AOM_MCP_SERVER_ID
     try:
         res = await aom.admin("POST", "/v1/servers", {
-            "server_id": server, "label": "Royal Caribbean Guest Services", "owner": "RCI Digital Guest Experience",
+            "server_id": server, "label": "Princess Cruises Guest Services", "owner": "Princess Digital Guest Experience",
             "mcp_url": config.AOM_MCP_PUBLIC_URL, "trust_status": "trusted",
             "default_allowed_roles": ["support_agent", "admin"],
         })
@@ -103,8 +103,8 @@ async def _ensure_agent() -> str:
         log.info("Rotated the key of existing AOM agent %s", agent_id)
     else:
         res = await aom.admin("POST", "/v1/agents", {
-            "name": AGENT_NAME, "role": "support_agent", "owner": "RCI Digital Guest Experience",
-            "description": "Royal Caribbean mobile app concierge: personalization, RAG over the daily Databricks guest "
+            "name": AGENT_NAME, "role": "support_agent", "owner": "Princess Digital Guest Experience",
+            "description": "Princess Cruises mobile app concierge: personalization, RAG over the daily Databricks guest "
                            "profiles, and guest-service actions (upgrades, excursions, dining, packages, check-in).",
             "allowed_tools": [f"{config.AOM_MCP_SERVER_ID}::{t}" for t in TOOLS],
         })

@@ -1,7 +1,7 @@
 {
-  "bucket": "royal",
+  "bucket": "princess",
   "scopes": {
-    "rccl": {
+    "pcl": {
       "collections": {
         "profiles": {
           "sync": "function (doc, oldDoc, meta) {\n  // Written only by the backend (Couchbase SDK writes, imported by SG).\n  // Phones pull these; any attempt to push one is rejected.\n  requireAdmin();\n  if (doc._deleted) { if (oldDoc && oldDoc.channels) { channel(oldDoc.channels); } return; }\n  channel(doc.channels);\n}"

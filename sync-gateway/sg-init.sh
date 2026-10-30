@@ -1,9 +1,9 @@
 #!/bin/sh
-# Creates (or updates) the `royal` Sync Gateway database over the admin API.
+# Creates (or updates) the `princess` Sync Gateway database over the admin API.
 set -u
 SG="${SG_ADMIN_URL:-http://sync-gateway:4985}"
 AUTH="${SG_ADMIN_USERNAME:-Administrator}:${SG_ADMIN_PASSWORD:-password123}"
-DB="${SG_DB:-royal}"
+DB="${SG_DB:-princess}"
 echo "Waiting for Sync Gateway admin API at $SG ..."
 until curl -s -o /dev/null -u "$AUTH" "$SG/"; do sleep 3; done
 for i in $(seq 1 30); do

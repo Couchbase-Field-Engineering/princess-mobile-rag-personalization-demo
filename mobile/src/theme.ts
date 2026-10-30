@@ -1,29 +1,29 @@
 import { Platform, type ViewStyle } from 'react-native';
 
 /**
- * Royal Caribbean-inspired palette: deep navy and royal blue with a gold
- * accent and ocean blues. Swap in official brand tokens (and the licensed
+ * Princess Cruises-inspired palette: deep navy and Princess blue with a
+ * champagne-gold accent and sea blues. Swap in official brand tokens (and the licensed
  * logo/fonts) for a customer-facing build - this demo ships no brand assets.
  */
 const shadowCard: ViewStyle = Platform.select({
-  ios: { shadowColor: '#0A1A3F', shadowOpacity: 0.12, shadowRadius: 14, shadowOffset: { width: 0, height: 6 } },
+  ios: { shadowColor: '#0B2545', shadowOpacity: 0.12, shadowRadius: 14, shadowOffset: { width: 0, height: 6 } },
   android: { elevation: 3 },
-  default: { boxShadow: '0 6px 18px rgba(10,26,63,0.12)' } as ViewStyle,
+  default: { boxShadow: '0 6px 18px rgba(11,37,69,0.12)' } as ViewStyle,
 }) as ViewStyle;
 
 export const theme = {
   color: {
-    navy: '#0A1A3F',
-    navyDeep: '#06112B',
-    royal: '#16357A',
-    royalBright: '#1F4BB0',
-    gold: '#F5B800',
-    goldSoft: '#FFF4D1',
-    ocean: '#0077C8',
-    oceanSoft: '#E3F2FC',
+    navy: '#0B2545',
+    navyDeep: '#061A33',
+    princess: '#1B4F9C',
+    princessBright: '#2A6BC9',
+    gold: '#D9AE4F',
+    goldSoft: '#FAF1DA',
+    ocean: '#1C86D1',
+    oceanSoft: '#E4F1FB',
     bg: '#F3F5F9',
     surface: '#FFFFFF',
-    text: '#0B1530',
+    text: '#0A1A30',
     muted: '#5D6884',
     faint: '#97A0B6',
     border: '#E2E6EF',
@@ -37,13 +37,13 @@ export const theme = {
     onDarkMuted: 'rgba(255,255,255,0.72)',
   },
   gradient: {
-    hero: ['#06112B', '#16357A'] as const,
-    suite: ['#16357A', '#6A3FB5'] as const,
-    ocean: ['#0077C8', '#00B3B0'] as const,
+    hero: ['#061A33', '#1B4F9C'] as const,
+    suite: ['#1B4F9C', '#5B4FA8'] as const,
+    ocean: ['#1C86D1', '#2BB3A3'] as const,
     dining: ['#5B1A2E', '#B6463C'] as const,
-    drinks: ['#B6463C', '#F5B800'] as const,
+    drinks: ['#B6463C', '#D9AE4F'] as const,
     spa: ['#2E6B62', '#8CC7B1'] as const,
-    deck: ['#0A1A3F', '#0077C8'] as const,
+    deck: ['#0B2545', '#1C86D1'] as const,
   },
   space: { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 },
   type: { xs: 11, sm: 13, md: 15, lg: 17, xl: 20, title: 26, hero: 34 },

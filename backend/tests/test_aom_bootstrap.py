@@ -35,8 +35,8 @@ def stack(tmp_path_factory):
                     "2026-10-09", "--target-mb", "2", "--out", str(dump)], check=True, capture_output=True)
     env = {**os.environ, "STORE_DRIVER": "memory", "DUMP_DIR": str(dump), "AOM_URL": AOM, "AOM_AGENT_API_KEY": "",
            "AOM_ADMIN_PASSWORD": "Cruise-Demo-2026", "AOM_AUTO_REGISTER": "true", "KB_PROFILE_LIMIT": "10",
-           "AOM_MCP_PUBLIC_URL": f"{API}/rccl/mcp", "SG_ADMIN_URL": "", "REQUEST_POLL_SECONDS": "0.3",
-           "FAKE_MCP_URL": f"{API}/rccl/mcp", "FAKE_FRESH_AOM": "1"}
+           "AOM_MCP_PUBLIC_URL": f"{API}/pcl/mcp", "SG_ADMIN_URL": "", "REQUEST_POLL_SECONDS": "0.3",
+           "FAKE_MCP_URL": f"{API}/pcl/mcp", "FAKE_FRESH_AOM": "1"}
     uv = [sys.executable, "-m", "uvicorn"]
     procs = [subprocess.Popen(uv + ["tests.fake_aom:app", "--port", "18092"], cwd=BACKEND, env=env,
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)]
@@ -58,11 +58,11 @@ def test_registers_itself_with_a_fresh_aom(stack):
     st = httpx.get(f"{API}/api/status").json()
     assert st["aom"]["registration"]["state"] == "registered" and st["aom"]["configured"]
     fake = httpx.get(f"{AOM}/test/state").json()
-    assert fake["admin_pw_set"] and fake["servers"] == ["rccl-guest-services"]
-    assert [a["name"] for a in fake["agents"]] == ["RCI Guest Concierge"]
+    assert fake["admin_pw_set"] and fake["servers"] == ["pcl-guest-services"]
+    assert [a["name"] for a in fake["agents"]] == ["Princess Guest Concierge"]
     assert len(fake["agents"][0]["allowed_tools"]) == 11
-    assert fake["approvals_cfg"]["require_for_tools"] == ["rccl-guest-services::apply_goodwill_upgrade"]
-    assert fake["rag_apps"]["rci-guest-concierge"]["enabled"]
+    assert fake["approvals_cfg"]["require_for_tools"] == ["pcl-guest-services::apply_goodwill_upgrade"]
+    assert fake["rag_apps"]["princess-guest-concierge"]["enabled"]
 
 
 def test_concierge_is_governed_after_self_registration(stack):
@@ -70,5 +70,5 @@ def test_concierge_is_governed_after_self_registration(stack):
     h = {"Authorization": f"Bearer {r.json()['token']}"}
     a = httpx.post(f"{API}/api/concierge", headers=h, json={"message": "Can we upgrade to a suite?"}, timeout=30).json()
     assert a["governed"] and a["context"]["kb_mode"] == "aom"
-    b = httpx.post(f"{API}/api/concierge", headers=h, json={"message": "How does RoyalUp work?"}, timeout=30).json()
+    b = httpx.post(f"{API}/api/concierge", headers=h, json={"message": "How does Princess Upgrade work?"}, timeout=30).json()
     assert b["context"]["source"] == "aom-rag"

@@ -2,12 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: couchbase
-  labels: {{- include "royal.labels" . | nindent 4 }}
+  labels: {{- include "princess.labels" . | nindent 4 }}
 spec:
   # Headless: a stable couchbase://couchbase name for the backend, Sync Gateway and init.
   clusterIP: None
   publishNotReadyAddresses: true
-  selector: {{- include "royal.selector" "couchbase" | nindent 4 }}
+  selector: {{- include "princess.selector" "couchbase" | nindent 4 }}
   ports:
     - { name: admin, port: 8091 }
     - { name: views, port: 8092 }
@@ -19,15 +19,15 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: couchbase
-  labels: {{- include "royal.labels" . | nindent 4 }}
+  labels: {{- include "princess.labels" . | nindent 4 }}
 spec:
   serviceName: couchbase
   replicas: 1
   selector:
-    matchLabels: {{- include "royal.selector" "couchbase" | nindent 6 }}
+    matchLabels: {{- include "princess.selector" "couchbase" | nindent 6 }}
   template:
     metadata:
-      labels: {{- include "royal.selector" "couchbase" | nindent 8 }}
+      labels: {{- include "princess.selector" "couchbase" | nindent 8 }}
     spec:
       containers:
         - name: couchbase
@@ -71,7 +71,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: couchbase-init
-  labels: {{- include "royal.labels" . | nindent 4 }}
+  labels: {{- include "princess.labels" . | nindent 4 }}
   annotations:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "0"
@@ -80,7 +80,7 @@ spec:
   backoffLimit: 6
   template:
     metadata:
-      labels: {{- include "royal.selector" "couchbase-init" | nindent 8 }}
+      labels: {{- include "princess.selector" "couchbase-init" | nindent 8 }}
     spec:
       restartPolicy: OnFailure
       containers:
@@ -95,11 +95,11 @@ spec:
             - { name: CB_INDEX_RAMSIZE, value: {{ .Values.couchbase.ramQuotaMB.index | quote }} }
             - { name: CB_BUCKET_RAMSIZE, value: {{ .Values.couchbase.ramQuotaMB.bucket | quote }} }
             - name: CB_USERNAME
-              valueFrom: { secretKeyRef: { name: royal-app-secrets, key: COUCHBASE_USERNAME } }
+              valueFrom: { secretKeyRef: { name: princess-app-secrets, key: COUCHBASE_USERNAME } }
             - name: CB_PASSWORD
-              valueFrom: { secretKeyRef: { name: royal-app-secrets, key: COUCHBASE_PASSWORD } }
+              valueFrom: { secretKeyRef: { name: princess-app-secrets, key: COUCHBASE_PASSWORD } }
           volumeMounts:
             - { name: scripts, mountPath: /scripts, readOnly: true }
       volumes:
         - name: scripts
-          configMap: { name: royal-app-scripts }
+          configMap: { name: princess-app-scripts }

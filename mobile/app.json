@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Royal Caribbean Demo",
-    "slug": "rccl-mobile-personalization",
+    "name": "Princess Cruises Demo",
+    "slug": "pcl-mobile-personalization",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "rccldemo",
+    "scheme": "pcldemo",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.couchbase.demo.rcclpersonalization",
+      "bundleIdentifier": "com.couchbase.demo.pclpersonalization",
       "buildNumber": "1",
       "infoPlist": {
         "NSAppTransportSecurity": {
@@ -29,7 +29,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0A1A3F"
       },
-      "package": "com.couchbase.demo.rcclpersonalization",
+      "package": "com.couchbase.demo.pclpersonalization",
       "versionCode": 1,
       "usesCleartextTraffic": true
     },

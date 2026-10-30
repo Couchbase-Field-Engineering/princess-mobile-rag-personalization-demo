@@ -17,7 +17,7 @@ from mcp.client.streamable_http import streamablehttp_client
 app = FastAPI()
 S = {"docs": {}, "memory": [], "cache": {}, "approvals": {}, "calls": [], "servers": {}, "ctx": {}, "rag_apps": {}}
 KEY = "fake-agent-key"
-APPROVAL_TOOLS = {"rccl-guest-services::apply_goodwill_upgrade"}
+APPROVAL_TOOLS = {"pcl-guest-services::apply_goodwill_upgrade"}
 
 
 def auth(h):
@@ -278,7 +278,7 @@ async def invoke(body: dict, authorization: str = Header(None)):
             raise HTTPException(403, "not approved")
         S["approvals"][aid]["status"] = "consumed"
     server, tool = tid.split("::")
-    result = await call_mcp(os.getenv("FAKE_MCP_URL", "http://127.0.0.1:8201/rccl/mcp"), tool, body["arguments"])
+    result = await call_mcp(os.getenv("FAKE_MCP_URL", "http://127.0.0.1:8201/pcl/mcp"), tool, body["arguments"])
     return {"role": "support_agent", "tool_id": tid, "result": result, "latency_ms": 5, "trace": {"trace_id": "tr"}}
 
 

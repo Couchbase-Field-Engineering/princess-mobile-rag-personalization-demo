@@ -2,18 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: web
-  labels: {{- include "royal.labels" . | nindent 4 }}
+  labels: {{- include "princess.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
-    matchLabels: {{- include "royal.selector" "web" | nindent 6 }}
+    matchLabels: {{- include "princess.selector" "web" | nindent 6 }}
   template:
     metadata:
-      labels: {{- include "royal.selector" "web" | nindent 8 }}
+      labels: {{- include "princess.selector" "web" | nindent 8 }}
     spec:
       containers:
         - name: web
-          image: {{ include "royal.image" (dict "root" . "image" .Values.web.image) }}
+          image: {{ include "princess.image" (dict "root" . "image" .Values.web.image) }}
           imagePullPolicy: {{ .Values.web.image.pullPolicy }}
           ports:
             - { name: http, containerPort: 80 }
@@ -25,12 +25,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: web
-  labels: {{- include "royal.labels" . | nindent 4 }}
+  labels: {{- include "princess.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.web.service.type }}
   {{- with .Values.externalIPs }}
   externalIPs: {{- toYaml . | nindent 4 }}
   {{- end }}
-  selector: {{- include "royal.selector" "web" | nindent 4 }}
+  selector: {{- include "princess.selector" "web" | nindent 4 }}
   ports:
     - { name: http, port: {{ .Values.web.service.port }}, targetPort: http }

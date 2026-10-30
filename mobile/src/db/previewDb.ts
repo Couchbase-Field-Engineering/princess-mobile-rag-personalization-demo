@@ -1,4 +1,4 @@
-import { api } from '../api';
+import { api, ApiError } from '../api';
 import { PREVIEW_PULL_MS } from '../config';
 import type { ActionRequest, SyncState } from '../types';
 import { buildSnapshot, Emitter, type CollectionName, type LocalDb, type Snapshot, type SyncSession } from './localDb';
@@ -105,6 +105,13 @@ export class PreviewDb implements LocalDb {
       this.setState({ status: 'idle', lastSyncAt: Date.now(), pendingPush: this.unpushed().length, detail: undefined });
       if (JSON.stringify(data.docs.map((r) => r.doc)) !== before || out.length) this.changes.emit();
     } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        // The backend rejected the session: stop polling; the app signs the guest out.
+        if (this.timer) clearInterval(this.timer);
+        this.timer = null;
+        this.setState({ status: 'error', detail: 'session-expired', pendingPush: this.unpushed().length });
+        return;
+      }
       this.setState({ status: 'offline', detail: (e as Error).message, pendingPush: this.unpushed().length });
     } finally {
       this.busy = false;

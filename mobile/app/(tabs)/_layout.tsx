@@ -34,7 +34,7 @@ export default function TabsLayout() {
         tabBarLabelPosition: 'below-icon',
         tabBarLabelStyle: { fontSize: theme.type.xs, fontWeight: '700', lineHeight: 17 },
         tabBarIcon: ({ focused, color, size }) => (
-          <Ionicons name={(ICONS[route.name] ?? ICONS.index)[focused ? 0 : 1]} size={size - 2} color={focused ? theme.color.royal : color} />
+          <Ionicons name={(ICONS[route.name] ?? ICONS.index)[focused ? 0 : 1]} size={size - 2} color={focused ? theme.color.princess : color} />
         ),
       })}
     >

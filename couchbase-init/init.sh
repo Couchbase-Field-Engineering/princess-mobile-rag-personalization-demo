@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# One-shot Couchbase Server setup for the demo: cluster, bucket `royal`,
-# scope `rccl`, its collections and the indexes the backend queries.
+# One-shot Couchbase Server setup for the demo: cluster, bucket `princess`,
+# scope `pcl`, its collections and the indexes the backend queries.
 # Idempotent - safe to re-run on every `docker compose up`.
 set -uo pipefail
 H="${CB_HOST:-couchbase}"
 U="${CB_USERNAME:-Administrator}"
 P="${CB_PASSWORD:-password123}"
-B="${CB_BUCKET:-royal}"
-S="${CB_SCOPE:-rccl}"
+B="${CB_BUCKET:-princess}"
+S="${CB_SCOPE:-pcl}"
 COLLECTIONS="profiles offers bookings requests concierge context_cache catalog inventory lookups"
 
 echo "Waiting for Couchbase at $H:8091 ..."

@@ -16,7 +16,7 @@ export function Wordmark({ light = true, size = 15 }: { light?: boolean; size?: 
         <Ionicons name="boat" size={size * 0.9} color={theme.color.gold} />
       </View>
       <View>
-        <Text style={{ color: c, fontSize: size, fontWeight: '800', letterSpacing: 2.2 }}>ROYAL CARIBBEAN</Text>
+        <Text style={{ color: c, fontSize: size, fontWeight: '800', letterSpacing: 2.2 }}>PRINCESS CRUISES</Text>
         <Text style={{ color: light ? theme.color.onDarkMuted : theme.color.muted, fontSize: size * 0.58, letterSpacing: 1.6 }}>
           PERSONALIZATION DEMO
         </Text>
@@ -64,7 +64,7 @@ export function Button({ label, onPress, kind = 'gold', icon, disabled, busy, sm
   label: string; onPress: () => void; kind?: 'gold' | 'navy' | 'ghost' | 'light'; icon?: IconName; disabled?: boolean; busy?: boolean; small?: boolean;
 }) {
   const bg = { gold: theme.color.gold, navy: theme.color.navy, ghost: 'transparent', light: theme.color.surface }[kind];
-  const fg = { gold: theme.color.navy, navy: theme.color.onDark, ghost: theme.color.royal, light: theme.color.navy }[kind];
+  const fg = { gold: theme.color.navy, navy: theme.color.onDark, ghost: theme.color.princess, light: theme.color.navy }[kind];
   return (
     <Pressable
       onPress={onPress}

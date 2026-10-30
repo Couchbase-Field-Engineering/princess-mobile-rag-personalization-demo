@@ -6,7 +6,7 @@ Two identities:
   scripts/register_with_aom.py via POST /v1/agents) - everything the
   concierge does at runtime: Knowledge Base retrieval, memory, cached LLM
   completions, and tool invocation. Every call shows up in AOM's audit log,
-  traces and topology as the "RCI Guest Concierge" agent.
+  traces and topology as the "Princess Guest Concierge" agent.
 * An **operator** dashboard session (`AOM_ADMIN_USERNAME`/`PASSWORD`) - only
   the daily loader uses it, to publish Knowledge Base documents, because AOM
   deliberately makes adding retrievable knowledge an operator action.
@@ -24,7 +24,7 @@ import httpx
 
 from . import config
 
-log = logging.getLogger("rccl.aom")
+log = logging.getLogger("pcl.aom")
 
 # Set per concierge turn / per request so every AOM call made while answering
 # one question (KB retrieval, memory, tool calls, the LLM) lands in ONE run
@@ -65,7 +65,7 @@ class AOMClient:
 
     def _headers(self, trace_id: str | None = None):
         h = {"Authorization": f"Bearer {self.key}", "Content-Type": "application/json",
-             "X-AOM-Agent-Id": "rci-guest-concierge"}
+             "X-AOM-Agent-Id": "princess-guest-concierge"}
         ctx = current_trace.get() or {}
         trace_id = trace_id or ctx.get("trace_id")
         if trace_id:

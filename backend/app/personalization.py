@@ -39,7 +39,7 @@ async def compute_offers(profile: dict) -> list[dict]:
         offers.append({
             "offer_id": "checkin", "kind": "checkin", "palette": PALETTES["checkin"],
             "title": "Check in & pick your arrival time",
-            "subtitle": f"Sailing in {dts} day{'s' if dts != 1 else ''} - get your SetSail Pass",
+            "subtitle": f"Sailing in {dts} day{'s' if dts != 1 else ''} - get OceanReady",
             "reason": "Required before boarding" + (" · popular slots are filling" if dts <= 10 else ""),
             "price_label": "Free", "score": 1.0 + (0.5 if dts <= 7 else 0),
             "cta": {"label": "Check in", "screen": "checkin"},
@@ -56,7 +56,7 @@ async def compute_offers(profile: dict) -> list[dict]:
         inv, _ = await get_inventory(r["sailing_id"])
         if inv["available"].get(rec, 0) > 0:
             cur = r["stateroom"]["category_code"]
-            min_bid = C.royalup_min_bid(cur, rec)
+            min_bid = C.upgrade_bid_min(cur, rec)
             ppn = C.upgrade_price_ppn(cur, rec)
             bid = s.get("recommended_bid_per_night_usd") or min_bid
             reason = _reason_list(
@@ -67,7 +67,7 @@ async def compute_offers(profile: dict) -> list[dict]:
             offers.append({
                 "offer_id": f"upgrade-{rec}", "kind": "upgrade", "palette": PALETTES["upgrade"],
                 "title": f"Upgrade to {C.a_or_an(C.CATEGORY_BY_CODE[rec]['name'])}",
-                "subtitle": f"Bid from ${min_bid}/night with RoyalUp, or upgrade now for ${ppn}/night",
+                "subtitle": f"Bid from ${min_bid}/night with Princess Upgrade, or upgrade now for ${ppn}/night",
                 "reason": reason or "Your upgrade pick for this sailing",
                 "price_label": f"Suggested bid ${bid}/person/night",
                 "score": s.get("upgrade_propensity", 0) * (1.15 if dts <= 14 else 1.0),
@@ -77,7 +77,7 @@ async def compute_offers(profile: dict) -> list[dict]:
                     "category_code": c["code"], "category_name": c["name"], "available": inv["available"].get(c["code"], 0),
                     "instant_price_ppn": C.upgrade_price_ppn(cur, c["code"]),
                     "instant_total_usd": C.upgrade_price_ppn(cur, c["code"]) * r["nights"] * r["party_size"],
-                    "royalup_min_bid_ppn": C.royalup_min_bid(cur, c["code"]),
+                    "upgrade_bid_min_ppn": C.upgrade_bid_min(cur, c["code"]),
                     "perks": C.CATEGORY_PERKS.get(c["code"], []), "recommended": c["code"] == rec,
                     "recommended_bid_ppn": bid if c["code"] == rec else None,
                 } for c in C.CABIN_CATEGORIES if cur_rank < c["rank"] <= cur_rank + 3],
@@ -88,21 +88,21 @@ async def compute_offers(profile: dict) -> list[dict]:
     for pkg in C.PACKAGES:
         if pkg["code"] in owned.get("packages", []):
             continue
-        if pkg["code"] == "REFRESH" and "DELUXE_BEV" in owned.get("packages", []):
+        if pkg["code"] == "ZERO_ALC" and "PLUS" in owned.get("packages", []):
             continue
-        if pkg["code"] in ("DELUXE_BEV",) and profile["age_band"] in ("0-2", "3-5", "6-11", "12-17"):
+        if pkg["code"] in ("PLUS",) and profile["age_band"] in ("0-2", "3-5", "6-11", "12-17"):
             continue
         prop = s.get(pkg["propensity"], 0)
-        if pkg["code"] == "REFRESH":
+        if pkg["code"] == "ZERO_ALC":
             prop = prop * 0.6 if s.get("price_sensitivity", 0.5) > 0.5 else prop * 0.35
-        if pkg["code"] == "ULT_DINING":
+        if pkg["code"] == "SPEC_DINING":
             prop *= 0.8
         offers.append({
             "offer_id": f"package-{pkg['code']}", "kind": "package", "palette": PALETTES["package"],
             "title": pkg["name"], "subtitle": pkg["blurb"],
-            "reason": {"DELUXE_BEV": "Based on what you've enjoyed on past sailings",
-                       "VOOM": "Stay connected at sea", "THE_KEY": "Skip the lines" + (" with the kids" if prefs.get("travels_with_kids") else ""),
-                       "ULT_DINING": "You love specialty dining", "REFRESH": "All the mocktails & lattes you want"}.get(pkg["code"], ""),
+            "reason": {"PLUS": "Based on what you've enjoyed on past voyages",
+                       "MEDALLIONNET": "Stay connected at sea", "PREMIER": "Drinks, dining and Wi-Fi, all included" + (" for the whole family" if prefs.get("travels_with_kids") else ""),
+                       "SPEC_DINING": "You love specialty dining", "ZERO_ALC": "All the mocktails & lattes you want"}.get(pkg["code"], ""),
             "price_label": f"${pkg['price_per_day']} {pkg['per']}", "score": prop * 0.85,
             "cta": {"label": "Add to my cruise", "tool": "purchase_package", "args": {"package_code": pkg["code"]}},
         })
@@ -162,12 +162,12 @@ async def compute_offers(profile: dict) -> list[dict]:
     # --- spa ---------------------------------------------------------------------
     if profile["age_band"] not in ("0-2", "3-5", "6-11", "12-17"):
         pick = "SPA-COUPLES" if prefs.get("celebration") in ("anniversary", "honeymoon") else (
-            "SPA-THERMAL" if "wellness" in likes else "SPA-HOTSTONE")
+            "SPA-ENCLAVE" if "wellness" in likes else "SPA-HOTSTONE")
         if pick not in owned.get("spa", []):
             sp = C.SPA_BY_ID[pick]
             offers.append({
                 "offer_id": f"spa-{pick}", "kind": "spa", "palette": PALETTES["spa"],
-                "title": sp["name"], "subtitle": f"Vitality Spa · {sp['minutes']} min" if sp["minutes"] else "Vitality Spa · all sailing",
+                "title": sp["name"], "subtitle": f"Lotus Spa · {sp['minutes']} min" if sp["minutes"] else "Lotus Spa · all sailing",
                 "reason": "Save 20% on port days", "price_label": f"from ${round(sp['price'] * 0.8)}",
                 "score": s.get("spa_propensity", 0) * 0.9,
                 "cta": {"label": "Choose a time", "screen": "spa", "args": {"treatment_id": pick}},

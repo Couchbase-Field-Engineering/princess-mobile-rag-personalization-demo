@@ -26,7 +26,7 @@ function apiUrl(): string {
 }
 
 export const API_URL = apiUrl().replace(/\/$/, '');
-export const SG_URL = (process.env.EXPO_PUBLIC_SG_URL || `ws://${hostGuess()}:4984/royal`).replace(/\/$/, '');
+export const SG_URL = (process.env.EXPO_PUBLIC_SG_URL || `ws://${hostGuess()}:4984/princess`).replace(/\/$/, '');
 
 /** "auto" = Couchbase Lite when the native module is linked (dev build), browser preview otherwise. */
 export const DB_ENGINE = (process.env.EXPO_PUBLIC_DB_ENGINE || 'auto') as 'auto' | 'cbl' | 'preview';

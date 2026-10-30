@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 /** Idempotency marker written into the generated ios/Podfile. */
-const MARKER = 'rccl-fmt-consteval-fix';
+const MARKER = 'pcl-fmt-consteval-fix';
 
 /**
  * Force `{fmt}` off compile-time format-string checks.

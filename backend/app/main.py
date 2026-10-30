@@ -1,8 +1,8 @@
-"""Backend for the Royal Caribbean personalization demo.
+"""Backend for the Princess Cruises personalization demo.
 
   /api/*          app sign-in (mints a Sync Gateway session), concierge, status,
                   and a REST "preview sync" used only by the browser preview build
-  /rccl/mcp/      the rccl-guest-services MCP server AOM governs
+  /pcl/mcp/      the pcl-guest-services MCP server AOM governs
 
 Background tasks: the Databricks dump loader/poller and the offline-first
 request worker.
@@ -22,7 +22,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import aom_bootstrap, concierge, config, loader, personalization, rag_app, sgw, worker
+from . import aom_bootstrap, concierge, config, loader, metrics, personalization, rag_app, sgw, worker
 from .aom_client import aom
 from .docs import (CATALOG_ID, STATE, bookings_id, chat_id, ctx_id, days_to_sail, guest_channel,
                    now_iso, offers_id, profile_id)
@@ -30,12 +30,12 @@ from .mcp_server import mcp
 from .store import store
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
-log = logging.getLogger("rccl.api")
+log = logging.getLogger("pcl.api")
 
 PERSONA_BLURBS = {
-    "G00000101": "Diamond member celebrating an anniversary - in a Balcony, primed for a suite upgrade.",
-    "G00000201": "First-time family of four on a 3-night weekend - excursions, The Key, family upgrade.",
-    "G00000301": "Emerald solo wellness traveler sailing in 2 days - spa, Chef's Table, Grand Suite bid.",
+    "G00000101": "Captain's Circle Elite celebrating an anniversary - in a Balcony, primed for a suite upgrade.",
+    "G00000201": "First-time family of four on a 3-night Princess Cays getaway - excursions, Princess Premier, family upgrade.",
+    "G00000301": "Platinum solo wellness traveler sailing in 2 days - spa, Chef's Table, Premium Suite bid.",
 }
 _bg: list = []
 
@@ -65,9 +65,9 @@ async def lifespan(app: FastAPI):
         t.cancel()
 
 
-app = FastAPI(title="RCI Mobile Personalization Demo", lifespan=lifespan)
+app = FastAPI(title="Princess Mobile Personalization Demo", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_methods=["*"], allow_headers=["*"])
-app.mount("/rccl", mcp.streamable_http_app())
+app.mount("/pcl", mcp.streamable_http_app())
 
 
 # --------------------------------------------------------------------------
@@ -101,19 +101,20 @@ def current_guest(authorization: str | None = Header(default=None)) -> str:
 async def index():
     """Landing page: where everything in the demo lives."""
     rows = [
+        ("http://localhost:8081/story", "The story: why Couchbase, not Redis, for an offline-first AI guest app (start here)"),
         ("http://localhost:8081", "The app in a browser (docker compose service <code>web</code>)"),
         ("http://localhost:8200/api/status", "Backend status: dump load, Knowledge Base publishing, AOM, Sync Gateway"),
         ("http://localhost:8200/docs", "Backend API (OpenAPI)"),
-        ("http://localhost:8200/rccl/mcp", "MCP server <code>rccl-guest-services</code> (called by AOM)"),
+        ("http://localhost:8200/pcl/mcp", "MCP server <code>pcl-guest-services</code> (called by AOM)"),
         ("http://localhost:18091", "Couchbase Web Console (Administrator / password123)"),
-        ("ws://localhost:4984/royal", "Sync Gateway - Couchbase Lite replicates here"),
+        ("ws://localhost:4984/princess", "Sync Gateway - Couchbase Lite replicates here"),
         ("https://localhost:8090", "Couchbase Agent Operations Manager (its own stack)"),
     ]
     items = "".join(f'<li><a href="{u}">{u}</a> &nbsp;{d}</li>' for u, d in rows)
-    return f"""<!doctype html><html><head><meta charset="utf-8"><title>RCI demo backend</title>
+    return f"""<!doctype html><html><head><meta charset="utf-8"><title>Princess demo backend</title>
 <style>body{{font-family:-apple-system,Arial,sans-serif;max-width:760px;margin:48px auto;padding:0 16px;color:#0B1530}}
 h1{{color:#0A1A3F}} li{{margin:10px 0}} a{{color:#16357A;font-weight:600}}</style></head>
-<body><h1>Royal Caribbean personalization demo</h1>
+<body><h1>Princess Cruises personalization demo</h1>
 <p>This is the backend. Open the app at <a href="http://localhost:8081">http://localhost:8081</a>.
 Loaded dump: <b>{STATE.get("export_date") or "loading..."}</b> ({loader.STATUS.get("state")}).</p>
 <ul>{items}</ul></body></html>"""
@@ -128,14 +129,15 @@ async def health():
 async def status():
     aom_state = {"configured": aom.enabled, "url": config.AOM_URL or None, "kb_publisher": aom.admin_enabled,
                  "last_error": aom.last_error, "registration": aom_bootstrap.STATUS, "rag_app": dict(rag_app.STATUS, app_id=config.RAG_APP_ID),
-                 "context_namespace": config.CONTEXT_NAMESPACE}
+                 "context_namespace": config.CONTEXT_NAMESPACE,
+                 "dashboard_url": config.AOM_DASHBOARD_URL or None}
     if aom.enabled:
         try:
             aom_state["health"] = await aom.health()
         except Exception as exc:  # noqa: BLE001
             aom_state["health"] = {"error": str(exc)[:200]}
     return {"store": store.driver, "export_date": STATE.get("export_date"),
-            "load": {k: v for k, v in loader.STATUS.items()}, "aom": aom_state,
+            "load": {k: v for k, v in loader.STATUS.items()}, "aom": aom_state, "metrics": metrics.snapshot(),
             "sync_gateway": {"configured": sgw.enabled(), "public_url": config.SG_PUBLIC_URL or None, "db": config.SG_DB},
             "mcp_server": {"server_id": config.AOM_MCP_SERVER_ID, "registered_url": config.AOM_MCP_PUBLIC_URL}}
 

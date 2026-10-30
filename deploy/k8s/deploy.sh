@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Deploy the Couchbase Agent Operations Manager ("agent-ops") and the Royal
-# Caribbean demo ("royal-app") with Helm onto the single-node K3s cluster on
+# Deploy the Couchbase Agent Operations Manager ("agent-ops") and the Princess
+# Cruises demo ("princess-app") with Helm onto the single-node K3s cluster on
 # mother (Rancher-managed), without a container registry:
 #
 #   1. builds the 5 images here with Docker, for mother's CPU architecture
 #        AOM:   couchbase-aom-operations-manager, couchbase-aom-sample-mcp-servers, couchbase-aom-ui
-#        demo:  rccl-backend, rccl-web
+#        demo:  pcl-backend, pcl-web
 #   2. copies them to mother and imports them into K3s's containerd
 #      (asks for your sudo password on mother once)
 #   3. copies both charts to mother and runs `helm upgrade --install` there
@@ -20,7 +20,7 @@
 #   AOM_ADMIN_PASSWORD  AOM dashboard admin password. On a fresh AOM the demo backend sets it as the
 #                       first-login password; on an existing AOM it must be the current one. Prompted if unset.
 #   ANTHROPIC_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY   optional LLM keys for AOM (else labelled stubs)
-#   ONLY                "aom" or "royal" to deploy just one of them
+#   ONLY                "aom" or "princess" to deploy just one of them
 #   SKIP_BUILD=1        reuse the images already on mother (set TAG to the tag to deploy)
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
@@ -31,8 +31,8 @@ AOM_DIR="${AOM_DIR:-$HOME/github-couchbaselabs/couchbase-agent-operations-manage
 TAG="${TAG:-$(date +%Y%m%d-%H%M%S)}"
 ONLY="${ONLY:-}"
 AOM_NS=agent-ops
-ROYAL_NS=royal-app
-REMOTE_DIR='~/rccl-deploy'
+PRINCESS_NS=princess-app
+REMOTE_DIR='~/pcl-deploy'
 
 say() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
 remote() { if [ "$MOTHER" = local ]; then bash -lc "$1"; else ssh "$MOTHER" "bash -lc $(printf '%q' "$1")"; fi; }
@@ -40,7 +40,7 @@ remote_tty() { if [ "$MOTHER" = local ]; then bash -lc "$1"; else ssh -t "$MOTHE
 
 want() { [ -z "$ONLY" ] || [ "$ONLY" = "$1" ]; }
 
-if want aom || want royal; then :; else echo "ONLY must be aom or royal"; exit 1; fi
+if want aom || want princess; then :; else echo "ONLY must be aom or princess"; exit 1; fi
 # The checkout may be nested one level down (…/couchbase-agent-operations-manager/couchbase-agent-operations-manager).
 if [ ! -d "$AOM_DIR/helm" ] && [ -d "$AOM_DIR/couchbase-agent-operations-manager/helm" ]; then
   AOM_DIR="$AOM_DIR/couchbase-agent-operations-manager"
@@ -48,7 +48,7 @@ fi
 if want aom && [ ! -d "$AOM_DIR/helm/couchbase-agent-operations-manager" ]; then
   echo "AOM checkout not found at $AOM_DIR (set AOM_DIR)"; exit 1
 fi
-if want royal && [ -z "${AOM_ADMIN_PASSWORD:-}" ]; then
+if want princess && [ -z "${AOM_ADMIN_PASSWORD:-}" ]; then
   read -r -s -p "AOM admin password (12+ characters): " AOM_ADMIN_PASSWORD; echo
 fi
 
@@ -71,29 +71,29 @@ if [ -z "${SKIP_BUILD:-}" ]; then
     build couchbase-aom-sample-mcp-servers "$AOM_DIR/sample-mcp-servers"
     build couchbase-aom-ui "$AOM_DIR/ui"
   fi
-  if want royal; then
-    build rccl-backend "$ROOT/backend"
-    build rccl-web "$ROOT/web"
+  if want princess; then
+    build pcl-backend "$ROOT/backend"
+    build pcl-web "$ROOT/web"
   fi
   say "Copying ${#IMAGES[@]} images to mother and importing them into K3s"
   if [ "$MOTHER" = local ]; then
     docker save "${IMAGES[@]}" | sudo k3s ctr images import -
   else
-    docker save "${IMAGES[@]}" | gzip -1 | ssh "$MOTHER" "cat > /tmp/rccl-images.tar.gz"
-    remote_tty 'gunzip -f /tmp/rccl-images.tar.gz && sudo k3s ctr images import /tmp/rccl-images.tar && rm -f /tmp/rccl-images.tar'
+    docker save "${IMAGES[@]}" | gzip -1 | ssh "$MOTHER" "cat > /tmp/pcl-images.tar.gz"
+    remote_tty 'gunzip -f /tmp/pcl-images.tar.gz && sudo k3s ctr images import /tmp/pcl-images.tar && rm -f /tmp/pcl-images.tar'
   fi
 fi
 
 say "Copying the Helm charts to mother"
 # Chart copies of the repo's init scripts and dump generator.
-cp couchbase-init/init.sh sync-gateway/db-config.json databricks/generate_mock_dump.py helm/royal-app/files/
+cp couchbase-init/init.sh sync-gateway/db-config.json databricks/generate_mock_dump.py helm/princess-app/files/
 STAGE=$(mktemp -d)
 mkdir -p "$STAGE/charts"
-cp -R helm/royal-app "$STAGE/charts/royal-app"
-cp deploy/k8s/values-mother.yaml "$STAGE/royal-values.yaml"
+cp -R helm/princess-app "$STAGE/charts/princess-app"
+cp deploy/k8s/values-mother.yaml "$STAGE/princess-values.yaml"
 want aom && cp -R "$AOM_DIR/helm/couchbase-agent-operations-manager" "$STAGE/charts/agent-ops"
 if [ "$MOTHER" = local ]; then
-  mkdir -p ~/rccl-deploy && cp -R "$STAGE"/. ~/rccl-deploy/
+  mkdir -p ~/pcl-deploy && cp -R "$STAGE"/. ~/pcl-deploy/
 else
   remote "mkdir -p $REMOTE_DIR"
   tar -C "$STAGE" -czf - . | ssh "$MOTHER" "tar -C $REMOTE_DIR -xzf -"
@@ -109,9 +109,9 @@ yaml_str() { python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$1"; 
   echo "    openai: $(yaml_str "${OPENAI_API_KEY:-}")"
   echo "    gemini: $(yaml_str "${GEMINI_API_KEY:-}")"
 } | remote "umask 077; cat > $REMOTE_DIR/aom-secrets.yaml"
-if want royal; then
+if want princess; then
   printf 'aom:\n  adminPassword: %s\n' "$(yaml_str "$AOM_ADMIN_PASSWORD")" \
-    | remote "umask 077; cat > $REMOTE_DIR/royal-secrets.yaml"
+    | remote "umask 077; cat > $REMOTE_DIR/princess-secrets.yaml"
 fi
 
 if [ "$MOTHER" = local ]; then NODE_IP=$(hostname -I | awk '{print $1}'); else NODE_IP="${MOTHER#*@}"; fi
@@ -127,7 +127,7 @@ if ! command -v helm >/dev/null; then
   mkdir -p \$HOME/.local/bin
   curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | HELM_INSTALL_DIR=\$HOME/.local/bin USE_SUDO=false bash
 fi
-if [ '$ONLY' != royal ]; then
+if [ '$ONLY' != princess ]; then
   echo '--- agent-ops (Couchbase Agent Operations Manager) ---'
   helm upgrade --install aom charts/agent-ops -n $AOM_NS --create-namespace \
     -f charts/agent-ops/values-k3s.yaml -f aom-secrets.yaml \
@@ -139,24 +139,24 @@ if [ '$ONLY' != royal ]; then
   kubectl -n $AOM_NS patch svc aom-ui --type merge -p '{\"spec\":{\"externalIPs\":[\"$NODE_IP\"]}}' || true
 fi
 if [ '$ONLY' != aom ]; then
-  echo '--- royal-app (Royal Caribbean demo) ---'
-  helm upgrade --install royal-app charts/royal-app -n $ROYAL_NS --create-namespace \
-    -f royal-values.yaml -f royal-secrets.yaml \
+  echo '--- princess-app (Princess Cruises demo) ---'
+  helm upgrade --install princess-app charts/princess-app -n $PRINCESS_NS --create-namespace \
+    -f princess-values.yaml -f princess-secrets.yaml \
     --set backend.image.tag=$TAG --set web.image.tag=$TAG \
     --timeout 25m
 fi
 kubectl get pods,svc -n $AOM_NS 2>/dev/null || true
-kubectl get pods,svc -n $ROYAL_NS 2>/dev/null || true
+kubectl get pods,svc -n $PRINCESS_NS 2>/dev/null || true
 "
 
 HOST="${MOTHER#*@}"; [ "$MOTHER" = local ] && HOST=$(remote "hostname -I | awk '{print \$1}'")
 say "Done"
 cat <<MSG
   AOM dashboard:        https://$HOST:3111   (admin / your AOM admin password)
-  Royal Caribbean app:  http://$HOST:8081
+  Princess Cruises app:  http://$HOST:8081
   Backend status:       http://$HOST:8200/api/status   (aom.registration should reach "registered")
-  Couchbase Lite:       ws://$HOST:4984/royal
+  Couchbase Lite:       ws://$HOST:4984/princess
 
 First start takes several minutes (Couchbase init, the 100 MiB export, KB publishing). Watch with:
-  ssh $MOTHER kubectl -n $ROYAL_NS logs deploy/backend -f
+  ssh $MOTHER kubectl -n $PRINCESS_NS logs deploy/backend -f
 MSG

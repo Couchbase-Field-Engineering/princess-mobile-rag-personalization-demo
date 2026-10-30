@@ -11,13 +11,13 @@ import { theme } from '@/src/theme';
 import { Button, fmtDate, Pill, Wordmark } from '@/src/ui/components';
 
 const FALLBACK: Persona[] = [
-  { guest_id: 'G00000101', name: 'Olivia Bennett', last_name: 'Bennett', booking_id: '4810101', ship: 'Icon of the Seas', embark_date: '', days_to_sail: 9, tier: 'Diamond', stateroom: 'Balcony', blurb: 'Diamond member celebrating an anniversary.' },
-  { guest_id: 'G00000201', name: 'Carlos Rivera', last_name: 'Rivera', booking_id: '4820202', ship: 'Utopia of the Seas', embark_date: '', days_to_sail: 3, tier: 'Platinum', stateroom: 'Interior', blurb: 'Family of four on a weekend getaway.' },
-  { guest_id: 'G00000301', name: 'Priya Natarajan', last_name: 'Natarajan', booking_id: '4830303', ship: 'Wonder of the Seas', embark_date: '', days_to_sail: 2, tier: 'Emerald', stateroom: 'Junior Suite', blurb: 'Solo wellness traveler.' },
+  { guest_id: 'G00000101', name: 'Olivia Bennett', last_name: 'Bennett', booking_id: '4810101', ship: 'Sun Princess', embark_date: '', days_to_sail: 9, tier: 'Elite', stateroom: 'Balcony', blurb: 'Elite member celebrating an anniversary.' },
+  { guest_id: 'G00000201', name: 'Carlos Rivera', last_name: 'Rivera', booking_id: '4820202', ship: 'Caribbean Princess', embark_date: '', days_to_sail: 3, tier: 'Gold', stateroom: 'Interior', blurb: 'Family of four on a weekend getaway.' },
+  { guest_id: 'G00000301', name: 'Priya Natarajan', last_name: 'Natarajan', booking_id: '4830303', ship: 'Star Princess', embark_date: '', days_to_sail: 2, tier: 'Platinum', stateroom: 'Mini-Suite', blurb: 'Solo wellness traveler.' },
 ];
 
 export default function Login() {
-  const { session, signIn } = useAuth();
+  const { session, signIn, notice } = useAuth();
   const insets = useSafeAreaInsets();
   const [booking, setBooking] = useState('');
   const [last, setLast] = useState('');
@@ -54,6 +54,12 @@ export default function Login() {
           <Text style={styles.sub}>Sign in with your reservation to see offers picked for you, plan every day and chat with your concierge - even at sea with no signal.</Text>
 
           <View style={styles.form}>
+            {notice ? (
+              <View style={styles.notice}>
+                <Ionicons name="time-outline" size={16} color={theme.color.navy} />
+                <Text style={styles.noticeText}>{notice}</Text>
+              </View>
+            ) : null}
             <Text style={styles.label}>RESERVATION NUMBER</Text>
             <TextInput value={booking} onChangeText={setBooking} placeholder="e.g. 4810101" placeholderTextColor={theme.color.faint} style={styles.input} keyboardType="number-pad" />
             <Text style={styles.label}>LAST NAME</Text>
@@ -96,6 +102,8 @@ const styles = StyleSheet.create({
   label: { color: theme.color.muted, fontSize: theme.type.xs, fontWeight: '800', letterSpacing: 1.3 },
   input: { borderWidth: 1, borderColor: theme.color.border, borderRadius: theme.radiusSm, padding: 13, fontSize: theme.type.lg, color: theme.color.text, marginBottom: 6 },
   err: { color: theme.color.danger, fontWeight: '600' },
+  notice: { flexDirection: 'row', gap: 8, alignItems: 'center', backgroundColor: '#FFF4D6', borderRadius: theme.radiusSm, padding: 10, marginBottom: 6 },
+  noticeText: { flex: 1, color: theme.color.navy, fontWeight: '600', fontSize: theme.type.sm },
   persona: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: theme.radius, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' },
   avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: theme.color.gold, alignItems: 'center', justifyContent: 'center' },
   pname: { color: theme.color.onDark, fontWeight: '800', fontSize: theme.type.md },

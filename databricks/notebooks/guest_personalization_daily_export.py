@@ -5,8 +5,8 @@
 # MAGIC Runs every morning (see `../jobs/guest_personalization_daily_export.job.json`, 05:00 America/New_York).
 # MAGIC
 # MAGIC 1. Join upcoming reservations with Guest 360 (loyalty, preferences, sailing history, onboard spend).
-# MAGIC 2. Score every passenger with the registered personalization model (`rccl-personalization`, alias `champion`).
-# MAGIC 3. Write the Delta table `rccl_prod.guest360.passenger_reservation_personalization`.
+# MAGIC 2. Score every passenger with the registered personalization model (`pcl-personalization`, alias `champion`).
+# MAGIC 3. Write the Delta table `pcl_prod.guest360.passenger_reservation_personalization`.
 # MAGIC 4. Export the same rows as JSON Lines to a Unity Catalog volume partitioned by `dt=`,
 # MAGIC    with `_SUCCESS` and `_manifest.json` - the drop the demo backend's loader picks up and
 # MAGIC    publishes to Couchbase (operational + Couchbase Lite sync) and the AOM Knowledge Base.
@@ -16,9 +16,9 @@
 
 # COMMAND ----------
 
-dbutils.widgets.text("catalog", "rccl_prod")
+dbutils.widgets.text("catalog", "pcl_prod")
 dbutils.widgets.text("schema", "guest360")
-dbutils.widgets.text("export_volume", "/Volumes/rccl_prod/guest360/exports/passenger_reservation_personalization")
+dbutils.widgets.text("export_volume", "/Volumes/pcl_prod/guest360/exports/passenger_reservation_personalization")
 dbutils.widgets.text("horizon_days", "150")
 dbutils.widgets.text("num_files", "4")
 
@@ -61,7 +61,7 @@ party = (
                                  "age_band", "relationship")).alias("party"))
 )
 guests = spark.table("guest_profile")          # names, contact, home city, language, consent
-loyalty = spark.table("crown_anchor_status")   # tier, points, cruises_completed, member_since
+loyalty = spark.table("captains_circle_status")   # tier, points, cruises_completed, member_since
 prefs = spark.table("guest_preferences")       # interests[], dietary[], celebration, bed, pillow, ...
 history = (
     spark.table("sailing_history")
@@ -92,9 +92,9 @@ base = (
 import mlflow
 
 mlflow.set_registry_uri("databricks-uc")
-model_uri = f"models:/{CATALOG}.ml.rccl_personalization@champion"
+model_uri = f"models:/{CATALOG}.ml.pcl_personalization@champion"
 score_udf = mlflow.pyfunc.spark_udf(spark, model_uri, result_type="string")  # returns JSON of ml_scores
-model_version = mlflow.MlflowClient().get_model_version_by_alias(f"{CATALOG}.ml.rccl_personalization", "champion").version
+model_version = mlflow.MlflowClient().get_model_version_by_alias(f"{CATALOG}.ml.pcl_personalization", "champion").version
 
 feature_cols = [c for c in base.columns if c not in ("first_name", "last_name", "email")]
 scored = base.withColumn("ml_scores_json", score_udf(F.struct(*feature_cols)))
@@ -106,16 +106,16 @@ scored = base.withColumn("ml_scores_json", score_udf(F.struct(*feature_cols)))
 
 ml_schema = ("struct<model_version:string,scored_at:string,upgrade_propensity:double,price_sensitivity:double,"
              "beverage_package_propensity:double,specialty_dining_propensity:double,excursion_propensity:double,"
-             "spa_propensity:double,wifi_propensity:double,the_key_propensity:double,casino_propensity:double,"
+             "spa_propensity:double,wifi_propensity:double,premier_propensity:double,casino_propensity:double,"
              "churn_risk:double,predicted_onboard_spend_usd:double,recommended_upgrade_category:string,"
              "recommended_bid_per_night_usd:int,segment:string,next_best_action:string>")
 
 out = scored.select(
     F.lit(export_date).alias("export_date"),
     F.lit(SCHEMA_VERSION).alias("schema_version"),
-    "guest_id", "crown_anchor_number", "first_name", "last_name", "email", "age_band",
+    "guest_id", "captains_circle_number", "first_name", "last_name", "email", "age_band",
     "home_city", "home_state", "home_country", "preferred_language",
-    F.struct(F.lit("Crown & Anchor Society").alias("program"), "tier", "points", "cruises_completed",
+    F.struct(F.lit("Captain's Circle").alias("program"), "tier", "points", "cruises_completed",
              "member_since").alias("loyalty"),
     F.struct("booking_id", "booking_status", "booked_date", "booking_channel", "lead_guest",
              "sailing_id", "ship_code", "ship_name", "itinerary_code", "itinerary_name", "nights",
@@ -126,7 +126,7 @@ out = scored.select(
     F.struct("interests", "dietary", "celebration", "bed_configuration", "pillow", "stateroom_location_pref",
              "communication_channel", "travels_with_kids").alias("preferences"),
     F.struct("past_sailings", "avg_onboard_spend_usd", "lifetime_value_usd", "upgrades_accepted",
-             "royalup_bids_placed", "last_nps").alias("history"),
+             "upgrade_bids_placed", "last_nps").alias("history"),
     F.struct("beverage", "dining", "excursions", "spa", "casino", "retail").alias("onboard_spend_mix"),
     F.struct("packages", "excursions", "dining", "spa").alias("purchased_for_sailing"),
     F.from_json("ml_scores_json", ml_schema).alias("ml_scores"),
@@ -153,7 +153,7 @@ files = [f for f in dbutils.fs.ls(path) if f.name.startswith("part-")]
 manifest = {
     "table": f"{CATALOG}.{SCHEMA}.passenger_reservation_personalization",
     "export_date": export_date, "schema_version": SCHEMA_VERSION,
-    "model_version": f"rccl-personalization-v{model_version}", "format": "jsonl",
+    "model_version": f"pcl-personalization-v{model_version}", "format": "jsonl",
     "rows": daily.count(), "bookings": daily.select("reservation.booking_id").distinct().count(),
     "bytes": sum(f.size for f in files), "files": [{"file": f.name, "bytes": f.size} for f in files],
 }

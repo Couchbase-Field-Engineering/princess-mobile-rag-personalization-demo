@@ -5,4 +5,6 @@
 FROM nginx:1.27.3-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 ADD dist.tgz /usr/share/nginx/html/
+# The story that opens the demo: http://<host>:8081/story
+COPY story.html /usr/share/nginx/html/story.html
 EXPOSE 80

@@ -2,7 +2,7 @@
 
 With AOM configured, every tool call - whether it came from a tap in the app
 (an offline-first `requests` document) or from the concierge - goes through
-`POST /v1/tools/invoke` as `rccl-guest-services::<tool>`. AOM re-checks RBAC
+`POST /v1/tools/invoke` as `pcl-guest-services::<tool>`. AOM re-checks RBAC
 and the agent's tool scope, may park the call for a human (goodwill
 upgrades), traces it, audits it, scans the response, then calls this
 backend's MCP server, which runs the action in actions.py.
@@ -17,7 +17,7 @@ import logging
 from . import actions, config
 from .aom_client import AOMError, PendingApproval, aom
 
-log = logging.getLogger("rccl.tools")
+log = logging.getLogger("pcl.tools")
 
 
 def tool_id(name: str) -> str:

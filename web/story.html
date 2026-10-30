@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Personalization That Sails</title>
+<meta name="description" content="Why Couchbase, not Redis, for an AI-powered, offline-first cruise guest app - the story that opens the Princess Cruises personalization demo.">
+<style>
+:root{--bg:#f3f5f9;--panel:#fff;--panel2:#eef1f7;--line:#e2e6ef;--fg:#0b1530;--fg2:#3e4a66;--muted:#6b7590;--navy:#0b2545;--princess:#1b4f9c;--gold:#d9ae4f;--gold2:#a07a1f;--ocean:#1c86d1;--cb:#ea2328;--cb2:#c71d22;--green:#13804b;--amber:#b26200;--shadow:0 1px 2px rgba(11,37,69,.05),0 8px 28px rgba(11,37,69,.07)}
+html[data-theme=dark]{--bg:#070d1f;--panel:#0f1830;--panel2:#16213d;--line:#24304f;--fg:#eef2fb;--fg2:#c3cbe0;--muted:#8d98b5;--princess:#8db4ff;--gold2:#e4bd5a;--cb2:#ff5a5e;--green:#3ccf86;--amber:#ffb35c;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif}
+body{display:flex;flex-direction:column}
+a{color:var(--princess)}
+.bar{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:14px;padding:10px 22px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--fg);letter-spacing:-.01em;white-space:nowrap}
+.brand svg{width:26px;height:26px;display:block}.brand small{color:var(--muted);font-weight:500;font-size:13px;margin-left:4px}
+.dots{display:flex;gap:7px;margin:0 auto}.dots button{width:9px;height:9px;border-radius:50%;border:0;background:var(--line);padding:0;cursor:pointer;transition:background .2s,transform .2s}
+.dots button.on{background:var(--gold);transform:scale(1.3)}.dots button:hover{background:var(--muted)}
+.pill{font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--fg2);white-space:nowrap}
+.pill.ok{color:var(--green);border-color:rgba(19,128,75,.3);background:rgba(19,128,75,.08)}.pill.bad{color:var(--cb2);border-color:rgba(234,35,40,.3)}.pill.warn{color:var(--amber);border-color:rgba(178,98,0,.3);background:rgba(178,98,0,.08)}
+.btn{font:inherit;font-size:14px;font-weight:700;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#0a1a3f}.btn:hover{filter:brightness(.97)}.btn.sm{padding:6px 12px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:default}
+main{flex:1;scroll-snap-type:y proximity}
+section.ch{min-height:calc(100vh - 53px);display:flex;align-items:center;scroll-snap-align:start;padding:56px 22px}
+.wrap{width:min(1180px,100%);margin:0 auto}
+.kicker{color:var(--gold2);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+h1{font-size:clamp(36px,5.2vw,66px);line-height:1.04;letter-spacing:-.03em;margin:0 0 20px;font-weight:850}
+h2{font-size:clamp(28px,3.4vw,42px);line-height:1.1;letter-spacing:-.025em;margin:0 0 10px;font-weight:800}
+.accent{color:var(--princess)}.cbc{color:var(--cb2)}
+.lede{font-size:clamp(17px,1.4vw,20px);color:var(--fg2);max-width:780px;margin:0 0 26px}
+.src{color:var(--muted);font-size:12.5px;margin-top:16px}
+.grid{display:grid;gap:14px}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(245,184,0,.18);color:var(--gold2);font-weight:800;font-size:13px;margin-bottom:10px}
+.card h3{margin:0 0 6px;font-size:16px;letter-spacing:-.01em}.card p{margin:0;color:var(--fg2);font-size:14px}
+.card ul{margin:8px 0 0;padding-left:18px;color:var(--fg2);font-size:13.5px}.card li{margin:3px 0}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--panel2);color:var(--muted);margin-top:10px}
+.tag.cb{background:rgba(234,35,40,.08);color:var(--cb2)}
+.icon{font-size:22px;line-height:1;margin-bottom:8px;display:block}
+.hero{background:radial-gradient(1100px 620px at 85% -10%,rgba(0,119,200,.14),transparent 60%),radial-gradient(900px 500px at 0% 110%,rgba(245,184,0,.12),transparent 60%)}
+.scenario{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;margin-top:18px}
+.quote{background:linear-gradient(135deg,#06112b,#16357a);color:#fff;border-radius:18px;padding:22px 24px;box-shadow:var(--shadow)}
+.quote .who{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#f5b800;font-weight:800;margin-bottom:8px}
+.quote p{margin:0;font-size:17px;line-height:1.55;color:rgba(255,255,255,.92)}.quote b{color:#fff}
+/* diagram */
+.diagram{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:14px 16px}
+.diagram .head{display:flex;align-items:center;gap:12px;margin-bottom:8px;font-size:14px;color:var(--fg2)}.diagram .head .btn{margin-left:auto}
+.diagram svg{width:100%;height:auto;display:block}
+.sb{fill:var(--panel2);stroke:var(--line)}.st{fill:var(--fg);font-size:12.5px;font-weight:700}.ss{fill:var(--muted);font-size:10.5px}
+.sbad{stroke:#9aa3b8;stroke-dasharray:5 4;fill:rgba(120,130,160,.06)}.sred{stroke:var(--cb);stroke-dasharray:5 4;fill:rgba(234,35,40,.05)}
+.scb{fill:#ea2328}.scbt{fill:#fff;font-size:12.5px;font-weight:800}.scbs{fill:rgba(255,255,255,.85);font-size:10.5px}
+.sgold{fill:rgba(245,184,0,.16);stroke:#f5b800}.sline{stroke:var(--muted);stroke-width:1.3;fill:none;opacity:.55}.sline.x{stroke:var(--cb);opacity:.8;stroke-dasharray:3 4}
+.fade{transition:opacity .5s}.gone{opacity:0;pointer-events:none}
+.legend{display:flex;gap:16px;color:var(--muted);font-size:12px;margin-top:10px;flex-wrap:wrap}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+/* offline sim */
+.sim{display:grid;grid-template-columns:minmax(0,1fr) 300px 300px;gap:18px;align-items:start}
+.steps{display:grid;gap:10px}
+.step{display:grid;grid-template-columns:30px 1fr;gap:10px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--panel);opacity:.55;transition:opacity .3s,border-color .3s,box-shadow .3s}
+.step.on{opacity:1;border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,184,0,.18)}.step.done{opacity:1}
+.step .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);font-weight:800;font-size:12px;color:var(--fg2)}
+.step.done .n{background:rgba(19,128,75,.14);color:var(--green)}.step.on .n{background:var(--gold);color:#0a1a3f}
+.step h4{margin:0 0 2px;font-size:14.5px}.step p{margin:0;font-size:13px;color:var(--fg2)}
+.phone{border-radius:34px;background:#11131a;padding:9px;box-shadow:0 24px 50px rgba(11,37,69,.28)}
+.screen{border-radius:26px;background:#f3f5f9;overflow:hidden;height:460px;display:flex;flex-direction:column;color:#0b1530}
+.ph-top{background:linear-gradient(135deg,#06112b,#16357a);color:#fff;padding:12px 16px 14px}
+.ph-sb{display:flex;justify-content:space-between;font-size:11px;font-weight:700;opacity:.95}
+.ph-title{font-size:15px;font-weight:800;margin-top:10px}.ph-sub{font-size:11.5px;opacity:.75}
+.ph-body{padding:12px;display:grid;gap:10px;font-size:12.5px}
+.ph-card{background:#fff;border-radius:14px;padding:12px;border:1px solid #e2e6ef}
+.ph-card b{display:block;font-size:13px;margin-bottom:2px}
+.ph-pill{display:inline-block;margin-top:6px;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;background:#eef1f7;color:#5d6884}
+.ph-pill.warn{background:#fff3e0;color:#b26200}.ph-pill.ok{background:#e6f6ee;color:#13804b}.ph-pill.bad{background:#fdecec;color:#c0262d}.ph-pill.ocean{background:#e3f2fc;color:#0077c8}
+.ph-btn{margin-top:8px;text-align:center;background:#f5b800;color:#0a1a3f;font-weight:800;border-radius:999px;padding:7px}
+.ph-btn.off{background:#e2e6ef;color:#97a0b6}
+.ph-label{text-align:center;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:10px 0 0}
+.ph-err{background:#fdecec;color:#c0262d;border-radius:12px;padding:10px;font-weight:700;font-size:12px}
+.simctl{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+/* table */
+table.cmp{width:100%;border-collapse:collapse;font-size:14px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+table.cmp th,table.cmp td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+table.cmp th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--panel2)}
+table.cmp tr:last-child td{border-bottom:0}
+table.cmp td:first-child{font-weight:700;width:24%}
+.y,.p,.x{font-weight:800;margin-right:6px}.y{color:var(--green)}.p{color:var(--amber)}.x{color:var(--cb2)}
+table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+/* flow */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:stretch}
+.flow .card{position:relative}.flow .card:not(:last-child)::after{content:"→";position:absolute;right:-12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat .k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.stat .v{font-size:28px;font-weight:850;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.15;margin:4px 0}
+.stat .d{font-size:12.5px;color:var(--fg2)}
+.script{counter-reset:s;display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.script li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px;font-size:14px;color:var(--fg2)}
+.script li::before{content:counter(s);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:rgba(245,184,0,.18);color:var(--gold2);font-weight:800;font-size:12px}
+.script b{color:var(--fg)}
+.notes{position:fixed;right:18px;bottom:18px;width:min(390px,calc(100vw - 36px));background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;z-index:20;display:none}
+.notes.open{display:block}.notes h4{margin:0 0 6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2)}
+.notes ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--fg2)}.notes li{margin:4px 0}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.disclaimer{color:var(--muted);font-size:12px;margin-top:28px;max-width:760px}
+@media (max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.sim{grid-template-columns:1fr 1fr}.sim .steps{grid-column:1/-1}.flow{grid-template-columns:1fr 1fr}.flow .card::after{display:none}.stats{grid-template-columns:1fr 1fr}.scenario{grid-template-columns:1fr}}
+@media (max-width:700px){.g4,.g3,.g2,.sim,.flow,.stats{grid-template-columns:1fr}.dots{display:none}.bar .pill{display:none}.bar .brand{margin-right:auto}.bar{gap:8px;padding:10px 16px}.brand small{display:none}section.ch{padding:40px 16px}table.cmp{font-size:13px}}
+</style></head><body>
+<div class="bar">
+  <div class="brand"><svg viewBox="0 0 24 24" role="img" aria-label="Couchbase"><circle cx="12" cy="12" r="12" fill="#ea2328"/><path fill="#fff" d="M20.111 14.104a1.467 1.458 0 0 1-1.235 1.503c-1.422.244-4.385.398-6.875.398s-5.454-.15-6.877-.398c-.814-.14-1.235-.787-1.235-1.503V9.417a1.57 1.56 0 0 1 1.235-1.505 15.72 15.619 0 0 1 2.156-.14.537.533 0 0 1 .523.543v3.303c1.463 0 2.727-.086 4.201-.086 1.474 0 2.727.086 4.196.086V8.342a.535.532 0 0 1 .494-.569h.027a15.995 15.891 0 0 1 2.156.14 1.57 1.56 0 0 1 1.234 1.504z"/></svg>Couchbase <small>Princess Cruises mobile personalization demo · Personalization that sails</small></div>
+  <nav class="dots" id="dots" aria-label="Chapters"></nav>
+  <span class="pill" id="health">Demo: …</span>
+  <a class="btn sm" href="/login">Open the app ↗</a>
+  <button class="btn sm" id="theme" title="Toggle theme">☾</button>
+</div>
+<main id="main">
+
+<!-- 0 -->
+<section class="ch hero" data-notes="Open on the title. The claim for the next few minutes: an AI-personalized guest app has to work where guests actually are, which on a cruise is very often without a connection.|Redis is the comparison because it's what most teams reach for first to make personalization fast. It's great at that. The question is what it doesn't cover.|Where it ends: the live app, governed by Couchbase AOM, including a dinner change made with no signal.">
+  <div class="wrap">
+    <div class="kicker">Princess Cruises · AI-powered mobile personalization · Live demo</div>
+    <h1>Personalization that <span class="accent">sails with the guest</span>.</h1>
+    <p class="lede">A guest app that knows each passenger, recommends the right upgrade, dinner or excursion, answers questions with AI and books in one tap - <b>even on a beach with no signal</b>. Why that takes a database on the phone as well as in the cloud, and why <b class="cbc">Couchbase</b> covers both where a <b>Redis</b>-centered stack covers one.</p>
+    <div class="cta"><button class="btn primary" data-go="1">Start the story →</button><a class="btn" href="/login">Skip to the live app</a></div>
+    <p class="disclaimer">A demo scenario built for illustration. Princess Cruises names are used to set the scene; this is not an official Princess Cruises or MedallionClass application and implies no endorsement.</p>
+  </div>
+</section>
+
+<!-- 1 -->
+<section class="ch" data-notes="Make it concrete: a cruise is a week of moving in and out of coverage. Nobody has to explain this to anyone who has sailed.|The four cards are the four places connectivity drops: ashore, at sea, inside the ship, and at the terminal or tender.|Read Olivia's story. The point isn't the dinner; it's that the guest's intent happens at the moment they're offline, and the app has to capture it there.">
+  <div class="wrap">
+    <div class="kicker">Chapter 1 · Life on board</div>
+    <h2>A cruise is a week of <span class="accent">moving in and out of coverage</span>.</h2>
+    <p class="lede">Guests make plans all day - but the moments they want to change them are often the moments they have no signal.</p>
+    <div class="grid g4">
+      <div class="card"><span class="icon">🏝️</span><h3>Ashore and on excursions</h3><p>Snorkel boats, Princess Cays beaches, zip lines and remote ports: no ship Wi-Fi, patchy cellular, and international roaming many guests switch off.</p></div>
+      <div class="card"><span class="icon">🛰️</span><h3>At sea</h3><p>Internet at sea comes over satellite, is sold as a package, and is shared by thousands of guests and crew. Plenty of guests never buy it.</p></div>
+      <div class="card"><span class="icon">🚢</span><h3>Inside the ship</h3><p>Steel decks, theaters, spas and interior staterooms: dead spots even when the ship is connected.</p></div>
+      <div class="card"><span class="icon">🧳</span><h3>Terminal and tender</h3><p>Embarkation-day crowds and tender boats: the exact moments guests open the app for their Medallion boarding pass and arrival group.</p></div>
+    </div>
+    <div class="scenario">
+      <div class="quote"><div class="who">Olivia · Captain's Circle Elite · anniversary sailing</div><p>Olivia and Daniel are on a catamaran off St. Maarten. Their anniversary dinner is booked for 7:00. The boat is running an hour late. With no signal, she opens the app and moves the table to <b>8:30</b>. It shows "On device". When the tender docks and the phone finds the ship's network, it syncs. The table is confirmed before they reach their stateroom.</p></div>
+      <div class="card"><h3>What the app has to do in that moment</h3><ul><li>Show her reservation and the open seatings, <b>from the phone</b></li><li>Accept the change and keep it safely, <b>with no network</b></li><li>Send it on its own when a connection returns - <b>no "try again later"</b></li><li>Let the cruise line apply it under its own business rules, and sync the result back</li></ul><span class="tag cb">That is an offline-first database</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="ch" data-notes="This is the requirements list for an AI-personalized guest app. Four are about the phone, four are about the AI.|Most stacks are built around the bottom row - caching and AI - and treat the top row as an app-team problem. That's where the cost hides.|Everything on this slide is running in the live demo.">
+  <div class="wrap">
+    <div class="kicker">Chapter 2 · What the app needs</div>
+    <h2>Eight things have to be true, <span class="accent">on the phone and in the cloud</span>.</h2>
+    <p class="lede">Half of them live on the guest's device. The other half are what make the experience feel personal and intelligent.</p>
+    <div class="grid g4">
+      <div class="card"><div class="num">1</div><h3>On-device data</h3><p>Profile, itinerary, offers, bookings and the dining catalog stored on the phone, so every screen renders with no network.</p><span class="tag cb">Couchbase Lite</span></div>
+      <div class="card"><div class="num">2</div><h3>Offline writes</h3><p>Bids, bookings and changes saved locally first, queued, and never lost.</p><span class="tag cb">Couchbase Lite</span></div>
+      <div class="card"><div class="num">3</div><h3>Automatic sync</h3><p>Only what changed moves, in both directions, resuming where it stopped when the connection is weak.</p><span class="tag cb">Sync Gateway / App Services</span></div>
+      <div class="card"><div class="num">4</div><h3>Per-guest security</h3><p>Each phone receives only its guest's documents, and can only create its own pending requests.</p><span class="tag cb">Channels · sync functions</span></div>
+      <div class="card"><div class="num">5</div><h3>Fresh personalization</h3><p>Every morning's Databricks export of profiles and model scores loaded, re-ranked and pushed to phones.</p><span class="tag cb">Couchbase Server</span></div>
+      <div class="card"><div class="num">6</div><h3>AI grounded in the guest</h3><p>A concierge that answers from this guest's profile and the guest-services playbook, never another guest's data.</p><span class="tag cb">AOM Knowledge Base · RAG app</span></div>
+      <div class="card"><div class="num">7</div><h3>Context &amp; LLM caching</h3><p>Assembled context and model answers reused, so repeat questions are instant and cheap.</p><span class="tag cb">AOM Context &amp; LLM Cache</span></div>
+      <div class="card"><div class="num">8</div><h3>Governed actions</h3><p>Upgrades and bookings run as audited, role-checked agent tool calls, with a person approving the sensitive ones.</p><span class="tag cb">Agent Operations Manager</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="ch" data-notes="Be fair to Redis: it's an excellent in-memory cache and it now has vector search and semantic caching. If the app were always online, Redis plus a database would cover much of chapter 2's bottom row.|What it doesn't have is a database for the phone, or a way to sync one. So the app team adds SQLite, writes a sync API, invents conflict rules, and secures it - that's the red dashed path. And Redis still needs a system of record behind it.|Press Transform. Couchbase Lite on the phone, Sync Gateway in the middle, Couchbase Server for data, vectors and caching, AOM for the AI. Same JSON documents end to end.">
+  <div class="wrap">
+    <div class="kicker">Chapter 3 · How it usually gets built</div>
+    <h2>Redis makes the cloud fast. <span class="accent">It stops at the edge of the network.</span></h2>
+    <p class="lede">A Redis-centered stack covers caching, vectors and semantic caching well. Everything the phone needs gets built and run by the app team. Press <b>Transform</b> to see what one Couchbase data plane replaces.</p>
+    <div class="diagram">
+      <div class="head"><span id="diagHint">Grey dashed boxes are separate services to license, run and keep consistent. Red dashed is code your team writes and maintains.</span><button class="btn primary sm" id="transform">↻ Transform the stack</button></div>
+      <svg id="diag" viewBox="0 0 1140 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stack comparison">
+        <!-- phone -->
+        <g><rect x="16" y="120" width="150" height="200" rx="22" class="sb"/><text x="91" y="150" text-anchor="middle" class="st">Guest's phone</text><text x="91" y="170" text-anchor="middle" class="ss">iOS / Android app</text></g>
+        <!-- databricks -->
+        <g><rect x="964" y="176" width="160" height="88" rx="12" class="sb"/><text x="1044" y="208" text-anchor="middle" class="st">Databricks</text><text x="1044" y="228" text-anchor="middle" class="ss">daily guest export</text><text x="1044" y="246" text-anchor="middle" class="ss">profiles · model scores</text></g>
+        <g id="sprawl" class="fade">
+          <rect x="30" y="236" width="122" height="64" rx="10" class="sred"/><text x="91" y="262" text-anchor="middle" class="st">SQLite</text><text x="91" y="280" text-anchor="middle" class="ss">+ your own schema</text>
+          <rect x="210" y="40" width="200" height="58" rx="10" class="sred"/><text x="310" y="65" text-anchor="middle" class="st">Custom sync API</text><text x="310" y="83" text-anchor="middle" class="ss">delta tracking, retries, queues</text>
+          <rect x="210" y="116" width="200" height="58" rx="10" class="sred"/><text x="310" y="141" text-anchor="middle" class="st">Conflict + offline rules</text><text x="310" y="159" text-anchor="middle" class="ss">hand-written, per data type</text>
+          <rect x="210" y="192" width="200" height="58" rx="10" class="sred"/><text x="310" y="217" text-anchor="middle" class="st">Per-guest access layer</text><text x="310" y="235" text-anchor="middle" class="ss">who may read / write what</text>
+          <rect x="210" y="268" width="200" height="58" rx="10" class="sbad"/><text x="310" y="293" text-anchor="middle" class="st">Push / change feed</text><text x="310" y="311" text-anchor="middle" class="ss">tell phones what changed</text>
+          <rect x="460" y="40" width="200" height="58" rx="10" class="sbad"/><text x="560" y="65" text-anchor="middle" class="st">Redis</text><text x="560" y="83" text-anchor="middle" class="ss">cache · vectors · semantic cache</text>
+          <rect x="460" y="116" width="200" height="58" rx="10" class="sbad"/><text x="560" y="141" text-anchor="middle" class="st">Primary database</text><text x="560" y="159" text-anchor="middle" class="ss">system of record for guests</text>
+          <rect x="460" y="192" width="200" height="58" rx="10" class="sbad"/><text x="560" y="217" text-anchor="middle" class="st">Cache sync / CDC</text><text x="560" y="235" text-anchor="middle" class="ss">keep Redis = database</text>
+          <rect x="460" y="268" width="200" height="58" rx="10" class="sbad"/><text x="560" y="293" text-anchor="middle" class="st">Document / RAG store</text><text x="560" y="311" text-anchor="middle" class="ss">playbook + profiles for the LLM</text>
+          <rect x="710" y="116" width="200" height="58" rx="10" class="sbad"/><text x="810" y="141" text-anchor="middle" class="st">LLM gateway + governance</text><text x="810" y="159" text-anchor="middle" class="ss">keys, limits, audit, approvals</text>
+          <rect x="710" y="192" width="200" height="58" rx="10" class="sbad"/><text x="810" y="217" text-anchor="middle" class="st">ETL jobs</text><text x="810" y="235" text-anchor="middle" class="ss">Databricks → DB → Redis → RAG</text>
+          <path d="M166 220 C190 220 190 69 210 69" class="sline x"/><path d="M166 220 C190 220 190 145 210 145" class="sline x"/><path d="M166 220 L210 221" class="sline x"/>
+          <path d="M410 69 L460 69 M410 145 L460 145 M410 221 L460 221 M410 297 L460 297 M660 145 L710 145 M660 221 L710 221 M910 221 L964 221" class="sline"/>
+          <text x="91" y="352" text-anchor="middle" class="ss" fill="#c71d22">offline: build it yourself</text>
+        </g>
+        <g id="cb" class="fade gone">
+          <rect x="26" y="236" width="130" height="64" rx="10" class="scb"/><text x="91" y="262" text-anchor="middle" class="scbt">Couchbase Lite</text><text x="91" y="280" text-anchor="middle" class="scbs">JSON · SQL++ · vectors</text>
+          <rect x="250" y="160" width="190" height="120" rx="14" class="scb"/><text x="345" y="196" text-anchor="middle" class="scbt">Sync Gateway</text><text x="345" y="216" text-anchor="middle" class="scbs">delta sync, both ways</text><text x="345" y="234" text-anchor="middle" class="scbs">channels per guest</text><text x="345" y="252" text-anchor="middle" class="scbs">sync functions · conflicts</text>
+          <rect x="520" y="110" width="260" height="220" rx="16" class="scb"/><text x="650" y="146" text-anchor="middle" class="scbt">Couchbase Server</text><text x="650" y="168" text-anchor="middle" class="scbs">memory-first JSON + key-value</text><text x="650" y="186" text-anchor="middle" class="scbs">SQL++ · indexes · vector search</text><text x="650" y="204" text-anchor="middle" class="scbs">system of record and cache</text>
+          <rect x="545" y="230" width="210" height="80" rx="12" fill="#fff" stroke="#f5b800" stroke-width="2"/><text x="650" y="258" text-anchor="middle" style="fill:#0a1a3f;font-size:12.5px;font-weight:800">Agent Operations Manager</text><text x="650" y="276" text-anchor="middle" style="fill:#3e4a66;font-size:10.5px">Knowledge Base · RAG app</text><text x="650" y="292" text-anchor="middle" style="fill:#3e4a66;font-size:10.5px">Context + LLM Cache · governance</text>
+          <path d="M166 270 L250 230 M440 220 L520 220 M780 220 L964 220" class="sline" style="opacity:.9;stroke-width:2"/>
+          <text x="208" y="236" text-anchor="middle" class="ss">sync</text><text x="872" y="210" text-anchor="middle" class="ss">daily load</text>
+          <text x="91" y="352" text-anchor="middle" class="ss" fill="#13804b">offline: built in</text>
+        </g>
+      </svg>
+      <div class="legend"><span><i style="background:rgba(120,130,160,.25);border:1px dashed #9aa3b8"></i>a separate service</span><span><i style="background:rgba(234,35,40,.08);border:1px dashed #ea2328"></i>custom code to build and own</span><span><i style="background:#ea2328"></i>Couchbase</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="ch" data-notes="Walk the dinner change step by step. Press Next for each step.|Left phone is Couchbase Lite: the change is a local write first, so it succeeds immediately and shows 'On device'.|Right phone is the same app built online-only on a Redis-backed API: the tap needs the network, so it fails at sea and the guest has to remember to try again - by which time the 8:30 seating may be gone.|Step 4 is the important architectural point: the phone never talks to the reservation system directly. Sync Gateway checks the request belongs to that guest, and the backend applies it as a governed AOM tool call.">
+  <div class="wrap">
+    <div class="kicker">Chapter 4 · Offline-first, step by step</div>
+    <h2>Changing dinner <span class="accent">from a catamaran</span>.</h2>
+    <p class="lede">The same tap in two apps: one with Couchbase Lite on the phone, one that depends on a live connection to a Redis-backed API.</p>
+    <div class="sim">
+      <div>
+        <div class="steps" id="steps">
+          <div class="step"><div class="n">1</div><div><h4>Out of range</h4><p>The catamaran is off St. Maarten. No ship Wi-Fi, roaming off.</p></div></div>
+          <div class="step"><div class="n">2</div><div><h4>Move the table to 8:30</h4><p><b>Couchbase Lite:</b> saved on the phone as a pending request. Itinerary, menus and open seatings all still load. <b>Online-only:</b> the request needs the server.</p></div></div>
+          <div class="step"><div class="n">3</div><div><h4>Back aboard</h4><p>The phone finds the ship's network. The replicator pushes just the new document - no app open, no retry button.</p></div></div>
+          <div class="step"><div class="n">4</div><div><h4>Validated and applied</h4><p>Sync Gateway checks it's this guest's own pending request. The backend runs <code>reserve_specialty_dining</code> as a governed AOM tool call.</p></div></div>
+          <div class="step"><div class="n">5</div><div><h4>Confirmed on the phone</h4><p>The result, the booking and re-ranked offers sync back. Olivia sees "Confirmed".</p></div></div>
+        </div>
+        <div class="simctl"><button class="btn primary" id="simNext">Next step →</button><button class="btn" id="simReset">Start over</button></div>
+      </div>
+      <div><div class="phone"><div class="screen">
+        <div class="ph-top"><div class="ph-sb"><span>8:12</span><span id="cbSig">●●● Wi-Fi</span></div><div class="ph-title">Specialty dining</div><div class="ph-sub">Sun Princess · Crown Grill</div></div>
+        <div class="ph-body" id="cbBody"></div></div></div><p class="ph-label">Couchbase Lite on the phone</p></div>
+      <div><div class="phone"><div class="screen">
+        <div class="ph-top"><div class="ph-sb"><span>8:12</span><span id="rdSig">●●● Wi-Fi</span></div><div class="ph-title">Specialty dining</div><div class="ph-sub">Sun Princess · Crown Grill</div></div>
+        <div class="ph-body" id="rdBody"></div></div></div><p class="ph-label">Online-only app on a Redis-backed API</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="ch" data-notes="Now the AI half. Follow the data left to right: the Databricks export lands in Couchbase every morning, the Knowledge Base is republished, and the concierge is a registered RAG application in AOM.|The context cache is the interesting one: the context assembled for Olivia's question is cached in AOM - and the same document syncs to her phone. That's why the concierge can still answer at sea. A Redis semantic cache lives in the data center; it can't follow the guest.|Live numbers on this page come from the running demo.">
+  <div class="wrap">
+    <div class="kicker">Chapter 5 · One data plane for the AI</div>
+    <h2>The AI's context <span class="accent">travels to the phone, too</span>.</h2>
+    <p class="lede">Personalization and the AI concierge run on the same Couchbase documents the phone syncs, so the answer that was cached in the cloud is already on the device when the signal drops.</p>
+    <div class="flow">
+      <div class="card"><span class="icon">🧱</span><h3>Databricks export</h3><p>Every morning: one row per passenger with loyalty, preferences, history and model scores.</p></div>
+      <div class="card"><span class="icon">🗄️</span><h3>Couchbase Server</h3><p>Profiles upserted, offers re-ranked with live inventory, booking index rebuilt.</p></div>
+      <div class="card"><span class="icon">📚</span><h3>AOM Knowledge Base</h3><p>Today's playbook plus a profile per guest sailing soon. The concierge is a RAG app scoped to the playbook.</p></div>
+      <div class="card"><span class="icon">⚡</span><h3>Context &amp; LLM cache</h3><p>Context per guest and topic, invalidated by the next export or any booking. Shared answers for playbook questions.</p></div>
+      <div class="card"><span class="icon">📱</span><h3>On the phone</h3><p>The same context document syncs through Sync Gateway, so the concierge answers offline.</p></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">Today's export</div><div class="v" id="m_export">-</div><div class="d" id="m_rows">loaded into Couchbase</div></div>
+      <div class="stat"><div class="k">Knowledge Base</div><div class="v" id="m_kb">-</div><div class="d">documents published to AOM</div></div>
+      <div class="stat"><div class="k">Context cache</div><div class="v" id="m_ctx">-</div><div class="d" id="m_ctxd">hit rate this session</div></div>
+      <div class="stat"><div class="k">Queued offline</div><div class="v" id="m_off">-</div><div class="d" id="m_offd">requests made with no signal, then synced</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="ch" data-notes="The side-by-side. Be precise: Redis has vector search, semantic caching and SSD tiering now - don't claim otherwise.|The rows that decide this use case are the first four: on-device data, offline writes, sync and per-guest security. Redis has no product for them; Couchbase ships them.|The cost row is the quiet one: a Redis-centered design still needs a primary database, plus the sync service the app team builds. Couchbase Server is the system of record and the memory-first cache in one.">
+  <div class="wrap">
+    <div class="kicker">Chapter 6 · Side by side</div>
+    <h2>Couchbase vs Redis for an <span class="accent">offline-first AI guest app</span>.</h2>
+    <p class="lede">Both are fast. The difference is how much of the app each one covers.</p>
+    <table class="cmp">
+      <thead><tr><th>Capability</th><th>Couchbase</th><th>Redis-centered stack</th></tr></thead>
+      <tbody>
+        <tr><td>Database on the phone</td><td><span class="y">✓</span>Couchbase Lite: embedded JSON database for iOS, Android and more, with SQL++ queries and vector search on the device.</td><td><span class="x">✗</span>No on-device product.<small>The app team adds SQLite or similar and designs its own schema.</small></td></tr>
+        <tr><td>Offline writes and sync</td><td><span class="y">✓</span>Sync Gateway / Capella App Services: delta sync in both directions, automatic resume, peer-to-peer option.</td><td><span class="x">✗</span>Build a sync API, change tracking and retry queues.<small>Redis Data Integration feeds Redis from databases; it doesn't sync to devices.</small></td></tr>
+        <tr><td>Conflicts</td><td><span class="y">✓</span>Built-in resolution, with custom resolvers where needed.</td><td><span class="x">✗</span>Hand-written rules per data type.</td></tr>
+        <tr><td>Per-guest data on the device</td><td><span class="y">✓</span>Channels and sync functions: a phone gets only its guest's documents, and can only create its own requests.</td><td><span class="p">~</span>An access layer in the custom API.</td></tr>
+        <tr><td>JSON documents and queries</td><td><span class="y">✓</span>SQL++ with indexes over the same JSON on server and phone.</td><td><span class="p">~</span>JSON and the Redis Query Engine in the cloud; nothing shared with the phone.</td></tr>
+        <tr><td>Vector search</td><td><span class="y">✓</span>On Couchbase Server and in Couchbase Lite.</td><td><span class="y">✓</span>In Redis (cloud side).</td></tr>
+        <tr><td>Context and LLM caching</td><td><span class="y">✓</span>Memory-first KV, plus AOM's Context Cache and LLM Cache on Couchbase - and cached context syncs to the phone.</td><td><span class="y">✓</span>A strength: Redis caching and semantic caching (LangCache).<small>Cloud-side only; it can't answer a guest who's offline.</small></td></tr>
+        <tr><td>Durable system of record</td><td><span class="y">✓</span>Couchbase Server is the database and the cache.</td><td><span class="p">~</span>Persistence and SSD tiering exist, but designs usually keep a primary database behind Redis and sync the two.</td></tr>
+        <tr><td>Governed AI actions</td><td><span class="y">✓</span>Agent Operations Manager: identities, RBAC on tools, approvals, traces, audit, budgets.</td><td><span class="p">~</span>A separate gateway and governance product.</td></tr>
+      </tbody>
+    </table>
+    <p class="src">Redis capabilities as publicly described by Redis: <a href="https://redis.io/docs/latest/operate/rc/langcache" target="_blank" rel="noopener">LangCache semantic caching</a>, <a href="https://redis.io/solutions/flex" target="_blank" rel="noopener">Redis Flex</a> tiering. Couchbase: <a href="https://docs.couchbase.com/couchbase-lite/current" target="_blank" rel="noopener">Couchbase Lite documentation</a>.</p>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="ch" data-notes="Hand off to the live app, and open AOM next to it.|Run the script: Olivia's upgrade bid, then Profile → 'At sea - no signal', change a dinner reservation, and turn the signal back on. Show it land in AOM's audit log and traces.|Ask the concierge a playbook question twice to show the LLM cache hit, and a personal question to show the context cache.">
+  <div class="wrap">
+    <div class="kicker">See it run</div>
+    <h2>Now take it <span class="accent">to sea</span>.</h2>
+    <p class="lede">The live demo runs on exactly the right-hand side of chapter 3: Couchbase Lite (in the browser preview, the same documents over REST), Sync Gateway, Couchbase Server and Agent Operations Manager.</p>
+    <div class="grid g3">
+      <div class="card"><h3>The guest app</h3><p>Sign in as Olivia, Carlos or Priya - each from today's Databricks export.</p><a class="btn primary" href="/login" style="margin-top:12px">Open the app →</a></div>
+      <div class="card"><h3>Agent Operations Manager</h3><p>The concierge's identity, its RAG application, the context and LLM caches, traces and the approval queue.</p><a class="btn" id="aomLink" target="_blank" rel="noopener" href="#" style="margin-top:12px">Open AOM ↗</a></div>
+      <div class="card"><h3>The demo, live</h3><p id="liveLine">Checking the backend…</p><a class="btn" href="/api/status" target="_blank" style="margin-top:12px">Backend status ↗</a></div>
+    </div>
+    <div class="card" style="margin-top:14px"><h3 style="margin-bottom:10px">A five-minute script</h3>
+      <ol class="script">
+        <li><span><b>Personalized from this morning's data.</b> Sign in as Olivia. For You leads with check-in and a Premium Suite upgrade for her anniversary.</span></li>
+        <li><span><b>A governed upgrade.</b> Place a Princess Upgrade bid. It runs as an AOM tool call - show it in AOM's audit log.</span></li>
+        <li><span><b>Go to sea.</b> Profile → "At sea - no signal". The status bar shows No service.</span></li>
+        <li><span><b>Change dinner offline.</b> Reserve a table: it shows "On device". Ask the concierge something - it answers from Couchbase Lite.</span></li>
+        <li><span><b>Back aboard.</b> Turn the signal back on: the request syncs and is confirmed, and the concierge's playbook answers come from AOM's LLM cache.</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+</main>
+
+<aside class="notes" id="notes"><h4>Talking points</h4><ul id="notesList"></ul></aside>
+
+<script>
+const $=s=>document.querySelector(s); const chapters=[...document.querySelectorAll('section.ch')];
+// ---- navigation
+const dots=$('#dots'); chapters.forEach((c,i)=>{const b=document.createElement('button'); b.title='Chapter '+i; b.onclick=()=>go(i); dots.appendChild(b);});
+let cur=0; function go(i){i=Math.max(0,Math.min(chapters.length-1,i)); chapters[i].scrollIntoView({behavior:'smooth',block:'start'});}
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(+b.dataset.go));
+const io=new IntersectionObserver(es=>{for(const e of es){if(e.isIntersecting){cur=chapters.indexOf(e.target); [...dots.children].forEach((d,i)=>d.classList.toggle('on',i===cur)); renderNotes();}}},{threshold:.55});
+chapters.forEach(c=>io.observe(c));
+document.addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT')return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();go(cur+1);} if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(cur-1);}
+  const k=e.key.toLowerCase(); if(k==='n'){toggleNotes();} if(k==='t'&&cur===3){transform();} if(k===' '&&cur===4){e.preventDefault();simNext();} });
+// ---- notes
+function renderNotes(){const n=(chapters[cur].dataset.notes||'').split('|').filter(Boolean); $('#notesList').innerHTML=n.map(x=>`<li>${x}</li>`).join('');}
+function toggleNotes(){$('#notes').classList.toggle('open'); renderNotes();}
+renderNotes();
+// ---- theme
+function setTheme(t){document.documentElement.dataset.theme=t; $('#theme').textContent=t==='dark'?'☀':'☾'; try{localStorage.setItem('pcl-story-theme',t)}catch(e){}}
+try{setTheme(localStorage.getItem('pcl-story-theme')||'light')}catch(e){setTheme('light')}
+$('#theme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+// ---- diagram
+let transformed=false;
+function transform(){transformed=!transformed; $('#sprawl').classList.toggle('gone',transformed); $('#cb').classList.toggle('gone',!transformed);
+  $('#transform').textContent=transformed?'↺ Show the Redis-centered stack':'↻ Transform the stack';
+  $('#diagHint').textContent=transformed?'One set of JSON documents from the phone to the cloud: Couchbase Lite, Sync Gateway, Couchbase Server, and AOM for the AI.':'Grey dashed boxes are separate services to license, run and keep consistent. Red dashed is code your team writes and maintains.';}
+$('#transform').onclick=transform;
+// ---- offline simulation
+const S=[ // per step: [cb signal, cb body, redis signal, redis body]
+  ['●●● Wi-Fi', card('Tonight · 7:00 PM','Table for 2 · anniversary noted','Confirmed','ok')+btn('Change time'),
+   '●●● Wi-Fi', card('Tonight · 7:00 PM','Table for 2 · anniversary noted','Confirmed','ok')+btn('Change time')],
+  ['No service', card('Tonight · 7:00 PM','Loaded from Couchbase Lite','Confirmed','ok')+times()+btn('Move to 8:30'),
+   'No service', `<div class="ph-err">Can't load reservations. Check your connection.</div>`+btn('Change time',true)],
+  ['No service', card('Tonight · 8:30 PM','Saved on this phone · sends when connected','On device','warn')+card('Itinerary · boarding pass · menus','All available offline','Couchbase Lite','ocean'),
+   'No service', `<div class="ph-err">Couldn't change your reservation. Try again when you're online.</div>`+card('Tonight · 7:00 PM','The guest has to remember to retry','Not changed','bad')],
+  ['●●● Ship Wi-Fi', card('Tonight · 8:30 PM','Synced to Princess Cruises','Processing','ocean'),
+   '●●● Ship Wi-Fi', card('Tonight · 7:00 PM','Nothing queued - the change was never saved','Not changed','bad')],
+  ['●●● Ship Wi-Fi', card('Tonight · 8:30 PM','Run through Couchbase AOM · Sync Gateway checked guest','Processing','ocean'),
+   '●●● Ship Wi-Fi', card('Tonight · 7:00 PM','If she remembers: retry, and 8:30 may be gone','Not changed','bad')],
+  ['●●● Ship Wi-Fi', card('Tonight · 8:30 PM','Table for 2 at Crown Grill · dietary notes shared','Confirmed','ok')+card('For You','Re-ranked after the booking','Synced','ok'),
+   '●●● Ship Wi-Fi', card('Tonight · 7:00 PM','Olivia misses the dinner','Not changed','bad')],
+];
+function card(t,s,p,tone){return `<div class="ph-card"><b>${t}</b>${s}<br><span class="ph-pill ${tone}">${p}</span></div>`}
+function btn(l,off){return `<div class="ph-btn${off?' off':''}">${l}</div>`}
+function times(){return `<div class="ph-card"><b>Open seatings tonight</b>6:00 · 6:30 · <u>8:30</u> · 9:00</div>`}
+let st=0; const steps=[...document.querySelectorAll('#steps .step')];
+function renderSim(){const s=S[st]; $('#cbSig').textContent=s[0]; $('#cbBody').innerHTML=s[1]; $('#rdSig').textContent=s[2]; $('#rdBody').innerHTML=s[3];
+  steps.forEach((el,i)=>{el.classList.toggle('on',i===st-1); el.classList.toggle('done',i<st-1);});
+  $('#simNext').disabled=st>=S.length-1; $('#simNext').textContent=st===0?'Start →':'Next step →';}
+function simNext(){if(st<S.length-1){st++;renderSim();}}
+$('#simNext').onclick=simNext; $('#simReset').onclick=()=>{st=0;renderSim();}; renderSim();
+// ---- live data from the running demo
+async function poll(){try{const d=await fetch('/api/status',{cache:'no-store'}).then(r=>r.json()); const a=d.aom||{}, l=d.load||{}, m=d.metrics||{}, reg=(a.registration||{}).state;
+  const ok=a.configured&&a.health&&a.health.status==='ok';
+  $('#health').textContent=ok?'AOM: connected'+(reg==='registered'?' · registered':''):(a.configured?'AOM: connecting…':'AOM: not configured');
+  $('#health').className='pill '+(ok?'ok':(a.configured?'warn':'bad'));
+  if(a.dashboard_url){$('#aomLink').href=a.dashboard_url;} else {$('#aomLink').style.display='none';}
+  $('#m_export').textContent=d.export_date||'-'; if(l.rows){$('#m_rows').textContent=l.rows.toLocaleString()+' passenger rows loaded into Couchbase';}
+  const kb=l.kb||{}; $('#m_kb').textContent=kb.done!=null?kb.done.toLocaleString():'-'; if(kb.done==null&&kb.state){$('#m_kb').nextElementSibling.textContent='Knowledge Base: '+kb.state;}
+  $('#m_ctx').textContent=m.context_hit_rate!=null?Math.round(m.context_hit_rate)+'%':'-';
+  $('#m_ctxd').textContent=(m.concierge_turns||0)+' concierge answers since '+(m.since||'').slice(0,10);
+  $('#m_off').textContent=(m.requests_queued_offline||0).toLocaleString(); $('#m_offd').textContent='of '+(m.requests||0)+' requests: made with no signal, then synced';
+  const rag=(a.rag_app||{}).state; const ragTxt={registered:'registered',updated:'registered',waiting_for_playbook:'waiting for the playbook'}[rag]||'not registered';
+  $('#liveLine').textContent=`${l.state==='loaded'?'Loaded':'Loading'} export ${d.export_date||'…'} · ${(m.requests||0)} bookings and changes processed${a.configured?' through AOM':''} · concierge RAG app ${ragTxt}.`;
+}catch(e){$('#health').textContent='Demo backend: offline'; $('#health').className='pill bad'; $('#liveLine').textContent="The demo backend isn't answering yet.";}}
+poll(); setInterval(poll,10000);
+</script>
+</body></html>

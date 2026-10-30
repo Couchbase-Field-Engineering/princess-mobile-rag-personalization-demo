@@ -1,32 +1,32 @@
 {
-  "table": "rccl_prod.guest360.passenger_reservation_personalization",
+  "table": "pcl_prod.guest360.passenger_reservation_personalization",
   "export_date": "2026-10-09",
   "schema_version": "guest_personalization_v3",
-  "model_version": "rccl-personalization-v4.2",
+  "model_version": "pcl-personalization-v4.2",
   "format": "jsonl",
-  "rows": 23817,
-  "bookings": 8327,
-  "bytes": 104860578,
+  "rows": 23497,
+  "bookings": 8275,
+  "bytes": 104859294,
   "files": [
     {
       "file": "part-00000-33218a5e-c81d-850b-ee66-8de6aac93a05-c000.json",
-      "rows": 5957,
-      "bytes": 26217803
+      "rows": 5887,
+      "bytes": 26216807
     },
     {
       "file": "part-00001-33218a5e-c81d-850b-ee66-8de6aac93a05-c000.json",
-      "rows": 5969,
-      "bytes": 26216183
+      "rows": 5881,
+      "bytes": 26214414
     },
     {
       "file": "part-00002-33218a5e-c81d-850b-ee66-8de6aac93a05-c000.json",
-      "rows": 5940,
-      "bytes": 26215070
+      "rows": 5860,
+      "bytes": 26217538
     },
     {
       "file": "part-00003-33218a5e-c81d-850b-ee66-8de6aac93a05-c000.json",
-      "rows": 5951,
-      "bytes": 26211522
+      "rows": 5869,
+      "bytes": 26210535
     }
   ],
   "sailings": 173,

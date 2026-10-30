@@ -15,12 +15,12 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from . import config, tool_gateway
+from . import config, metrics, tool_gateway
 from .actions import TOOLS
 from .docs import guest_channel, now_iso
 from .store import store
 
-log = logging.getLogger("rccl.worker")
+log = logging.getLogger("pcl.worker")
 
 # Tools a guest's phone may request. Read-only tools are answered by the
 # concierge; nothing here lets a phone name another guest.
@@ -28,6 +28,7 @@ REQUESTABLE = set(TOOLS) - {"get_guest_context", "get_upgrade_offers", "search_s
 
 
 async def process(key: str, doc: dict) -> dict:
+    first = doc.get("status") != "awaiting_approval"
     guest_id = doc.get("guest_id")
     tool = doc.get("tool")
     if doc.get("status") == "awaiting_approval":
@@ -66,6 +67,7 @@ async def process(key: str, doc: dict) -> dict:
         "channels": [guest_channel(guest_id)],
     })
     await store.upsert("requests", key, doc)
+    metrics.request(doc, first)
     log.info("request %s %s -> %s", key, tool, status)
     return doc
 

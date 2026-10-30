@@ -75,11 +75,11 @@ def test_concierge_context_cache_and_playbook(client):
     h, gid = login(client, "4830303", "Natarajan")
     a = client.post("/api/concierge", headers=h, json={"message": "Can I upgrade my room?"}).json()
     assert a["intent"] == "upgrade" and a["personal"] and a["context"]["status"] == "miss"
-    assert any(x["tool"] == "place_royalup_bid" for x in a["actions"])
+    assert any(x["tool"] == "place_upgrade_bid" for x in a["actions"])
     b = client.post("/api/concierge", headers=h, json={"message": "What would an upgrade cost me?"}).json()
     assert b["context"]["status"] == "hit"
-    g = client.post("/api/concierge", headers=h, json={"message": "What's included in The Key?"}).json()
-    assert g["personal"] is False and "priority" in g["reply"].lower()
+    g = client.post("/api/concierge", headers=h, json={"message": "What's included in Princess Premier?"}).json()
+    assert g["personal"] is False and "specialty dining" in g["reply"].lower()
     assert ("context_cache", f"ctx::{gid}::upgrade") in pull(client, h)
 
 
@@ -87,22 +87,22 @@ def test_offline_request_flow_upgrade_and_invalidation(client):
     h, gid = login(client, "4810101", "Bennett")
     client.post("/api/concierge", headers=h, json={"message": "upgrade options for my cabin?"})
     assert ("context_cache", f"ctx::{gid}::upgrade") in pull(client, h)
-    r = push(client, h, gid, "purchase_cabin_upgrade", {"category_code": "JS"})
+    r = push(client, h, gid, "purchase_cabin_upgrade", {"category_code": "MS"})
     assert r["status"] == "confirmed", r
     docs = pull(client, h)
-    assert docs[("profiles", f"profile::{gid}")]["reservation"]["stateroom"]["category_code"] == "JS"
+    assert docs[("profiles", f"profile::{gid}")]["reservation"]["stateroom"]["category_code"] == "MS"
     # partner's profile moved too
     assert ("context_cache", f"ctx::{gid}::upgrade") not in docs  # invalidated by the booking
     up = [o for o in docs[("offers", f"offers::{gid}")]["offers"] if o["kind"] == "upgrade"]
-    assert not up or up[0]["offer_id"] != "upgrade-JS"
+    assert not up or up[0]["offer_id"] != "upgrade-MS"
 
 
 def test_business_rule_failures_come_back_on_the_request(client):
     h, gid = login(client, "4820202", "Rivera")
-    r = push(client, h, gid, "reserve_specialty_dining", {"restaurant_id": "EMPIRE", "date": "2026-10-12", "time": "19:00"})
+    r = push(client, h, gid, "reserve_specialty_dining", {"restaurant_id": "LOVEBRITTO", "date": "2026-10-12", "time": "19:00"})
     assert r["status"] == "failed" and "isn't on" in r["summary"]
-    r = push(client, h, gid, "book_shore_excursion", {"excursion_id": "CCY-THRILL"})
-    assert r["status"] == "confirmed" and r["charge_usd"] == 89 * 4
+    r = push(client, h, gid, "book_shore_excursion", {"excursion_id": "PCY-AQUAPARK"})
+    assert r["status"] == "confirmed" and r["charge_usd"] == 59 * 4
     r = push(client, h, gid, "get_upgrade_offers", {})
     assert r["status"] == "failed"
 

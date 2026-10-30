@@ -4,7 +4,7 @@ import type { ActionRequest, Catalog, ChatDoc, ContextDoc, OffersDoc, Profile, S
  * The app's local database. Two implementations with the same contract:
  *
  * - `couchbase-lite` (cblDb.native.ts): the real thing. An on-device Couchbase
- *   Lite database (scope `rccl`, same collections as the server) kept in sync
+ *   Lite database (scope `pcl`, same collections as the server) kept in sync
  *   by a continuous push/pull replicator against Sync Gateway. Everything
  *   renders from here, so the app works with no connectivity at all.
  * - `preview` (previewDb.ts): a browser/Expo Go stand-in for demos without a
@@ -12,7 +12,7 @@ import type { ActionRequest, Catalog, ChatDoc, ContextDoc, OffersDoc, Profile, S
  *   `/api/sync/pull` and pushes requests with `/api/sync/push`. Same document
  *   ids and shapes.
  */
-export const SCOPE = 'rccl';
+export const SCOPE = 'pcl';
 export const COLLECTIONS = ['profiles', 'offers', 'bookings', 'requests', 'concierge', 'context_cache', 'catalog'] as const;
 export type CollectionName = (typeof COLLECTIONS)[number];
 
