@@ -242,7 +242,11 @@ With `EXPO_PUBLIC_DB_ENGINE=auto`, the app uses Couchbase Lite whenever the nati
 
 ```bash
 AOM_ADMIN_PASSWORD='<12+ characters>' ./deploy/k8s/deploy.sh      # MOTHER=ehind@192.168.111.4 by default
+# mother already runs AOM and the Royal Caribbean demo (royal-app): add this one next to them
+AOM_ADMIN_PASSWORD='<current AOM password>' ONLY=princess ./deploy/k8s/deploy.sh
 ```
+
+`deploy/k8s/values-mother.yaml` publishes this demo on **8082 / 8201 / 4986** so it can run alongside `royal-app` on 8081 / 8200 / 4984. Both demos register with the same AOM under different ids (`pcl-guest-services`, *Princess Guest Concierge*, `princess-guest-concierge`), so they show up side by side on AOM's Agents, Servers and RAG Applications pages.
 
 It runs four steps:
 
@@ -260,12 +264,12 @@ It runs four steps:
 | `backend` | Loads the dump into Couchbase and serves the MCP server. Self-registers with AOM (`AOM_AUTO_REGISTER`, see below) |
 | `databricks-dump` PVC | Holds the dump. The backend's init container exports today's 100 MiB partition on first start |
 | `databricks-daily-export` CronJob | 05:00 America/New_York: exports a new partition and keeps the newest 2. The backend picks it up within 5 minutes |
-| `web` | The phone-framed app on 8081. nginx proxies `/api` to the backend, so the browser needs only one URL |
+| `web` | The phone-framed app on 8082 (8081 in Compose). nginx proxies `/api` to the backend, so the browser needs only one URL |
 
 **Self-registration.** No register script is needed in the cluster. With `AOM_AUTO_REGISTER=true`, the backend does the following on startup and retries until AOM is up:
 
 * signs in to AOM. On a fresh AOM, it sets `AOM_ADMIN_PASSWORD` as the admin's first-login password
-* registers `pcl-guest-services` at `http://backend.princess-app.svc.cluster.local:8200/pcl/mcp`
+* registers `pcl-guest-services` at `http://backend.princess-app.svc.cluster.local:8200/pcl/mcp` (the in-cluster port; the published port is 8201)
 * issues the *Princess Guest Concierge* agent and keeps its key in Couchbase
 * turns on the approval tier
 * publishes the Knowledge Base and the RAG application
@@ -275,10 +279,10 @@ Progress is in `/api/status` under `aom.registration`.
 | URL on the node (192.168.111.4) | |
 |---|---|
 | `https://…:3111` | AOM dashboard (`admin` / `AOM_ADMIN_PASSWORD`) |
-| `http://…:8081/story` | The story: start here |
-| `http://…:8081` | The app |
-| `http://…:8200/api/status` | Backend status |
-| `ws://…:4984/princess` | Sync Gateway for Couchbase Lite (point a device build's `EXPO_PUBLIC_SG_URL` here, and `EXPO_PUBLIC_API_URL` at `:8200`) |
+| `http://…:8082/story` | The story: start here |
+| `http://…:8082` | The app |
+| `http://…:8201/api/status` | Backend status |
+| `ws://…:4986/princess` | Sync Gateway for Couchbase Lite (point a device build's `EXPO_PUBLIC_SG_URL` here, and `EXPO_PUBLIC_API_URL` at `:8201`) |
 
 Ports are published by K3s's built-in ServiceLB. If a Service stays `<pending>`, either ServiceLB is disabled or the port is already taken on the node. In that case, set that Service's `type: NodePort` in `values-mother.yaml`. Redeploy just one side with `ONLY=aom` or `ONLY=princess`.
 

@@ -12,12 +12,14 @@ aom:
   # Linked from the story page.
   dashboardUrl: https://192.168.111.4:3111
 
-# K3s's ServiceLB (Klipper) binds each LoadBalancer port on the node's IP:
-#   8081 the app, 8200 the backend API, 4984 Sync Gateway (Couchbase Lite).
+# K3s's ServiceLB (Klipper) binds each LoadBalancer port on the node's IP.
+# The Royal Caribbean demo (release royal-app) already holds 8081 / 8200 / 4984
+# on mother, so this demo publishes one port up from each:
+#   8082 the app, 8201 the backend API, 4986 Sync Gateway (Couchbase Lite).
 # AOM's dashboard is on 3111 (agent-ops chart, values-k3s.yaml).
 web:
-  service: { type: LoadBalancer, port: 8081 }
+  service: { type: LoadBalancer, port: 8082 }
 backend:
-  service: { type: LoadBalancer, port: 8200 }
+  service: { type: LoadBalancer, port: 8201 }
 syncGateway:
-  service: { type: LoadBalancer, port: 4984 }
+  service: { type: LoadBalancer, port: 4986 }

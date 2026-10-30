@@ -14,6 +14,10 @@
 # Usage, from this repository on your Mac:
 #   AOM_ADMIN_PASSWORD='<12+ chars>' ./deploy/k8s/deploy.sh
 #
+# mother already runs AOM (agent-ops) and the Royal Caribbean demo (royal-app). To add
+# this demo next to them, deploy only it, with the current AOM admin password:
+#   AOM_ADMIN_PASSWORD='<current AOM password>' ONLY=princess ./deploy/k8s/deploy.sh
+#
 # Environment:
 #   MOTHER              ssh target              (default ehind@192.168.111.4; "local" = run on the node itself)
 #   AOM_DIR             AOM repository checkout (default ~/github-couchbaselabs/couchbase-agent-operations-manager)
@@ -150,12 +154,14 @@ kubectl get pods,svc -n $PRINCESS_NS 2>/dev/null || true
 "
 
 HOST="${MOTHER#*@}"; [ "$MOTHER" = local ] && HOST=$(remote "hostname -I | awk '{print \$1}'")
+port() { python3 -c 'import re,sys; t=open(sys.argv[1]).read(); m=re.search(sys.argv[2]+r":\s*\n\s*service:.*?port:\s*(\d+)", t, re.S); print(m.group(1) if m else sys.argv[3])' deploy/k8s/values-mother.yaml "$1" "$2"; }
+WEB_PORT=$(port web 8081); API_PORT=$(port backend 8200); SG_PORT=$(port syncGateway 4984)
 say "Done"
 cat <<MSG
   AOM dashboard:        https://$HOST:3111   (admin / your AOM admin password)
-  Princess Cruises app:  http://$HOST:8081
-  Backend status:       http://$HOST:8200/api/status   (aom.registration should reach "registered")
-  Couchbase Lite:       ws://$HOST:4984/princess
+  Princess Cruises app: http://$HOST:$WEB_PORT   (the story: http://$HOST:$WEB_PORT/story)
+  Backend status:       http://$HOST:$API_PORT/api/status   (aom.registration should reach "registered")
+  Couchbase Lite:       ws://$HOST:$SG_PORT/princess
 
 First start takes several minutes (Couchbase init, the 100 MiB export, KB publishing). Watch with:
   ssh $MOTHER kubectl -n $PRINCESS_NS logs deploy/backend -f
