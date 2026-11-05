@@ -161,7 +161,9 @@ async def run(initial_load: asyncio.Task | None = None):
         except Exception as exc:  # noqa: BLE001 - keep retrying until AOM is up
             STATUS.update(state="retrying", error=str(exc)[:300])
             status = getattr(exc, "status", None)
-            if status in (401, 403, 429):
+            # 401/403: wrong password. 409: wrong password *and* the first-login
+            # probe was refused (password already set). 429: locked out already.
+            if status in (400, 401, 403, 409, 429):
                 # Wrong AOM_ADMIN_PASSWORD (or already locked out): AOM locks the
                 # admin account for 30 minutes after 10 failed logins in 15, so
                 # don't hammer it - one try every 5 minutes until the password
