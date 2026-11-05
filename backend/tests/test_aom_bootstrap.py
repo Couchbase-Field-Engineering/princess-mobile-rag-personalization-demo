@@ -59,8 +59,8 @@ def test_registers_itself_with_a_fresh_aom(stack):
     assert st["aom"]["registration"]["state"] == "registered" and st["aom"]["configured"]
     fake = httpx.get(f"{AOM}/test/state").json()
     assert fake["admin_pw_set"] and fake["servers"] == ["pcl-guest-services"]
-    assert [a["name"] for a in fake["agents"]] == ["Princess Guest Concierge"]
-    assert len(fake["agents"][0]["allowed_tools"]) == 11
+    assert [a["name"] for a in fake["agents"]] == ["Princess Guest Concierge", "Princess Stateroom Upgrade Agent"]
+    assert len(fake["agents"][0]["allowed_tools"]) == 11 and len(fake["agents"][1]["allowed_tools"]) == 5
     assert fake["approvals_cfg"]["require_for_tools"] == ["pcl-guest-services::apply_goodwill_upgrade"]
     assert fake["rag_apps"]["princess-guest-concierge"]["enabled"]
 

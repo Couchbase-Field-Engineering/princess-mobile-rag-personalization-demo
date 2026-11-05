@@ -8,7 +8,11 @@ in as an AOM dashboard admin:
      server (POST /v1/servers) - or re-ingests it if it is already registered -
      so AOM pulls its 11 tools into the vetted catalog, open to the
      `support_agent` and `admin` roles.
-  2. Issues the agent identity **Princess Guest Concierge** (POST /v1/agents, role
+  2. Issues two agent identities (POST /v1/agents, role support_agent):
+     **Princess Guest Concierge**, scoped to all 11 tools, and **Princess Stateroom
+     Upgrade Agent**, scoped to the 5 upgrade tools and written to .env as
+     AOM_UPGRADE_AGENT_API_KEY (it runs every Confirm on the upgrade screen and
+     keeps the outcome in AOM Agent Memory). The concierge key is issued
      `support_agent`, scoped to exactly those 11 tools) and writes its API key
      into ../.env as AOM_AGENT_API_KEY. With --rotate, rotates the key of an
      existing agent instead.
@@ -47,6 +51,12 @@ TOOLS = ["get_guest_context", "get_upgrade_offers", "place_upgrade_bid", "purcha
          "purchase_package", "book_spa_treatment", "complete_online_checkin"]
 APPROVAL_TOOLS = [f"{SERVER_ID}::apply_goodwill_upgrade"]
 RAG_APP_ID = "princess-guest-concierge"
+UPGRADE_AGENT_NAME = "Princess Stateroom Upgrade Agent"
+UPGRADE_TOOLS = ["get_guest_context", "get_upgrade_offers", "place_upgrade_bid", "purchase_cabin_upgrade",
+                 "apply_goodwill_upgrade"]
+UPGRADE_DESCRIPTION = ("Princess Cruises stateroom upgrade agent. Triggered when a guest confirms an upgrade in the "
+                       "mobile app: recalls the guest's stateroom history and preferences from Agent Memory, applies "
+                       "the upgrade, bid or complimentary move as a governed tool call, and remembers the outcome.")
 # Keep in step with backend/app/rag_app.py, which owns the definition at runtime.
 RAG_SYSTEM_PROMPT = (
     "You are the Princess Cruises Guest Concierge in the guest's mobile app. Answer the guest's question "
@@ -173,6 +183,7 @@ def main():
     st, body = api.call("GET", "/v1/agents")
     if st != 200:
         die(f"Listing agents failed ({st}): {body.get('detail')}")
+    body_agents = body
     existing = next((a for a in body.get("agents", []) if a.get("name") == AGENT_NAME and a.get("status") == "active"), None)
     key = None
     if existing and args.rotate:
@@ -194,6 +205,30 @@ def main():
         if st != 200:
             die(f"Agent creation failed ({st}): {body.get('detail')}")
         key = body["api_key"]
+        print(f"  agent {body['agent']['agent_id']} issued")
+
+    # 2b. the Stateroom Upgrade Agent --------------------------------------------------
+    existing_up = next((a for a in body_agents.get("agents", []) if a.get("name") == UPGRADE_AGENT_NAME
+                        and a.get("status") == "active"), None)
+    upgrade_key = None
+    if existing_up and args.rotate:
+        print(f"→ Rotating key for agent '{UPGRADE_AGENT_NAME}' ({existing_up['agent_id']})")
+        st, body = api.call("POST", f"/v1/agents/{existing_up['agent_id']}/rotate", {"revoke_immediately": False})
+        if st != 200:
+            die(f"Rotate failed ({st}): {body.get('detail')}")
+        upgrade_key = body["api_key"]
+    elif existing_up:
+        print(f"  agent '{UPGRADE_AGENT_NAME}' already exists ({existing_up['agent_id']}); keeping its key")
+    else:
+        print(f"→ Issuing agent identity '{UPGRADE_AGENT_NAME}' (role support_agent, {len(UPGRADE_TOOLS)} scoped tools, Agent Memory)")
+        st, body = api.call("POST", "/v1/agents", {
+            "name": UPGRADE_AGENT_NAME, "role": "support_agent", "owner": "Princess Digital Guest Experience",
+            "description": UPGRADE_DESCRIPTION,
+            "allowed_tools": [f"{SERVER_ID}::{t}" for t in UPGRADE_TOOLS],
+        })
+        if st != 200:
+            die(f"Agent creation failed ({st}): {body.get('detail')}")
+        upgrade_key = body["api_key"]
         print(f"  agent {body['agent']['agent_id']} issued")
 
     # 3. approval tier ---------------------------------------------------------------
@@ -235,6 +270,8 @@ def main():
                "AOM_ADMIN_PASSWORD": args.admin_password}
     if key:
         updates["AOM_AGENT_API_KEY"] = key
+    if upgrade_key:
+        updates["AOM_UPGRADE_AGENT_API_KEY"] = upgrade_key
     set_env(updates)
     print(f"→ Wrote {', '.join(updates)} to {os.path.abspath(ENV_PATH)}")
     if key:

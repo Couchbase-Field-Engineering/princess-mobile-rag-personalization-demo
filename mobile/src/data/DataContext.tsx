@@ -1,4 +1,22 @@
 import * as Crypto from 'expo-crypto';
+
+/**
+ * 16 hex chars for a request id. `crypto.randomUUID()` only exists in secure
+ * contexts (https or localhost), so the web build opened over plain http on a
+ * LAN or public IP has to fall back to getRandomValues, which is available
+ * everywhere.
+ */
+function requestId(): string {
+  try {
+    return Crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+  } catch {
+    try {
+      return Array.from(Crypto.getRandomBytes(8), (b) => b.toString(16).padStart(2, '0')).join('');
+    } catch {
+      return (Date.now().toString(16) + Math.random().toString(16).slice(2)).slice(0, 16);
+    }
+  }
+}
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { api, ApiError, type LoginResponse } from '../api';
 import { createLocalDb } from '../db/engine';
@@ -99,7 +117,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     async (tool: string, args: Record<string, unknown>, title: string) => {
       if (!session || !dbRef.current) throw new Error('Not signed in');
       const req: ActionRequest = {
-        _id: `req::${session.guest_id}::${Crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`,
+        _id: `req::${session.guest_id}::${requestId()}`,
         type: 'request',
         guest_id: session.guest_id,
         tool,

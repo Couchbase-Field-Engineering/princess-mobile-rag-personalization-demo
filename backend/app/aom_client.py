@@ -47,9 +47,10 @@ class PendingApproval(Exception):
 
 
 class AOMClient:
-    def __init__(self):
+    def __init__(self, key: str | None = None, agent_id: str = "princess-guest-concierge"):
         self.url = config.AOM_URL
-        self.key = config.AOM_AGENT_API_KEY
+        self.key = config.AOM_AGENT_API_KEY if key is None else key
+        self.agent_id = agent_id
         self._client = httpx.AsyncClient(verify=config.AOM_VERIFY_TLS, timeout=config.AOM_TIMEOUT_SECONDS)
         self._admin_cookies: httpx.Cookies | None = None
         self.last_error: str | None = None
@@ -65,7 +66,7 @@ class AOMClient:
 
     def _headers(self, trace_id: str | None = None):
         h = {"Authorization": f"Bearer {self.key}", "Content-Type": "application/json",
-             "X-AOM-Agent-Id": "princess-guest-concierge"}
+             "X-AOM-Agent-Id": self.agent_id}
         ctx = current_trace.get() or {}
         trace_id = trace_id or ctx.get("trace_id")
         if trace_id:
@@ -121,6 +122,20 @@ class AOMClient:
 
     async def memory_search(self, user_id, query, top_k=4) -> dict:
         return await self._post("/v1/memory/search", {"user_id": user_id, "query": query, "top_k": top_k})
+
+    async def memory_list(self, user_id, limit=500) -> list[dict]:
+        return (await self._get("/v1/memory", {"user_id": user_id, "limit": limit})).get("entries", [])
+
+    async def memory_delete(self, memory_id: str) -> bool:
+        try:
+            r = await self._client.delete(f"{self.url}/v1/memory/{memory_id}", headers=self._headers())
+        except httpx.HTTPError as exc:
+            raise AOMError(f"AOM unreachable: {exc}") from exc
+        if r.status_code == 404:
+            return False
+        if r.status_code >= 400:
+            raise AOMError(f"AOM DELETE /v1/memory -> HTTP {r.status_code}: {r.text[:300]}", r.status_code, r.text)
+        return True
 
     async def invoke(self, tool_id: str, arguments: dict, approval_id: str | None = None) -> dict:
         body = {"tool_id": tool_id, "arguments": arguments}
@@ -182,6 +197,24 @@ class AOMClient:
             "source": source, "allowed_roles": config.KB_ALLOWED_ROLES, "metadata": metadata,
         })
 
+    async def llm_cache_namespaces(self, prefix: str) -> set[str]:
+        """Namespaces present in AOM's LLM Cache that start with `prefix`. The
+        RAG application caches under `rag:<app>:<retrieval fingerprint>`, so
+        the exact names are only known by looking."""
+        entries = (await self.admin("GET", "/v1/llm/cache?limit=500") or {}).get("entries", [])
+        return {e["namespace"] for e in entries if str(e.get("namespace") or "").startswith(prefix)}
+
+    async def context_cache_namespaces(self, prefix: str) -> set[str]:
+        entries = (await self.admin("GET", "/v1/context/cache?limit=500") or {}).get("entries", [])
+        return {e["namespace"] for e in entries if str(e.get("namespace") or "").startswith(prefix)}
+
+    async def purge_llm_cache(self, namespace: str) -> int:
+        """Operator action: drop every LLM Cache entry in one namespace."""
+        return int((await self.admin("POST", "/v1/llm/cache/purge", {"namespace": namespace}) or {}).get("purged") or 0)
+
+    async def purge_context_cache(self, namespace: str) -> int:
+        return int((await self.admin("POST", "/v1/context/cache/purge", {"namespace": namespace}) or {}).get("purged") or 0)
+
     async def kb_delete(self, document_id) -> None:
         try:
             await self.admin("DELETE", f"/v1/knowledge/{document_id}")
@@ -191,3 +224,7 @@ class AOMClient:
 
 
 aom = AOMClient()
+# The Stateroom Upgrade Agent's identity (see upgrade_agent.py). Same AOM, its
+# own key and agent id, so its runs, traces and memory writes are attributed
+# to it on AOM's pages.
+upgrade_aom = AOMClient(key=config.AOM_UPGRADE_AGENT_API_KEY, agent_id="princess-upgrade-agent")

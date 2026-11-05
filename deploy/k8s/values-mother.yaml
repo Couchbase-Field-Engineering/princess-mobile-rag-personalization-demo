@@ -7,8 +7,19 @@ externalIPs: ["192.168.111.4"]
 
 aom:
   enabled: true
-  # The agent-ops release (fullnameOverride: aom) in namespace agent-ops.
+  # The AOM this demo registers with. Two are reachable from mother:
+  #   - the in-cluster agent-ops release:  https://aom-operations-manager.agent-ops.svc.cluster.local:8090
+  #     (dashboard https://192.168.111.4:3111; AOM reaches the MCP server in-cluster, leave mcpPublicUrl blank)
+  #   - the AOM behind the public IP (the NOV procurement demo's), whose dashboard proxies the API:
+  #     https://45.52.200.223:3111. It is outside the cluster, so it reaches this demo's MCP server
+  #     through the published backend port on the node.
+  # Nov 2026: the in-cluster AOM (dashboard https://192.168.111.4:3111), so the fleet
+  # chatbot workload (scripts/run_chatbot_workload.py) lands on that dashboard. The
+  # registration bootstrap handles the switch: the key kept in Couchbase fails on the
+  # new AOM, so both agent identities are issued fresh there.
   url: https://aom-operations-manager.agent-ops.svc.cluster.local:8090
+  # Blank = AOM reaches the MCP server in-cluster (backend.princess-app.svc.cluster.local:8200).
+  mcpPublicUrl: ""
   # Linked from the story page.
   dashboardUrl: https://192.168.111.4:3111
 

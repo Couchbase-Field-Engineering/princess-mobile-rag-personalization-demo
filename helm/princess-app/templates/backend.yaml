@@ -42,6 +42,9 @@ spec:
           command: ["sh", "/scripts/dump.sh"]
           env:
             - { name: DUMP_TZ, value: {{ .Values.dump.daily.timeZone | quote }} }
+            # Regenerate today's partition even if it exists (after a catalog change,
+            # e.g. new ships): the backend reloads it because the part files are new.
+            - { name: FORCE, value: {{ if .Values.dump.forceExportOnStart }}"1"{{ else }}"0"{{ end }} }
           volumeMounts:
             - { name: dump, mountPath: /data }
             - { name: scripts, mountPath: /scripts, readOnly: true }
@@ -79,9 +82,11 @@ spec:
               valueFrom: { secretKeyRef: { name: princess-app-secrets, key: AOM_ADMIN_PASSWORD } }
             - name: AOM_AGENT_API_KEY
               valueFrom: { secretKeyRef: { name: princess-app-secrets, key: AOM_AGENT_API_KEY } }
+            - name: AOM_UPGRADE_AGENT_API_KEY
+              valueFrom: { secretKeyRef: { name: princess-app-secrets, key: AOM_UPGRADE_AGENT_API_KEY } }
             - { name: AOM_VERIFY_TLS, value: {{ .Values.aom.verifyTls | quote }} }
             # How AOM (in its own namespace) reaches this backend's MCP server.
-            - { name: AOM_MCP_PUBLIC_URL, value: {{ printf "http://backend.%s.svc.cluster.local:8200/pcl/mcp" .Release.Namespace | quote }} }
+            - { name: AOM_MCP_PUBLIC_URL, value: {{ .Values.aom.mcpPublicUrl | default (printf "http://backend.%s.svc.cluster.local:8200/pcl/mcp" .Release.Namespace) | quote }} }
             - { name: AOM_LLM_PROVIDER, value: {{ .Values.aom.llmProvider | quote }} }
             - { name: AOM_LLM_MODEL, value: {{ .Values.aom.llmModel | quote }} }
             {{- end }}

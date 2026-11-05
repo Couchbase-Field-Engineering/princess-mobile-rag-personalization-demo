@@ -78,6 +78,10 @@ aom:
   enabled: true
   # The in-cluster AOM API (the agent-ops chart with fullnameOverride: aom).
   url: https://aom-operations-manager.agent-ops.svc.cluster.local:8090
+  # Where AOM reaches this demo's MCP server (it ingests the tools from here and
+  # calls them). Blank = the in-cluster backend Service; set it when AOM runs
+  # outside the cluster, e.g. http://<node ip>:<backend port>/pcl/mcp.
+  mcpPublicUrl: ""
   adminUsername: admin
   # Required when aom.enabled. AOM requires 12+ characters, not a common password.
   adminPassword: ""
@@ -85,6 +89,8 @@ aom:
   dashboardUrl: ""
   # Optional: a key for an agent you registered yourself; blank = self-register.
   agentApiKey: ""
+  # Optional: a key for the Stateroom Upgrade Agent; blank = self-register.
+  upgradeAgentApiKey: ""
   verifyTls: false
   # Optional: pin the LLM AOM routes completions to.
   llmProvider: ""
@@ -97,6 +103,9 @@ dump:
   targetMb: 100
   parts: 4
   keepPartitions: 2
+  # Re-export today's partition on every backend start, even if it is already there.
+  # Turn on for one deploy after a catalog change (e.g. the fleet grew), then off again.
+  forceExportOnStart: false
   persistence:
     size: 2Gi
     storageClassName: ""

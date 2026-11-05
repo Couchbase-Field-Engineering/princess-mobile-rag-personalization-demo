@@ -87,8 +87,8 @@ class Gen:
             while day < self.d0 + dt.timedelta(days=150):
                 itin_code = itins[i % len(itins)]
                 itin = C.ITINERARIES[itin_code]
-                # 7-night ships sail Sundays, short ones Fri (3n) / Mon (4n)
-                offset = {7: 6, 3: 4, 4: 0}[itin["nights"]]
+                # 7-night (and longer) sailings leave Sundays, short ones Fri (3n) / Mon (4n)
+                offset = {7: 6, 3: 4, 4: 0}.get(itin["nights"], 6)
                 embark = day + dt.timedelta(days=offset)
                 if embark > self.d0:
                     out.append(self._sailing(code, itin_code, embark))

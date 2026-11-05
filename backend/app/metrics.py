@@ -55,6 +55,13 @@ def request(doc: dict, first: bool) -> None:
         pass
 
 
+def reset() -> None:
+    for k, v in list(STATS.items()):
+        if isinstance(v, int):
+            STATS[k] = 0
+    STATS["since"] = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def snapshot() -> dict:
     s = dict(STATS)
     turns = s["context_hits"] + s["context_misses"]

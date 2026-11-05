@@ -26,6 +26,7 @@ import argparse
 import asyncio
 import datetime as dt
 import glob
+import hashlib
 import json
 import logging
 import os
@@ -47,6 +48,13 @@ _TASKS: list = []  # keep a reference so background KB publishing is not garbage
 def latest_partition(dump_dir: str) -> str | None:
     parts = sorted(p for p in glob.glob(os.path.join(dump_dir, "dt=*")) if os.path.exists(os.path.join(p, "_SUCCESS")))
     return parts[-1] if parts else None
+
+
+def partition_id(partition: str) -> str:
+    """Identifies one export: the part file names carry the Spark job's UUID,
+    so a re-exported partition for the same date has a different id."""
+    names = sorted(os.path.basename(p) for p in glob.glob(os.path.join(partition, "part-*.json")))
+    return hashlib.sha1("|".join(names).encode()).hexdigest()[:12]
 
 
 def read_rows(partition: str):
@@ -74,7 +82,9 @@ async def load(dump_dir: str | None = None, force=False, kb=True) -> dict:
         return STATUS
     export_date = os.path.basename(part).split("=", 1)[1]
     state = await store.get("lookups", "load_state") or {}
-    if state.get("export_date") == export_date and not force and state.get("driver") == store.driver and store.driver == "couchbase":
+    pid = partition_id(part)
+    if (state.get("export_date") == export_date and state.get("partition_id") == pid and not force
+            and state.get("driver") == store.driver and store.driver == "couchbase"):
         STATE["export_date"] = export_date
         STATUS.update(state="loaded", **state)
         log.info("Dump %s already loaded", export_date)
@@ -138,7 +148,7 @@ async def load(dump_dir: str | None = None, force=False, kb=True) -> dict:
     for _, gid in sorted(planning):
         await personalization.refresh_offers(gid)
 
-    summary = {"export_date": export_date, "partition": part, "rows": rows, "bookings": len(bookings),
+    summary = {"export_date": export_date, "partition": part, "partition_id": pid, "rows": rows, "bookings": len(bookings),
                "skipped_outside_window": skipped, "carried_live_state": carried, "bytes": nbytes,
                "offers_ranked": len(planning), "load_seconds": round(time.time() - t0, 1),
                "driver": store.driver, "loaded_at": now_iso()}

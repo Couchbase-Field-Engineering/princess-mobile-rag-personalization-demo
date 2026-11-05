@@ -10,6 +10,8 @@ the backend does on startup what the register script does by hand:
 2. Registers its own MCP server `pcl-guest-services` (or re-ingests it), at
    AOM_MCP_PUBLIC_URL, the URL AOM uses to reach this backend.
 3. Issues the "Princess Guest Concierge" agent identity, scoped to the 11 tools,
+   and the "Princess Stateroom Upgrade Agent" identity, scoped to the 5 upgrade
+   tools (upgrade_agent.py - triggered by Confirm, writes to Agent Memory),
    and keeps its API key in Couchbase (`lookups::aom_agent`) so a restart
    reuses it. If the agent already exists and its key isn't known here, the
    key is rotated.
@@ -26,7 +28,8 @@ import asyncio
 import logging
 
 from . import config, loader
-from .aom_client import AOMError, aom
+from . import upgrade_agent
+from .aom_client import AOMError, aom, upgrade_aom
 from .store import store
 
 log = logging.getLogger("pcl.aom_bootstrap")
@@ -37,6 +40,9 @@ TOOLS = ["get_guest_context", "get_upgrade_offers", "place_upgrade_bid", "purcha
          "purchase_package", "book_spa_treatment", "complete_online_checkin"]
 APPROVAL_TOOLS = ["apply_goodwill_upgrade"]
 KEY_DOC = "aom_agent"
+UPGRADE_KEY_DOC = "aom_upgrade_agent"
+AGENT_DESCRIPTION = ("Princess Cruises mobile app concierge: personalization, RAG over the daily Databricks guest "
+                     "profiles, and guest-service actions (upgrades, excursions, dining, packages, check-in).")
 
 STATUS: dict = {"state": "off"}
 
@@ -89,28 +95,29 @@ async def _key_works(key: str) -> bool:
         aom.key = saved
 
 
-async def _ensure_agent() -> str:
-    if config.AOM_AGENT_API_KEY:
-        return config.AOM_AGENT_API_KEY
-    stored = await store.get("lookups", KEY_DOC) or {}
+async def _ensure_agent(name: str = AGENT_NAME, tools: list[str] = TOOLS, key_doc: str = KEY_DOC,
+                        configured_key: str = "", description: str = AGENT_DESCRIPTION) -> str:
+    """Issue (or re-use) one AOM agent identity and keep its key in Couchbase."""
+    if configured_key:
+        return configured_key
+    stored = await store.get("lookups", key_doc) or {}
     if stored.get("api_key") and await _key_works(stored["api_key"]):
         return stored["api_key"]
     agents = (await aom.admin("GET", "/v1/agents")).get("agents", [])
-    existing = next((a for a in agents if a.get("name") == AGENT_NAME and a.get("status") == "active"), None)
+    existing = next((a for a in agents if a.get("name") == name and a.get("status") == "active"), None)
     if existing:
         res = await aom.admin("POST", f"/v1/agents/{existing['agent_id']}/rotate", {"revoke_immediately": True})
         agent_id = existing["agent_id"]
-        log.info("Rotated the key of existing AOM agent %s", agent_id)
+        log.info("Rotated the key of existing AOM agent %s (%s)", agent_id, name)
     else:
         res = await aom.admin("POST", "/v1/agents", {
-            "name": AGENT_NAME, "role": "support_agent", "owner": "Princess Digital Guest Experience",
-            "description": "Princess Cruises mobile app concierge: personalization, RAG over the daily Databricks guest "
-                           "profiles, and guest-service actions (upgrades, excursions, dining, packages, check-in).",
-            "allowed_tools": [f"{config.AOM_MCP_SERVER_ID}::{t}" for t in TOOLS],
+            "name": name, "role": "support_agent", "owner": "Princess Digital Guest Experience",
+            "description": description,
+            "allowed_tools": [f"{config.AOM_MCP_SERVER_ID}::{t}" for t in tools],
         })
         agent_id = res["agent"]["agent_id"]
-        log.info("Issued AOM agent identity %s", agent_id)
-    await store.upsert("lookups", KEY_DOC, {"type": "aom_agent", "agent_id": agent_id, "api_key": res["api_key"]})
+        log.info("Issued AOM agent identity %s (%s)", agent_id, name)
+    await store.upsert("lookups", key_doc, {"type": "aom_agent", "name": name, "agent_id": agent_id, "api_key": res["api_key"]})
     return res["api_key"]
 
 
@@ -142,7 +149,10 @@ async def run(initial_load: asyncio.Task | None = None):
             STATUS.update(state="registering_server")
             tools = await _register_server()
             STATUS.update(state="issuing_agent", tools=tools)
-            aom.key = await _ensure_agent()
+            aom.key = await _ensure_agent(configured_key=config.AOM_AGENT_API_KEY)
+            STATUS.update(state="issuing_upgrade_agent")
+            upgrade_aom.key = await _ensure_agent(upgrade_agent.AGENT_NAME, upgrade_agent.TOOLS, UPGRADE_KEY_DOC,
+                                                  config.AOM_UPGRADE_AGENT_API_KEY, upgrade_agent.DESCRIPTION)
             STATUS.update(state="approval_tier")
             await _approval_tier()
             STATUS.update(state="registered")
@@ -150,8 +160,18 @@ async def run(initial_load: asyncio.Task | None = None):
             break
         except Exception as exc:  # noqa: BLE001 - keep retrying until AOM is up
             STATUS.update(state="retrying", error=str(exc)[:300])
-            log.warning("AOM registration not done yet (%s); retrying in %ss", exc, delay)
-            await asyncio.sleep(delay)
+            status = getattr(exc, "status", None)
+            if status in (401, 403, 429):
+                # Wrong AOM_ADMIN_PASSWORD (or already locked out): AOM locks the
+                # admin account for 30 minutes after 10 failed logins in 15, so
+                # don't hammer it - one try every 5 minutes until the password
+                # (or the lockout) is fixed.
+                wait = 300
+                log.error("AOM admin sign-in refused (%s) - check AOM_ADMIN_PASSWORD; retrying in %ss", exc, wait)
+            else:
+                wait = delay
+                log.warning("AOM registration not done yet (%s); retrying in %ss", exc, delay)
+            await asyncio.sleep(wait)
             delay = min(delay * 2, 60)
     # Knowledge Base + RAG application, now that the admin login works.
     state = await store.get("lookups", "load_state") or {}

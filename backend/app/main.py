@@ -22,7 +22,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import aom_bootstrap, concierge, config, loader, metrics, personalization, rag_app, sgw, worker
+from . import aom_bootstrap, concierge, config, demo_reset, loader, metrics, personalization, rag_app, sgw, worker, workload
 from .aom_client import aom
 from .docs import (CATALOG_ID, STATE, bookings_id, chat_id, ctx_id, days_to_sail, guest_channel,
                    now_iso, offers_id, profile_id)
@@ -139,7 +139,10 @@ async def status():
     return {"store": store.driver, "export_date": STATE.get("export_date"),
             "load": {k: v for k, v in loader.STATUS.items()}, "aom": aom_state, "metrics": metrics.snapshot(),
             "sync_gateway": {"configured": sgw.enabled(), "public_url": config.SG_PUBLIC_URL or None, "db": config.SG_DB},
-            "mcp_server": {"server_id": config.AOM_MCP_SERVER_ID, "registered_url": config.AOM_MCP_PUBLIC_URL}}
+            "mcp_server": {"server_id": config.AOM_MCP_SERVER_ID, "registered_url": config.AOM_MCP_PUBLIC_URL},
+            "workload": {k: v for k, v in workload.status().items()
+                         if k in ("state", "run_id", "started_at", "finished_at", "seconds", "done_turns", "total_turns",
+                                  "done_guests", "total_guests", "ships_covered", "fleet_size", "total")}}
 
 
 @app.get("/api/demo/personas")
@@ -263,6 +266,87 @@ async def ask(req: AskRequest, guest_id: str = Depends(current_guest)):
     if not req.message.strip():
         raise HTTPException(400, "Ask me something")
     return await concierge.ask(guest_id, req.message[:1000], req.session_id)
+
+
+# --------------------------------------------------------------------------
+# demo: fleet chatbot workload (see workload.py)
+# --------------------------------------------------------------------------
+class WorkloadRequest(BaseModel):
+    guests_per_ship: int = Field(3, ge=1, le=50)
+    turns_per_guest: int = Field(6, ge=2, le=30)
+    concurrency: int = Field(4, ge=1, le=32)
+    ships: list[str] | None = None          # catalog codes, e.g. ["SUN", "STR"]; default: the whole fleet
+    seed: int = 7
+    repeat_ratio: float = Field(0.5, ge=0, le=1)      # guests who ask their personal question twice (exact hit)
+    paraphrase_ratio: float = Field(0.3, ge=0, le=1)  # turns that reword a question (semantic hit)
+    window_days: int = Field(45, ge=1, le=150)        # pick guests sailing within this many days
+    pace_ms: int = Field(0, ge=0, le=5000)            # pause between a guest's turns
+
+
+@app.post("/api/demo/workload")
+async def workload_start(req: WorkloadRequest):
+    """Start the fleet chatbot workload against AOM: guests from every
+    Princess ship ask the concierge what passengers ask, through the real
+    RAG app / Context Cache / LLM Cache / Agent Memory path. Poll GET for
+    progress; the outcome shows on AOM's LLM Cache, Context Cache, RAG
+    Applications and Traces pages."""
+    try:
+        return await workload.start(**req.model_dump())
+    except (RuntimeError, ValueError) as exc:
+        raise HTTPException(409 if "already running" in str(exc) else 400, str(exc)) from None
+
+
+@app.get("/api/demo/workload")
+async def workload_status():
+    return workload.status()
+
+
+@app.delete("/api/demo/workload")
+async def workload_stop():
+    return await workload.stop()
+
+
+@app.get("/api/demo/workload/plan")
+async def workload_plan(guests_per_ship: int = 1, turns_per_guest: int = 6, seed: int = 7, window_days: int = 45,
+                        ships: str | None = None):
+    """Preview who would ask what, without running anything."""
+    codes = [c.strip().upper() for c in ships.split(",")] if ships else None
+    try:
+        guests = await workload.pick_guests(guests_per_ship, codes, window_days, seed)
+    except RuntimeError as exc:
+        raise HTTPException(409, str(exc)) from None
+    return {"sessions": workload.plan(guests, turns_per_guest, seed), "export_date": STATE.get("export_date")}
+
+
+@app.get("/api/demo/workload/catalog")
+async def workload_catalog():
+    """The fleet and the passenger use cases the workload draws from."""
+    return workload.catalog()
+
+
+# --------------------------------------------------------------------------
+# demo: reset (see demo_reset.py)
+# --------------------------------------------------------------------------
+class ResetRequest(BaseModel):
+    guests: list[str] | None = None   # default: the personas + everyone who changed something since the load
+    aom_memory: bool = True           # delete the guests' AOM Agent Memory entries
+    aom_caches: bool = True           # purge the concierge's LLM / Context Cache namespaces in AOM
+    counters: bool = True             # zero the in-process counters and forget the last workload report
+
+
+@app.post("/api/demo/reset")
+async def demo_reset_run(req: ResetRequest):
+    """Back to the state of today's export: requests, chat, cached context,
+    stateroom/check-in/purchases, offers - here and on the phone via Sync
+    Gateway - plus the guests' AOM memories and the concierge's AOM caches."""
+    if workload.RUN.get("state") == "running":
+        raise HTTPException(409, "a fleet workload is running - stop it first (DELETE /api/demo/workload)")
+    return await demo_reset.run(req.guests, req.aom_memory, req.aom_caches, req.counters)
+
+
+@app.get("/api/demo/reset")
+async def demo_reset_last():
+    return {"last": demo_reset.LAST, "default_guests": await demo_reset.default_guests()}
 
 
 @app.post("/api/admin/reload")

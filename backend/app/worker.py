@@ -15,7 +15,7 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from . import config, metrics, tool_gateway
+from . import config, metrics, tool_gateway, upgrade_agent
 from .actions import TOOLS
 from .docs import guest_channel, now_iso
 from .store import store
@@ -40,8 +40,7 @@ async def process(key: str, doc: dict) -> dict:
                        completed_at=now_iso())
             await store.upsert("requests", key, doc)
             return doc
-        result = await tool_gateway.invoke(tool, {**doc.get("args", {}), "guest_id": guest_id},
-                                           approval_id=doc["approval_id"])
+        result = await _run(doc, {**doc.get("args", {}), "guest_id": guest_id}, approval_id=doc["approval_id"])
     else:
         if tool not in REQUESTABLE:
             doc.update(status="failed", summary=f"'{tool}' can't be requested from the app", completed_at=now_iso())
@@ -52,7 +51,7 @@ async def process(key: str, doc: dict) -> dict:
         # guest_id comes from the document, which Sync Gateway only accepted
         # from that signed-in guest (requireUser in the sync function).
         args = {k: v for k, v in (doc.get("args") or {}).items() if k != "guest_id"}
-        result = await tool_gateway.invoke(tool, {**args, "guest_id": guest_id})
+        result = await _run(doc, {**args, "guest_id": guest_id})
 
     status = result.get("status", "failed")
     if result.get("ok") and status in ("ok", "accepted"):
@@ -63,6 +62,8 @@ async def process(key: str, doc: dict) -> dict:
         "status": status, "summary": result.get("summary"), "charge_usd": result.get("charge_usd"),
         "item": result.get("item"), "governed": result.get("governed", False), "trace_id": result.get("trace_id"),
         "approval_id": result.get("approval_id", doc.get("approval_id")),
+        "agent": result.get("agent", "princess-guest-concierge"),
+        "memories_recalled": result.get("memories_recalled", 0), "remembered": result.get("remembered", False),
         "completed_at": None if status == "awaiting_approval" else now_iso(),
         "channels": [guest_channel(guest_id)],
     })
@@ -70,6 +71,15 @@ async def process(key: str, doc: dict) -> dict:
     metrics.request(doc, first)
     log.info("request %s %s -> %s", key, tool, status)
     return doc
+
+
+async def _run(doc: dict, args: dict, approval_id: str | None = None) -> dict:
+    """Confirm on the upgrade screen creates one of the upgrade tools' requests:
+    those run as the Stateroom Upgrade Agent (with Agent Memory). Everything
+    else runs as the concierge."""
+    if doc.get("tool") in upgrade_agent.TRIGGER_TOOLS:
+        return await upgrade_agent.run(doc, args, approval_id=approval_id)
+    return await tool_gateway.invoke(doc.get("tool"), args, approval_id=approval_id)
 
 
 async def run_once() -> int:

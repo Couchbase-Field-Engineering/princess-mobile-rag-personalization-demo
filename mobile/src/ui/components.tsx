@@ -1,20 +1,27 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { theme, type GradientKey } from '../theme';
 import type { RequestStatus, SyncState } from '../types';
 
 export type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
-/** Text wordmark only - no brand artwork ships with this demo. */
+/**
+ * Wordmark in the style of the Princess live-chat header: the brand mark on the
+ * left, the uppercase wordmark beside it. The mark is `assets/images/brand-logo.png`,
+ * which ships as a generic placeholder - drop the licensed Princess mark in at
+ * that path (same name, square PNG with transparent background) for a
+ * customer-facing build. No licensed artwork is included in this repo.
+ */
+const BRAND_MARK = require('../../assets/images/brand-logo.png');
+
 export function Wordmark({ light = true, size = 15 }: { light?: boolean; size?: number }) {
   const c = light ? theme.color.onDark : theme.color.navy;
+  const mark = size * 2.1;
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-      <View style={[styles.mark, { borderColor: theme.color.gold }]}>
-        <Ionicons name="boat" size={size * 0.9} color={theme.color.gold} />
-      </View>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <Image source={BRAND_MARK} style={{ width: mark, height: mark, borderRadius: mark * 0.24 }} resizeMode="contain" accessibilityLabel="Princess Cruises" />
       <View>
         <Text style={{ color: c, fontSize: size, fontWeight: '800', letterSpacing: 2.2 }}>PRINCESS CRUISES</Text>
         <Text style={{ color: light ? theme.color.onDarkMuted : theme.color.muted, fontSize: size * 0.58, letterSpacing: 1.6 }}>
@@ -146,7 +153,6 @@ export function fmtDate(iso: string, opts: Intl.DateTimeFormatOptions = { weekda
 }
 
 const styles = StyleSheet.create({
-  mark: { width: 30, height: 30, borderRadius: 15, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   card: { backgroundColor: theme.color.surface, borderRadius: theme.radius, ...theme.shadow.card },
   waves: { position: 'absolute', right: -6, bottom: -14 },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, alignSelf: 'flex-start' },

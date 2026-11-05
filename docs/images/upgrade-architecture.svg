@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1900 1120" width="1900" height="1120" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTozNTc1MTYwNC0wNmVlLTRhNzQtOWY0NC1kYzkzNWY0MjE4MjgAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaFp2Tlc+Cyn3TP/K40Cj87QAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpjOTdkMThiMi1hNGM4LTQxMDktOWE2Mi00Y2I3MjIxMTc4YTJscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNo09aviHA25ukTsrJpeTcAUgAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggnG32s1XZP4TdseWoEdJV+lwIyObz+FxL1wLtW91YZsWkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaHnzKw6QrkddAScFBqgmY0QAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCBfVFeB7e2ow/V25fl+jG9QbyW+znNe0P7cnrebK4To2WRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBjTZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjM1NzUxNjA0LTA2ZWUtNGE3NC05ZjQ0LWRjOTM1ZjQyMTgyOC9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjMyOTIzZWY0LWI3YzMtNDE4Yy1iN2IzLTMxZjM1ODBlZTU0YnJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCCcbfazVdk/hN2x5agR0lX6XAjI5vP4XEvXAu1b3VhmxaJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggT1IgoezLNuoYTz17IRitSnsMCTM4pzW5oHCZNkdxpuiiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggtFhwEvf+YSPR/cqJUAfuSAHiTEJI7+2cvKcKyPM9a690Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQMk8EQu02Q6Kr6/REO4Npk5novOXJoXkmcm1Zr2V+rGnop51iBZaHFUBjLaVnLq5NA4nCQAmAvRjh2Ep33Wr5Us=</c2pa:manifest></metadata>
+<defs><marker id="arr-2B3440" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2B3440"/></marker><marker id="arr-0F6FDE" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0F6FDE"/></marker><marker id="arr-0E8A5F" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0E8A5F"/></marker><marker id="arr-B8860B" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#B8860B"/></marker><marker id="arr-EA2328" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#EA2328"/></marker></defs>
+<rect x="0" y="0" width="1900" height="1120" rx="0" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.5"/>
+<g transform="translate(40,32) scale(1.55)"><circle cx="12" cy="12" r="12" fill="#EA2328"/><path fill="#fff" d="M20.111 14.104a1.467 1.458 0 0 1-1.235 1.503c-1.422.244-4.385.398-6.875.398s-5.454-.15-6.877-.398c-.814-.14-1.235-.787-1.235-1.503V9.417a1.57 1.56 0 0 1 1.235-1.505 15.72 15.619 0 0 1 2.156-.14.537.533 0 0 1 .523.543v3.303c1.463 0 2.727-.086 4.201-.086 1.474 0 2.727.086 4.196.086V8.342a.535.532 0 0 1 .494-.569h.027a15.995 15.891 0 0 1 2.156.14 1.57 1.56 0 0 1 1.234 1.504z"/></g>
+<text x="92" y="48" font-size="22" fill="#101820" font-weight="800" text-anchor="start">Couchbase</text>
+<text x="92" y="68" font-size="12.5" fill="#6B7280" font-weight="500" text-anchor="start">Agent Operations Manager · Princess Cruises mobile personalization demo</text>
+<text x="1860" y="48" font-size="20" fill="#101820" font-weight="800" text-anchor="end">Upgrading a stateroom: the chatbot, the RAG application, and the RAG_KB and AIDP buckets</text>
+<text x="1860" y="68" font-size="12.5" fill="#6B7280" font-weight="500" text-anchor="end">Numbered steps follow one guest's upgrade. Lettered steps show the RAG application answering a playbook question on its own LLM path.</text>
+<rect x="40" y="82" width="1820" height="3" fill="#EA2328"/>
+<rect x="40" y="120" width="250" height="330" rx="14" fill="#F4F5F7" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="54" y="144" font-size="14" fill="#101820" font-weight="800" text-anchor="start">Guest's phone</text>
+<rect x="54" y="148" width="190" height="20" rx="10" fill="#E7F0FC" stroke="#E7F0FC" stroke-width="1.5"/>
+<text x="149" y="162" font-size="11" fill="#0F6FDE" font-weight="700" text-anchor="middle">Couchbase Lite · offline-first</text>
+<rect x="54" y="214" width="222" height="86" rx="14" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="68" y="238" font-size="14" fill="#0F6FDE" font-weight="800" text-anchor="start">Concierge chat</text>
+<text x="68" y="256" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">"Can we upgrade to a suite</text>
+<text x="68" y="271" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">for our anniversary?"</text>
+<rect x="54" y="314" width="222" height="86" rx="14" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="68" y="338" font-size="14" fill="#B8860B" font-weight="800" text-anchor="start">Upgrade → Confirm</text>
+<text x="68" y="356" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">Review &amp; confirm · $3,290</text>
+<text x="68" y="371" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">Writes a request doc locally</text>
+<text x="68" y="386" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">(pending) - no signal needed.</text>
+<text x="54" y="428" font-size="10.5" fill="#6B7280" font-weight="500" text-anchor="start">Local docs: profile · offers · bookings · catalog</text>
+<text x="54" y="442" font-size="10.5" fill="#6B7280" font-weight="500" text-anchor="start">context-cache copy · requests outbox · chat</text>
+<rect x="330" y="320" width="150" height="120" rx="14" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="344" y="344" font-size="14" fill="#101820" font-weight="800" text-anchor="start">Sync Gateway</text>
+<text x="344" y="362" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">channels per guest</text>
+<text x="344" y="377" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">delta sync, both ways</text>
+<text x="344" y="392" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">sync fn: a phone may only</text>
+<text x="344" y="407" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">create its own pending</text>
+<text x="344" y="422" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">requests</text>
+<rect x="520" y="120" width="410" height="400" rx="14" fill="#F4F5F7" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="534" y="144" font-size="14" fill="#101820" font-weight="800" text-anchor="start">Demo backend  (FastAPI)</text>
+<text x="534" y="162" font-size="11.5" fill="#6B7280" font-weight="500" text-anchor="start">Two AOM agent identities; one MCP server AOM calls back into</text>
+<rect x="534" y="186" width="382" height="98" rx="14" fill="#E7F0FC" stroke="#0F6FDE" stroke-width="1.5"/>
+<text x="548" y="210" font-size="14" fill="#0F6FDE" font-weight="800" text-anchor="start">Chatbot  ·  Princess Guest Concierge</text>
+<text x="548" y="228" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">agent id princess-guest-concierge · all 11 tools. Personal questions:</text>
+<text x="548" y="243" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">Context Cache → KB (own profile + playbook) → tool facts → chatbot LLM.</text>
+<text x="548" y="258" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">Answers come back with action chips (bid / upgrade now).</text>
+<rect x="534" y="298" width="382" height="98" rx="14" fill="#FBF3DC" stroke="#B8860B" stroke-width="1.5"/>
+<text x="548" y="322" font-size="14" fill="#B8860B" font-weight="800" text-anchor="start">Stateroom Upgrade Agent  ·  triggered by Confirm</text>
+<text x="548" y="340" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">agent id princess-upgrade-agent · scoped to the 5 upgrade tools.</text>
+<text x="548" y="355" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">Recalls Agent Memory → applies the upgrade as a governed tool</text>
+<text x="548" y="370" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">call → remembers the outcome (episodic + preference memory).</text>
+<rect x="534" y="410" width="184" height="96" rx="14" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="548" y="434" font-size="14" fill="#101820" font-weight="800" text-anchor="start">Worker</text>
+<text x="548" y="452" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">claims pending request docs;</text>
+<text x="548" y="467" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">upgrade tools → Upgrade Agent,</text>
+<text x="548" y="482" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">everything else → Chatbot</text>
+<rect x="732" y="410" width="184" height="96" rx="14" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="746" y="434" font-size="14" fill="#101820" font-weight="800" text-anchor="start">MCP server</text>
+<text x="746" y="452" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">pcl-guest-services · 11 tools</text>
+<text x="746" y="467" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">get_upgrade_offers,</text>
+<text x="746" y="482" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">purchase_cabin_upgrade, …</text>
+<rect x="990" y="120" width="710" height="400" rx="14" fill="#F4F5F7" stroke="#EA2328" stroke-width="1.5"/>
+<text x="1004" y="144" font-size="14" fill="#101820" font-weight="800" text-anchor="start">Couchbase Agent Operations Manager  (AI Data Plane)</text>
+<text x="1004" y="162" font-size="11.5" fill="#6B7280" font-weight="500" text-anchor="start">Identities · RBAC · approvals · traces · audit · budgets · caches · memory</text>
+<rect x="1004" y="196" width="220" height="98" rx="14" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="1018" y="220" font-size="14" fill="#101820" font-weight="800" text-anchor="start">Context Cache</text>
+<text x="1018" y="238" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">/v1/context/get · set</text>
+<text x="1018" y="253" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">key: guest · intent · export date ·</text>
+<text x="1018" y="268" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">profile rev · invalidated by booking</text>
+<rect x="1004" y="316" width="220" height="98" rx="14" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="1018" y="340" font-size="14" fill="#101820" font-weight="800" text-anchor="start">Knowledge Base</text>
+<text x="1018" y="358" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">vector search, role-filtered</text>
+<text x="1018" y="373" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">document_id-scoped: playbook for</text>
+<text x="1018" y="388" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">all; each guest their own profile</text>
+<rect x="1240" y="196" width="220" height="98" rx="14" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="1254" y="220" font-size="14" fill="#101820" font-weight="800" text-anchor="start">Tool gateway</text>
+<text x="1254" y="238" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">/v1/tools/invoke</text>
+<text x="1254" y="253" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">identity · RBAC · tool scope ·</text>
+<text x="1254" y="268" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">approval tier · trace · audit</text>
+<rect x="1240" y="316" width="220" height="98" rx="14" fill="#FBF3DC" stroke="#B8860B" stroke-width="1.5"/>
+<text x="1254" y="340" font-size="14" fill="#B8860B" font-weight="800" text-anchor="start">Agent Memory</text>
+<text x="1254" y="358" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">/v1/memory · memory/search</text>
+<text x="1254" y="373" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">episodic: what the guest did</text>
+<text x="1254" y="388" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">semantic: stateroom preferences</text>
+<rect x="1476" y="196" width="214" height="98" rx="14" fill="#E4F4EC" stroke="#0E8A5F" stroke-width="1.5"/>
+<text x="1490" y="220" font-size="14" fill="#0E8A5F" font-weight="800" text-anchor="start">RAG Application</text>
+<text x="1490" y="238" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">princess-guest-concierge</text>
+<text x="1490" y="253" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">scoped to today's playbook doc</text>
+<text x="1490" y="268" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">retrieve → generate → govern</text>
+<rect x="1476" y="316" width="214" height="98" rx="14" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="1490" y="340" font-size="14" fill="#101820" font-weight="800" text-anchor="start">LLM Cache gateway</text>
+<text x="1490" y="358" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">/v1/llm/complete</text>
+<text x="1490" y="373" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">exact + semantic hits</text>
+<text x="1490" y="388" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">namespace per app and path</text>
+<text x="1030" y="446.0" font-size="11" fill="#2B3440" font-weight="400" text-anchor="start">Operator pages: Agents · Traces · Audit Log · Approvals ·</text>
+<text x="1030" y="460.5" font-size="11" fill="#2B3440" font-weight="400" text-anchor="start">RAG Applications (queries, cache hits, model spend avoided) ·</text>
+<text x="1030" y="475.0" font-size="11" fill="#2B3440" font-weight="400" text-anchor="start">LLM Cache · Context Cache · Agent Memory · Knowledge Base.</text>
+<text x="1030" y="489.5" font-size="11" fill="#2B3440" font-weight="400" text-anchor="start">Cost per answer is visible on every trace.</text>
+<text x="1424" y="446.0" font-size="11" fill="#6B7280" font-weight="400" text-anchor="start">The chatbot and the RAG app are two</text>
+<text x="1424" y="460.5" font-size="11" fill="#6B7280" font-weight="400" text-anchor="start">different AOM callers: separate</text>
+<text x="1424" y="475.0" font-size="11" fill="#6B7280" font-weight="400" text-anchor="start">namespaces, budgets, cache hit rates</text>
+<text x="1424" y="489.5" font-size="11" fill="#6B7280" font-weight="400" text-anchor="start">and traces, even on one LLM provider.</text>
+<rect x="1724" y="196" width="136" height="98" rx="14" fill="#E4F4EC" stroke="#0E8A5F" stroke-width="1.5"/>
+<text x="1738" y="220" font-size="13" fill="#0E8A5F" font-weight="800" text-anchor="start">LLM · RAG app</text>
+<text x="1738" y="238" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">playbook answers,</text>
+<text x="1738" y="253" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">no guest data,</text>
+<text x="1738" y="268" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">one generation per</text>
+<text x="1738" y="283" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">question, shared</text>
+<rect x="1724" y="316" width="136" height="98" rx="14" fill="#E7F0FC" stroke="#0F6FDE" stroke-width="1.5"/>
+<text x="1738" y="340" font-size="13" fill="#0F6FDE" font-weight="800" text-anchor="start">LLM · chatbot</text>
+<text x="1738" y="358" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">personal answers</text>
+<text x="1738" y="373" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">on cached context</text>
+<text x="1738" y="388" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">+ memory; short</text>
+<text x="1738" y="403" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">call on a hit</text>
+<text x="1792" y="440" font-size="10.5" fill="#6B7280" font-weight="500" text-anchor="middle">same or different</text>
+<text x="1792" y="454" font-size="10.5" fill="#6B7280" font-weight="500" text-anchor="middle">provider: AOM routes,</text>
+<text x="1792" y="468" font-size="10.5" fill="#6B7280" font-weight="500" text-anchor="middle">caches and meters</text>
+<text x="1792" y="482" font-size="10.5" fill="#6B7280" font-weight="500" text-anchor="middle">each path separately</text>
+<rect x="40" y="640" width="1820" height="240" rx="14" fill="#F4F5F7" stroke="#EA2328" stroke-width="1.5"/>
+<text x="54" y="664" font-size="15" fill="#101820" font-weight="800" text-anchor="start">Couchbase Server  ·  one cluster, memory-first JSON + vector search</text>
+<text x="54" y="682" font-size="11.5" fill="#6B7280" font-weight="500" text-anchor="start">System of record and AI data plane on one cluster; buckets separate the application's data, the RAG content, and the AIDP state.</text>
+<rect x="54" y="700" width="876" height="166" rx="14" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="68" y="724" font-size="14" fill="#101820" font-weight="800" text-anchor="start">princess  ·  application bucket</text>
+<text x="68" y="742" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">scope pcl, replicated to phones through Sync Gateway</text>
+<text x="68" y="757" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">profiles · offers · bookings · inventory (CAS) · requests (offline-first outbox) · concierge chat · catalog</text>
+<text x="68" y="772" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">context_cache: the phone's copy of AOM's Context Cache entry, so the concierge answers at sea</text>
+<text x="68" y="787" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start"></text>
+<text x="68" y="802" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">System of record - the upgrade is applied here (step 12).</text>
+<rect x="990" y="700" width="330" height="166" rx="14" fill="#E4F4EC" stroke="#0E8A5F" stroke-width="1.5"/>
+<text x="1004" y="724" font-size="14" fill="#0E8A5F" font-weight="800" text-anchor="start">RAG_KB  ·  RAG bucket</text>
+<text x="1004" y="742" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">Knowledge Base documents, chunks, embeddings</text>
+<text x="1004" y="757" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">vector index · role filter per document</text>
+<text x="1004" y="772" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">Guest Services Playbook (shared) ·</text>
+<text x="1004" y="787" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">one profile document per guest sailing soon</text>
+<text x="1004" y="802" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start"></text>
+<text x="1004" y="817" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">Read by the RAG app and the chatbot's KB search.</text>
+<rect x="1340" y="700" width="520" height="166" rx="14" fill="#FBF3DC" stroke="#B8860B" stroke-width="1.5"/>
+<text x="1354" y="724" font-size="14" fill="#B8860B" font-weight="800" text-anchor="start">AIDP  ·  AI Data Plane bucket</text>
+<text x="1354" y="742" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">Agent Memory (episodic + semantic, consolidated)</text>
+<text x="1354" y="757" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">LLM Cache · Context Cache · retrieval cache</text>
+<text x="1354" y="772" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">agent identities + keys · tool catalog · approvals</text>
+<text x="1354" y="787" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">traces · audit log · budgets and usage</text>
+<text x="1354" y="802" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start"></text>
+<text x="1354" y="817" font-size="11.5" fill="#2B3440" font-weight="400" text-anchor="start">Written by both agents and the RAG application, only through AOM.</text>
+<path d="M 276 240 L 534 240" fill="none" stroke="#0F6FDE" stroke-width="2.2" marker-end="url(#arr-0F6FDE)" stroke-linejoin="round"/>
+<circle cx="405" cy="240" r="12.5" fill="#0F6FDE" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="405" y="244.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">1</text>
+<path d="M 534 268 L 276 268" fill="none" stroke="#0F6FDE" stroke-width="2.2" marker-end="url(#arr-0F6FDE)" stroke-linejoin="round"/>
+<circle cx="405" cy="268" r="12.5" fill="#0F6FDE" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="405" y="272.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">6</text>
+<path d="M 916 222 L 1004 222" fill="none" stroke="#0F6FDE" stroke-width="2" marker-end="url(#arr-0F6FDE)" stroke-linejoin="round"/>
+<circle cx="968" cy="222" r="12.5" fill="#0F6FDE" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="968" y="226.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">2</text>
+<path d="M 916 246 L 956 246 L 956 352 L 1004 352" fill="none" stroke="#0F6FDE" stroke-width="2" marker-end="url(#arr-0F6FDE)" stroke-linejoin="round"/>
+<circle cx="956" cy="300" r="12.5" fill="#0F6FDE" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="956" y="304.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">3</text>
+<path d="M 916 270 L 944 270 L 944 176 L 1350 176 L 1350 196" fill="none" stroke="#0F6FDE" stroke-width="2" marker-end="url(#arr-0F6FDE)" stroke-linejoin="round"/>
+<circle cx="1280" cy="176" r="12.5" fill="#0F6FDE" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="1280" y="180.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">4</text>
+<path d="M 916 322 L 944 322" fill="none" stroke="#EA2328" stroke-width="2" marker-end="url(#arr-EA2328)" stroke-linejoin="round"/>
+<circle cx="920" cy="322" r="12.5" fill="#EA2328" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="920" y="326.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">11</text>
+<path d="M 944 322 L 944 270" stroke="#EA2328" stroke-width="2" fill="none"/>
+<path d="M 916 258 L 978 258 L 978 186 L 1576 186 L 1576 294 L 1576 316" fill="none" stroke="#0F6FDE" stroke-width="2" stroke-dasharray="7 4" marker-end="url(#arr-0F6FDE)" stroke-linejoin="round"/>
+<circle cx="1576" cy="187" r="12.5" fill="#0F6FDE" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="1576" y="191.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">5</text>
+<path d="M 1260 294 L 1260 306 L 980 306 L 980 458 L 916 458" fill="none" stroke="#EA2328" stroke-width="2" marker-end="url(#arr-EA2328)" stroke-linejoin="round"/>
+<path d="M 276 350 L 330 350" fill="none" stroke="#B8860B" stroke-width="2.2" marker-end="url(#arr-B8860B)" stroke-linejoin="round"/>
+<circle cx="303" cy="334" r="12.5" fill="#B8860B" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="303" y="338.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">7</text>
+<path d="M 330 400 L 276 400" fill="none" stroke="#B8860B" stroke-width="2.2" marker-end="url(#arr-B8860B)" stroke-linejoin="round"/>
+<circle cx="303" cy="416" r="12.5" fill="#B8860B" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="303" y="420.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">13</text>
+<path d="M 405 440 L 405 700" fill="none" stroke="#B8860B" stroke-width="2" marker-end="url(#arr-B8860B)" stroke-linejoin="round"/>
+<circle cx="405" cy="580" r="12.5" fill="#B8860B" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="405" y="584.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">8</text>
+<path d="M 626 700 L 626 506" fill="none" stroke="#B8860B" stroke-width="2" marker-end="url(#arr-B8860B)" stroke-linejoin="round"/>
+<path d="M 626 410 L 626 396" fill="none" stroke="#B8860B" stroke-width="2.4" marker-end="url(#arr-B8860B)" stroke-linejoin="round"/>
+<circle cx="660" cy="403" r="12.5" fill="#B8860B" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="660" y="407.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">9</text>
+<path d="M 916 374 L 968 374 L 968 426 L 1280 426 L 1280 414" fill="none" stroke="#B8860B" stroke-width="2" marker-end="url(#arr-B8860B)" stroke-linejoin="round"/>
+<circle cx="1180" cy="426" r="12.5" fill="#B8860B" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="1180" y="430.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">10</text>
+<path d="M 1400 414 L 1400 700" fill="none" stroke="#B8860B" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#arr-B8860B)" stroke-linejoin="round"/>
+<path d="M 824 506 L 824 700" fill="none" stroke="#EA2328" stroke-width="2" marker-end="url(#arr-EA2328)" stroke-linejoin="round"/>
+<circle cx="824" cy="580" r="12.5" fill="#EA2328" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="824" y="584.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">12</text>
+<path d="M 1018 414 L 1018 700" fill="none" stroke="#0E8A5F" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#arr-0E8A5F)" stroke-linejoin="round"/>
+<path d="M 1676 414 L 1676 700" fill="none" stroke="#2B3440" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arr-2B3440)" stroke-linejoin="round"/>
+<text x="1668" y="600" font-size="10.5" fill="#6B7280" font-weight="500" text-anchor="end">answers + context</text>
+<text x="1668" y="614" font-size="10.5" fill="#6B7280" font-weight="500" text-anchor="end">cached in AIDP</text>
+<path d="M 276 226 L 505 226 L 505 104 L 1536 104 L 1536 196" fill="none" stroke="#0E8A5F" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#arr-0E8A5F)" stroke-linejoin="round"/>
+<rect x="700" y="94" width="330" height="20" rx="10" fill="#E4F4EC" stroke="#E4F4EC" stroke-width="1.5"/>
+<text x="865" y="108" font-size="11" fill="#0E8A5F" font-weight="700" text-anchor="middle">A   playbook question, e.g. "What's included in Princess Premier?"</text>
+<path d="M 1536 294 L 1536 316" fill="none" stroke="#0E8A5F" stroke-width="2.2" marker-end="url(#arr-0E8A5F)" stroke-linejoin="round"/>
+<circle cx="1506" cy="306" r="12.5" fill="#0E8A5F" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="1506" y="310.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">B</text>
+<path d="M 1690 365 L 1724 365" fill="none" stroke="#0F6FDE" stroke-width="2.2" marker-end="url(#arr-0F6FDE)" stroke-linejoin="round"/>
+<path d="M 1690 340 L 1710 340 L 1710 245 L 1724 245" fill="none" stroke="#0E8A5F" stroke-width="2.2" marker-end="url(#arr-0E8A5F)" stroke-linejoin="round"/>
+<circle cx="1710" cy="290" r="12.5" fill="#0E8A5F" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="1710" y="294.5" font-size="12.5" fill="#FFFFFF" font-weight="800" text-anchor="middle">C</text>
+<path d="M 1476 282 L 1466 282" fill="none" stroke="#0E8A5F" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#arr-0E8A5F)" stroke-linejoin="round"/>
+<text x="1468" y="294" font-size="9.5" fill="#0E8A5F" font-weight="600" text-anchor="start">retrieve (scoped)</text>
+<rect x="40" y="900" width="1820" height="200" rx="14" fill="#FFFFFF" stroke="#D9DDE3" stroke-width="1.5"/>
+<text x="54" y="924" font-size="14" fill="#101820" font-weight="800" text-anchor="start">Data flow: upgrading a stateroom reservation</text>
+<text x="54" y="948" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">1   Guest asks the chatbot about a suite upgrade (typed on the phone; sent when connected).</text>
+<text x="54" y="964" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">2   Chatbot checks AOM's Context Cache for guest · upgrade · today's export · profile revision - a miss on the first ask.</text>
+<text x="54" y="980" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">3   Chatbot retrieves from the Knowledge Base (RAG_KB bucket), scoped to this guest's own profile document plus the playbook.</text>
+<text x="54" y="996" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">4   Chatbot calls get_upgrade_offers through the Tool gateway → MCP server → live inventory in the princess bucket.</text>
+<text x="54" y="1012" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">5   Context is stored in the Context Cache (AIDP) and copied to the princess bucket for the phone; the chatbot LLM generates the answer.</text>
+<text x="54" y="1028" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">6   Answer returns with action chips: "Bid $135/night" and "Upgrade now · $3,290".</text>
+<text x="54" y="1044" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">7   Guest taps Upgrade now → Confirm: a pending request document is written in Couchbase Lite, online or not.</text>
+<text x="930" y="948" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">8   Sync Gateway pushes it into the princess bucket; the worker claims it.</text>
+<text x="930" y="964" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">9   Upgrade tools are routed to the Stateroom Upgrade Agent - its own AOM identity, scoped to 5 tools.</text>
+<text x="930" y="980" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">10  The agent recalls the guest's stateroom history and preferences from Agent Memory (AIDP bucket).</text>
+<text x="930" y="996" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">11  The agent invokes purchase_cabin_upgrade via the Tool gateway: identity, RBAC, scope, trace, audit.</text>
+<text x="930" y="1012" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">12  AOM calls the MCP server, which applies it in the princess bucket: inventory (CAS), stateroom, booking, re-ranked offers, context invalidated.</text>
+<text x="930" y="1028" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">13  The result syncs back ("Confirmed"); the agent writes the episode to Agent Memory, which the chatbot recalls on its next room question.</text>
+<text x="930" y="1044" font-size="11.3" fill="#2B3440" font-weight="400" text-anchor="start">A–C Separately, playbook questions go to the RAG application: Context Cache → Knowledge Base (RAG_KB) → LLM Cache → its own LLM; one answer, shared by every guest.</text>
+<rect x="1330" y="910" width="12" height="12" rx="3" fill="#0F6FDE"/>
+<text x="1347" y="920" font-size="10.5" fill="#2B3440" font-weight="600" text-anchor="start">chatbot</text>
+<rect x="1400" y="910" width="12" height="12" rx="3" fill="#0E8A5F"/>
+<text x="1417" y="920" font-size="10.5" fill="#2B3440" font-weight="600" text-anchor="start">RAG application</text>
+<rect x="1520" y="910" width="12" height="12" rx="3" fill="#B8860B"/>
+<text x="1537" y="920" font-size="10.5" fill="#2B3440" font-weight="600" text-anchor="start">upgrade agent + memory</text>
+<rect x="1680" y="910" width="12" height="12" rx="3" fill="#EA2328"/>
+<text x="1697" y="920" font-size="10.5" fill="#2B3440" font-weight="600" text-anchor="start">governed tool call</text>
+</svg>

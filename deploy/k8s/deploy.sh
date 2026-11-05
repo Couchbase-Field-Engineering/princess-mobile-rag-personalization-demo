@@ -26,6 +26,8 @@
 #   ANTHROPIC_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY   optional LLM keys for AOM (else labelled stubs)
 #   ONLY                "aom" or "princess" to deploy just one of them
 #   SKIP_BUILD=1        reuse the images already on mother (set TAG to the tag to deploy)
+#   FORCE_DUMP=true     re-export today's Databricks partition on start (after a catalog change,
+#                       e.g. the fleet grew to 17 ships) - the backend reloads it automatically
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 ROOT=$(pwd)
@@ -147,6 +149,7 @@ if [ '$ONLY' != aom ]; then
   helm upgrade --install princess-app charts/princess-app -n $PRINCESS_NS --create-namespace \
     -f princess-values.yaml -f princess-secrets.yaml \
     --set backend.image.tag=$TAG --set web.image.tag=$TAG \
+    --set dump.forceExportOnStart=${FORCE_DUMP:-false} \
     --timeout 25m
 fi
 kubectl get pods,svc -n $AOM_NS 2>/dev/null || true

@@ -37,6 +37,10 @@ KB_ALLOWED_ROLES = [r.strip() for r in os.getenv("KB_ALLOWED_ROLES", "support_ag
 # --- Couchbase Agent Operations Manager ------------------------------------------
 AOM_URL = os.getenv("AOM_URL", "").rstrip("/")
 AOM_AGENT_API_KEY = os.getenv("AOM_AGENT_API_KEY", "")
+# Second agent identity: the Stateroom Upgrade Agent (upgrade_agent.py). Issued by
+# register_with_aom.py / aom_bootstrap.py alongside the concierge; blank = upgrades
+# run as the concierge.
+AOM_UPGRADE_AGENT_API_KEY = os.getenv("AOM_UPGRADE_AGENT_API_KEY", "")
 AOM_ADMIN_USERNAME = os.getenv("AOM_ADMIN_USERNAME", "admin")
 AOM_ADMIN_PASSWORD = os.getenv("AOM_ADMIN_PASSWORD", "")
 AOM_VERIFY_TLS = _bool("AOM_VERIFY_TLS", False)

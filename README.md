@@ -16,15 +16,15 @@ The app's structure is based on [Fujio-Turner/mobile_field_service](https://gith
 
 ## How the demo opens
 
-`http://<host>:8081/story` is **Personalization That Sails**, an eight-chapter story for the room before the live app. Use ←/→ to move between chapters, **N** for talking points and ☾ for dark mode:
+`http://<host>:8081/story` is **Personalization That Sails**, an eight-chapter story for the room before the live app, about cutting the LLM cost of an AI concierge with the Agent Operations Manager. Use ←/→ to move between chapters, **N** for talking points and ☾ for dark mode:
 
-1. **Life on board.** Why cruise guests are offline so often: ashore and on excursions, at sea, inside the ship, at the terminal and tender. It closes with Olivia moving her anniversary dinner from a catamaran off St. Maarten with no signal.
-2. **What the app needs.** Eight requirements: four on the phone, four for the AI.
-3. **How it usually gets built.** A Redis-centered stack next to one Couchbase data plane. Press **Transform the stack**, or **T**.
-4. **Offline-first, step by step.** The same dinner change in two phones, one with Couchbase Lite and one online-only on a Redis-backed API. Press **Next step**, or Space.
-5. **One data plane for the AI.** Databricks to Couchbase to the AOM Knowledge Base, RAG app and caches, and on to the phone. It shows live numbers from the running backend.
-6. **Couchbase vs Redis, side by side.**
-7. **See it run.** Links to the app and the AOM dashboard, plus a five-minute demo script.
+1. **The question costs money.** Live chat has hours and a queue; a naive LLM chatbot pays the model for every question; at sea nothing answers at all. It closes with Olivia's two questions from a catamaran off St. Maarten, both answered from her phone.
+2. **Where the LLM bill comes from.** Four cost drivers (repeat questions, context rebuilt every turn, unscoped retrieval, no answer offline) and the fix for each: AOM's LLM Cache, Context Cache, scoped RAG application, and cached context synced to Couchbase Lite.
+3. **How it usually gets built.** Every box between the question and the answer is a bill. Press **Transform the stack**, or **T**.
+4. **The same questions, two bills.** Five questions walked through an AOM-governed concierge and a plain chatbot, with a running LLM spend on each phone. Press **Next step**, or Space.
+5. **One data plane for the AI.** Databricks to Couchbase to the AOM Knowledge Base, RAG app and caches, and on to the phone, with live cache hit rates and model calls avoided from the running backend.
+6. **Where the savings come from.** Question by question, with and without AOM.
+7. **See it run.** Links to the app and the AOM dashboard, plus a five-minute script that ends with Confirm triggering the Stateroom Upgrade Agent and Agent Memory.
 
 The phone frame's side panel links back to the story. The page is served by the `web` container (`web/story.html`). Its live numbers come from `/api/status`, which now includes `metrics`: concierge turns, context-cache and LLM-cache hit rates, and requests that were queued offline and synced later. The AOM link uses `AOM_DASHBOARD_URL`.
 
@@ -40,6 +40,7 @@ The phone frame's side panel links back to the story. The page is served by the 
 | **Context Caching** | For personal questions the concierge assembles context (the guest's own KB profile chunks, playbook chunks and live tool facts) and caches it in **AOM's Context Cache** (`/v1/context/set`, namespace `rag:princess-guest-concierge:guest-context`, key `<guest>:<intent>:<export_date>:r<profile rev>`, with the real build time as `source_latency_ms`). The next question is a `/v1/context/get` hit, shown as a `Context cache · hit` chip and as latency avoided on AOM's *Context Cache* page. The next dump or any booking by that guest changes the key, so the entry is never served stale. The same context is written to Couchbase as `ctx::<guest>::<intent>`, which syncs to the phone; that copy is what the offline concierge answers from. |
 | **LLM Caching** | Every completion goes through AOM's LLM cache. Playbook questions contain no personal data, so the second guest to ask the same question gets `LLM cache · exact hit` from the RAG application. Personal questions go through `/v1/llm/complete` in the `rag:princess-guest-concierge:personal` namespace, which AOM also attributes to the RAG application. |
 | **Governed actions** | Upgrades (Princess Upgrade bid, instant, goodwill), excursions, specialty dining, packages, spa and online check-in all run as `POST /v1/tools/invoke`. AOM re-checks RBAC and the agent's tool scope, traces and audits the call, scans the response, and holds goodwill upgrades for a person to approve. |
+| **Stateroom Upgrade Agent + Agent Memory** | **Confirm** on the upgrade screen creates a `purchase_cabin_upgrade`, `place_upgrade_bid` or `apply_goodwill_upgrade` request. The worker hands those to a second AOM identity, the **Princess Stateroom Upgrade Agent** (`backend/app/upgrade_agent.py`, scoped to the 5 upgrade tools). It first recalls the guest's stateroom history and preferences from **AOM Agent Memory** (`POST /v1/memory/search`), applies the upgrade as a governed tool call attributed to itself, then writes what happened back to memory (`POST /v1/memory`: from/to category and stateroom, sailing, what was paid or bid, the occasion). The request card shows *Run by the Stateroom Upgrade agent · Remembered in AOM Agent Memory*, and the concierge recalls the same memory on its next answer about rooms. |
 
 ---
 
@@ -59,6 +60,12 @@ The phone frame's side panel links back to the story. The page is served by the 
 | **8** | Sync Gateway carries requests up and results back down: the phone pushes its pending request, and the confirmed stateroom, booking and re-ranked offers come back. |
 | **9** | The worker runs each request as the **Princess Guest Concierge** agent through `POST /v1/tools/invoke`, so RBAC, tool scope, the approval tier, a trace and an audit entry are applied. |
 | **10** | AOM calls the `pcl-guest-services` MCP server, which applies the upgrade or booking in Couchbase, and that syncs back to the phone (2 → 8 → 5). |
+
+### Upgrading a stateroom: the chatbot, the RAG application and the two AI buckets
+
+![Upgrade architecture: chatbot vs RAG application, Couchbase RAG_KB and AIDP buckets, two LLM paths, numbered data flow](docs/images/upgrade-architecture.svg)
+
+The chatbot (Princess Guest Concierge) and the RAG application are two different AOM callers with separate namespaces, budgets and cache hit rates. The `RAG_KB` bucket holds the Knowledge Base; the `AIDP` bucket holds AOM's Agent Memory, LLM and Context Caches, identities, traces and audit; the `princess` bucket is the system of record the upgrade is applied in. Steps 1-13 follow one guest from "Can we upgrade?" through **Confirm**, the Stateroom Upgrade Agent and Agent Memory; A-C show a playbook question answered once by the RAG application for every guest.
 
 ### A guest's workflow, end to end
 
@@ -197,7 +204,7 @@ docker compose up -d --build backend       # picks up AOM_* from .env, publishes
 
 `register_with_aom.py` is idempotent. Run it again with `--rotate` to issue a new agent key. After it runs, AOM shows:
 
-* **Agents**: *Princess Guest Concierge*, role `support_agent`, scoped to the 11 `pcl-guest-services::*` tools
+* **Agents**: *Princess Guest Concierge*, role `support_agent`, scoped to the 11 `pcl-guest-services::*` tools, and *Princess Stateroom Upgrade Agent*, scoped to the 5 upgrade tools (key written to `.env` as `AOM_UPGRADE_AGENT_API_KEY`)
 * **Servers / Catalog**: `pcl-guest-services` (trusted) and its tools
 * **Knowledge**: *Guest Services Playbook <date>* and *Guest profile G… <date>* documents
 * **Approvals config**: `pcl-guest-services::apply_goodwill_upgrade` requires a human
@@ -270,7 +277,7 @@ It runs four steps:
 
 * signs in to AOM. On a fresh AOM, it sets `AOM_ADMIN_PASSWORD` as the admin's first-login password
 * registers `pcl-guest-services` at `http://backend.princess-app.svc.cluster.local:8200/pcl/mcp` (the in-cluster port; the published port is 8201)
-* issues the *Princess Guest Concierge* agent and keeps its key in Couchbase
+* issues the *Princess Guest Concierge* and *Princess Stateroom Upgrade Agent* identities and keeps their keys in Couchbase
 * turns on the approval tier
 * publishes the Knowledge Base and the RAG application
 
@@ -298,6 +305,31 @@ Ports are published by K3s's built-in ServiceLB. If a Service stays `<pending>`,
 2. **Priya Natarajan** (Platinum, solo wellness, *Star Princess*, Mini-Suite, sails in 2 days): asks "How does Princess Upgrade work?" and gets an **LLM cache exact hit** from Olivia's earlier question, because the playbook namespace is shared and has no personal data. Her feed leads with the spa and Chef's Table.
 3. **Carlos Rivera** (Gold, family of four, *Caribbean Princess* 3-night Princess Cays getaway, Interior): the feed leads with family excursions and Princess Premier. Booking the Princess Cays aqua park is priced for 4, and the Love by Britto is correctly refused because it isn't on Caribbean Princess.
 
+## Fleet chatbot workload: LLM Caching and Context Caching under load
+
+Three personas show *how* the caches work; the fleet workload shows what they do to a real queue. `POST /api/demo/workload` (the **Run fleet workload** button on the story page, or the script below) plays guests from all 17 Princess ships against the concierge, through the same path the phone uses: AOM RAG Application for playbook questions, AOM Context Cache + Knowledge Base + governed MCP tools for personal ones, AOM Agent Memory for what guests say about themselves, and `/v1/llm/complete` in the `rag:princess-guest-concierge:*` namespaces. Nothing is simulated on the AOM side - the point is to fill AOM's **LLM Cache**, **Context Cache**, **RAG Applications** and **Traces** pages with production-shaped traffic.
+
+```bash
+# against the deployment on mother (backend :8201, AOM dashboard https://192.168.111.4:3111)
+python scripts/run_chatbot_workload.py
+# bigger, faster, or a few ships
+python scripts/run_chatbot_workload.py --guests-per-ship 6 --turns 8 --concurrency 8 --ships SUN,STR,ENC
+python scripts/run_chatbot_workload.py --plan      # who asks what, without running
+python scripts/run_chatbot_workload.py --stop
+```
+
+What a passenger asks (`backend/app/workload.py`, `USE_CASES`): check-in, arrival time, documents, the Medallion, luggage and parking; upgrades and suite perks; shore excursions, Princess Cays, cancellations; dining, dietary needs, dress code, celebrations; Princess Plus / Premier, drinks, Wi-Fi, OceanNow; spa, fitness; itinerary and port times; kids, gratuities, smoking, laundry, casino, currency, medical, accessibility, Captain's Circle; and a noisy cabin (service recovery, behind the approval tier). The traffic is shaped the way a support queue is:
+
+* **Playbook questions** are drawn Zipf-style, so a few dominate. Most guests use the canonical wording (**exact hits** after the first guest pays for the answer), `--paraphrase-ratio` of them reword it (**semantic hits**), the long tail misses.
+* **Personal questions** build a per-guest, per-intent context once (`Context cache: built`); the follow-up in the same intent reuses it (**hit**); `--repeat-ratio` of guests ask the same thing again (**exact LLM hit**, same prompt).
+* **Statements** ("we're vegetarian") go to Agent Memory and are recalled on that guest's later turns.
+
+The run reports per ship, per use case and per cache outcome (`GET /api/demo/workload`), and the story page shows it live. Guests are picked from the loaded dump among those sailing within `--window-days` (default 45), lead guests first, so every ship in the catalog gets passengers.
+
+## Reset the demo
+
+`POST /api/demo/reset` (the **Reset demo** button on the story page, or `python scripts/reset_demo.py`) puts the demo back to the state of today's export. For the three personas plus every guest who changed something since the load (or `--guests G00000201`): their `requests`, chat and cached context are deleted, their profile is reloaded from the dump partition (stateroom, check-in, purchases, `rev` 0), the sold staterooms of their sailing are released, their offers re-ranked, and they are dropped from `live_guests`. Sync Gateway replicates the deletes and the fresh profile to the phone. In AOM, their Agent Memory entries are deleted and the concierge's cache namespaces (`rag:princess-guest-concierge*`, including the RAG application's own) are purged, so the next demo starts with a visible `miss` again; traces, audit log and approvals history are left alone. `--keep-aom-memory` / `--keep-aom-caches` / `--keep-counters` narrow it.
+
 ---
 
 ## The Databricks dump
@@ -308,7 +340,7 @@ Ports are published by K3s's built-in ServiceLB. If a Service stays `<pending>`,
 python3 databricks/generate_mock_dump.py --export-date 2026-10-09 --target-mb 100 --parts 4
 ```
 
-* **About 24,000 passenger reservations** (about 8,300 bookings) over 8 ships and 150 days of sailings, 100 MiB, deterministic for a given `--seed` on a given Python version. Each part is about 25 MB, under GitHub's 50 MB warning.
+* **About 24,000 passenger reservations** (about 8,300 bookings) over the 17-ship fleet (Caribbean, Mexican Riviera, Panama Canal, Australia, Japan and Southeast Asia home ports) and 150 days of sailings, 100 MiB, deterministic for a given `--seed` on a given Python version. Each part is about 25 MB, under GitHub's 50 MB warning.
 * One line is **one passenger on one upcoming reservation**: identity and loyalty (Captain's Circle tier and points), the reservation (ship, itinerary with port days, stateroom, party, check-in status), preferences, up to 12 past sailings, onboard spend mix, what's already purchased for this sailing, and **`ml_scores`** from `pcl-personalization-v4.2`.
 * `ml_scores` holds the propensities (upgrade, beverage, dining, excursion, spa, internet, Princess Premier), price sensitivity, segment, next best action, recommended upgrade category and suggested Princess Upgrade bid.
 * Three hand-built **demo personas**, with sailings relative to the export date, are always the first rows.
@@ -345,7 +377,8 @@ Backend variables go in `.env` (see `.env.example`); `docker-compose.yml` sets t
 | Variable | Default | |
 |---|---|---|
 | `STORE_DRIVER` | `memory` (compose: `couchbase`) | `memory` keeps guests sailing within `MEMORY_WINDOW_DAYS` |
-| `AOM_URL`, `AOM_AGENT_API_KEY` | — | Agent identity, written by `register_with_aom.py` |
+| `AOM_URL`, `AOM_AGENT_API_KEY` | — | Concierge agent identity, written by `register_with_aom.py` |
+| `AOM_UPGRADE_AGENT_API_KEY` | — | Stateroom Upgrade Agent identity, written by `register_with_aom.py`; blank = upgrades run as the concierge |
 | `AOM_ADMIN_USERNAME`, `AOM_ADMIN_PASSWORD` | — | Used only to publish KB documents |
 | `AOM_LLM_PROVIDER`, `AOM_LLM_MODEL` | AOM default | Pin the model completions use |
 | `KB_WINDOW_DAYS`, `KB_PROFILE_LIMIT` | `10`, `150` | Which passengers get a KB profile each day |
@@ -363,11 +396,11 @@ App variables (`mobile/.env`): `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_SG_URL`, `EXP
 ## Tests
 
 ```bash
-cd backend && pytest -q          # 13 tests
+cd backend && pytest -q          # 23 tests
 cd mobile && npm run typecheck
 ```
 
-`test_demo_flows.py` covers personalization, the context cache (hit, then invalidation after a booking), the offline request flow, business-rule failures, and push authorization. `test_aom_integration.py` runs the backend against `tests/fake_aom.py`, which has the same routes and shapes as AOM. It checks KB publishing, document-scoped retrieval, RAG application registration and its playbook-only scope, personal context cached through AOM's Context Cache, the LLM cache shared across guests for playbook questions but not personal ones, tool calls over real MCP, and the approval tier. `test_aom_bootstrap.py` starts the backend with `AOM_AUTO_REGISTER` against a *fresh* fake AOM and checks that it registers itself end to end.
+`test_demo_flows.py` covers personalization, the context cache (hit, then invalidation after a booking), the offline request flow, business-rule failures, and push authorization. `test_aom_integration.py` runs the backend against `tests/fake_aom.py`, which has the same routes and shapes as AOM. It checks KB publishing, document-scoped retrieval, RAG application registration and its playbook-only scope, personal context cached through AOM's Context Cache, the LLM cache shared across guests for playbook questions but not personal ones, tool calls over real MCP, and the approval tier, and runs the fleet workload through it (exact hits across guests, context hits on follow-ups). `test_workload.py` checks the workload's fleet coverage, plan and report in memory mode; `test_reset.py` checks the demo reset restores a persona after an upgrade. `test_aom_bootstrap.py` starts the backend with `AOM_AUTO_REGISTER` against a *fresh* fake AOM and checks that it registers itself end to end.
 
 ---
 
@@ -379,15 +412,18 @@ backend/            FastAPI API, MCP server, loader, worker, concierge (Python)
   app/personalization.py  For You ranking
   app/actions.py        upgrade / booking business logic behind every tool
   app/concierge.py      intent → AOM RAG app (playbook) | AOM Context Cache → KB + memory + LLM cache (personal) → actions
+  app/workload.py       fleet chatbot workload: every ship's guests × passenger use cases → the concierge → AOM caches
+  app/demo_reset.py     back to today's export: guest docs, profile, inventory, offers; AOM memories and cache namespaces
   app/rag_app.py        the concierge's AOM RAG Application definition, re-scoped daily
   app/loader.py         daily dump → Couchbase + AOM Knowledge Base
-  app/worker.py         offline-first requests → AOM tools/invoke
+  app/worker.py         offline-first requests → AOM tools/invoke (upgrades → the upgrade agent)
+  app/upgrade_agent.py  Stateroom Upgrade Agent: Agent Memory recall → governed upgrade → remember the outcome
   app/aom_bootstrap.py  self-registration with AOM (Kubernetes)
 mobile/             Expo app (Couchbase Lite engine + browser preview engine)
 databricks/         mock dump generator, PySpark notebook, daily job
 couchbase-init/     bucket / scope / collections / indexes
 sync-gateway/       bootstrap + database config with per-collection sync functions
-scripts/            register_with_aom.py, setup-corporate-ca.sh
+scripts/            register_with_aom.py, run_chatbot_workload.py, reset_demo.py, setup-corporate-ca.sh
 web/                nginx image serving the browser build of the app on :8081 (proxies /api to the backend)
 helm/princess-app/     Helm chart for the demo (Couchbase, Sync Gateway, backend, daily export CronJob, web)
 deploy/k8s/         deploy.sh + values for the K3s node "mother" (AOM and the demo)

@@ -15,10 +15,15 @@ export function RequestTracker({ id, onRetry, retryLabel = 'Try again' }: { id: 
   if (!q) return null;
   const ui = STATUS_UI[q.status] ?? STATUS_UI.pending;
   const waiting = q._local || q.status === 'pending' || q.status === 'processing';
+  const upgradeAgent = q.agent === 'princess-upgrade-agent' || ['purchase_cabin_upgrade', 'place_upgrade_bid', 'apply_goodwill_upgrade'].includes(q.tool);
+  const agentLabel = upgradeAgent ? 'Run by the Stateroom Upgrade agent through Couchbase AOM' : 'Run by the Concierge agent through Couchbase AOM';
   const steps = [
     { label: 'Saved in Couchbase Lite on your phone', done: true },
     { label: sync.status === 'paused' || sync.status === 'offline' ? 'Waiting for a connection…' : 'Synced to Princess Cruises', done: !q._local },
-    { label: q.governed === false ? 'Processed by guest services (AOM not configured - ungoverned)' : 'Run by the Concierge agent through Couchbase AOM', done: !waiting },
+    { label: q.governed === false ? 'Processed by guest services (AOM not configured - ungoverned)' : agentLabel, done: !waiting },
+    ...(upgradeAgent && q.governed !== false
+      ? [{ label: q.remembered ? `Remembered in AOM Agent Memory${q.memories_recalled ? ` · recalled ${q.memories_recalled} earlier` : ''}` : 'Saving the outcome to AOM Agent Memory', done: !waiting && !!q.remembered }]
+      : []),
     { label: q.status === 'awaiting_approval' ? 'Waiting for a Guest Services supervisor' : 'Result synced back to your phone', done: !waiting && q.status !== 'awaiting_approval' },
   ];
   return (

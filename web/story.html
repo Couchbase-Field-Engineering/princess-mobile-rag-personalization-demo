@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Personalization That Sails</title>
-<meta name="description" content="Why Couchbase, not Redis, for an AI-powered, offline-first cruise guest app - the story that opens the Princess Cruises personalization demo.">
+<title>Personalization That Sails · Cutting the cost of AI chat</title>
+<meta name="description" content="How Couchbase and the Agent Operations Manager cut the LLM cost of an AI concierge for cruise guests, online and off - the story that opens the Princess Cruises personalization demo.">
 <style>
 :root{--bg:#f3f5f9;--panel:#fff;--panel2:#eef1f7;--line:#e2e6ef;--fg:#0b1530;--fg2:#3e4a66;--muted:#6b7590;--navy:#0b2545;--princess:#1b4f9c;--gold:#d9ae4f;--gold2:#a07a1f;--ocean:#1c86d1;--cb:#ea2328;--cb2:#c71d22;--green:#13804b;--amber:#b26200;--shadow:0 1px 2px rgba(11,37,69,.05),0 8px 28px rgba(11,37,69,.07)}
 html[data-theme=dark]{--bg:#070d1f;--panel:#0f1830;--panel2:#16213d;--line:#24304f;--fg:#eef2fb;--fg2:#c3cbe0;--muted:#8d98b5;--princess:#8db4ff;--gold2:#e4bd5a;--cb2:#ff5a5e;--green:#3ccf86;--amber:#ffb35c;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35)}
@@ -103,7 +103,7 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
 @media (max-width:700px){.g4,.g3,.g2,.sim,.flow,.stats{grid-template-columns:1fr}.dots{display:none}.bar .pill{display:none}.bar .brand{margin-right:auto}.bar{gap:8px;padding:10px 16px}.brand small{display:none}section.ch{padding:40px 16px}table.cmp{font-size:13px}}
 </style></head><body>
 <div class="bar">
-  <div class="brand"><svg viewBox="0 0 24 24" role="img" aria-label="Couchbase"><circle cx="12" cy="12" r="12" fill="#ea2328"/><path fill="#fff" d="M20.111 14.104a1.467 1.458 0 0 1-1.235 1.503c-1.422.244-4.385.398-6.875.398s-5.454-.15-6.877-.398c-.814-.14-1.235-.787-1.235-1.503V9.417a1.57 1.56 0 0 1 1.235-1.505 15.72 15.619 0 0 1 2.156-.14.537.533 0 0 1 .523.543v3.303c1.463 0 2.727-.086 4.201-.086 1.474 0 2.727.086 4.196.086V8.342a.535.532 0 0 1 .494-.569h.027a15.995 15.891 0 0 1 2.156.14 1.57 1.56 0 0 1 1.234 1.504z"/></svg>Couchbase <small>Princess Cruises mobile personalization demo · Personalization that sails</small></div>
+  <div class="brand"><svg viewBox="0 0 24 24" role="img" aria-label="Couchbase"><circle cx="12" cy="12" r="12" fill="#ea2328"/><path fill="#fff" d="M20.111 14.104a1.467 1.458 0 0 1-1.235 1.503c-1.422.244-4.385.398-6.875.398s-5.454-.15-6.877-.398c-.814-.14-1.235-.787-1.235-1.503V9.417a1.57 1.56 0 0 1 1.235-1.505 15.72 15.619 0 0 1 2.156-.14.537.533 0 0 1 .523.543v3.303c1.463 0 2.727-.086 4.201-.086 1.474 0 2.727.086 4.196.086V8.342a.535.532 0 0 1 .494-.569h.027a15.995 15.891 0 0 1 2.156.14 1.57 1.56 0 0 1 1.234 1.504z"/></svg>Couchbase <small>Princess Cruises mobile personalization demo · Personalization that sails, at a fraction of the LLM cost</small></div>
   <nav class="dots" id="dots" aria-label="Chapters"></nav>
   <span class="pill" id="health">Demo: …</span>
   <a class="btn sm" href="/login">Open the app ↗</a>
@@ -112,60 +112,60 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
 <main id="main">
 
 <!-- 0 -->
-<section class="ch hero" data-notes="Open on the title. The claim for the next few minutes: an AI-personalized guest app has to work where guests actually are, which on a cruise is very often without a connection.|Redis is the comparison because it's what most teams reach for first to make personalization fast. It's great at that. The question is what it doesn't cover.|Where it ends: the live app, governed by Couchbase AOM, including a dinner change made with no signal.">
+<section class="ch hero" data-notes="Open on the title. The claim for the next few minutes: an AI concierge is the cheapest way to answer a guest's question - but only if the model isn't called for every single question.|The Agent Operations Manager is where the saving happens: every answer goes through its Context Cache and LLM Cache, is grounded by its Knowledge Base, and is traced so the cost of each answer is visible.|Where it ends: the live app, with the cache hit rates and the model calls avoided, next to AOM's own pages.">
   <div class="wrap">
     <div class="kicker">Princess Cruises · AI-powered mobile personalization · Live demo</div>
     <h1>Personalization that <span class="accent">sails with the guest</span>.</h1>
-    <p class="lede">A guest app that knows each passenger, recommends the right upgrade, dinner or excursion, answers questions with AI and books in one tap - <b>even on a beach with no signal</b>. Why that takes a database on the phone as well as in the cloud, and why <b class="cbc">Couchbase</b> covers both where a <b>Redis</b>-centered stack covers one.</p>
+    <p class="lede">A guest app that knows each passenger, recommends the right upgrade, dinner or excursion, answers questions with AI and books in one tap - <b>even on a beach with no signal</b>. Why that takes a database on the phone as well as in the cloud, why <b class="cbc">Couchbase</b> covers both, and how Couchbase reduces LLM chat costs.</p>
     <div class="cta"><button class="btn primary" data-go="1">Start the story →</button><a class="btn" href="/login">Skip to the live app</a></div>
     <p class="disclaimer">A demo scenario built for illustration. Princess Cruises names are used to set the scene; this is not an official Princess Cruises or MedallionClass application and implies no endorsement.</p>
   </div>
 </section>
 
 <!-- 1 -->
-<section class="ch" data-notes="Make it concrete: a cruise is a week of moving in and out of coverage. Nobody has to explain this to anyone who has sailed.|The four cards are the four places connectivity drops: ashore, at sea, inside the ship, and at the terminal or tender.|Read Olivia's story. The point isn't the dinner; it's that the guest's intent happens at the moment they're offline, and the app has to capture it there.">
+<section class="ch" data-notes="Start where the guest starts: with a question. Today it goes to a live chat with business hours, a queue, and a phone number to fall back on.|An LLM concierge answers at 3am and never says 'try again shortly' - but the obvious build pays the model for every question, and most questions are the same questions.|Olivia's scenario: her questions happen at the moments she is offline, and many of them have been asked a thousand times today by other guests. Both facts are savings waiting to happen.">
   <div class="wrap">
-    <div class="kicker">Chapter 1 · Life on board</div>
-    <h2>A cruise is a week of <span class="accent">moving in and out of coverage</span>.</h2>
-    <p class="lede">Guests make plans all day - but the moments they want to change them are often the moments they have no signal.</p>
+    <div class="kicker">Chapter 1 · The question costs money</div>
+    <h2>Every guest question has a price - <span class="accent">a person, a phone line, or a model call</span>.</h2>
+    <p class="lede">Live chat keeps business hours and a queue. An AI concierge is always on - but the simplest build pays the LLM full price for every question, including the ones it answered a minute ago.</p>
     <div class="grid g4">
-      <div class="card"><span class="icon">🏝️</span><h3>Ashore and on excursions</h3><p>Snorkel boats, Princess Cays beaches, zip lines and remote ports: no ship Wi-Fi, patchy cellular, and international roaming many guests switch off.</p></div>
-      <div class="card"><span class="icon">🛰️</span><h3>At sea</h3><p>Internet at sea comes over satellite, is sold as a package, and is shared by thousands of guests and crew. Plenty of guests never buy it.</p></div>
-      <div class="card"><span class="icon">🚢</span><h3>Inside the ship</h3><p>Steel decks, theaters, spas and interior staterooms: dead spots even when the ship is connected.</p></div>
-      <div class="card"><span class="icon">🧳</span><h3>Terminal and tender</h3><p>Embarkation-day crowds and tender boats: the exact moments guests open the app for their Medallion boarding pass and arrival group.</p></div>
+      <div class="card"><span class="icon">💬</span><h3>Live chat today</h3><p>Open during the service day, Pacific time. Outside it, or when the agents are busy, the guest gets "please try again shortly, or call us".</p><span class="tag">a person per conversation</span></div>
+      <div class="card"><span class="icon">📞</span><h3>The call center</h3><p>The fallback for everything the chat can't take: hold music, repeated identity checks, and the most expensive minute in the operation.</p><span class="tag">a person per call</span></div>
+      <div class="card"><span class="icon">🤖</span><h3>A naive LLM chatbot</h3><p>Always on and instant - but every question becomes a fresh prompt with the guest's profile, the policy text and the full chat history. "What's in Princess Plus?" is generated ten thousand times a day.</p><span class="tag">a model call per question</span></div>
+      <div class="card"><span class="icon">🏝️</span><h3>Nothing, at sea</h3><p>On a catamaran, a tender or an interior deck there is no signal - so none of the above answers at all. The guest's intent is lost, or becomes a call later.</p><span class="tag">no answer</span></div>
     </div>
     <div class="scenario">
-      <div class="quote"><div class="who">Olivia · Captain's Circle Elite · anniversary sailing</div><p>Olivia and Daniel are on a catamaran off St. Maarten. Their anniversary dinner is booked for 7:00. The boat is running an hour late. With no signal, she opens the app and moves the table to <b>8:30</b>. It shows "On device". When the tender docks and the phone finds the ship's network, it syncs. The table is confirmed before they reach their stateroom.</p></div>
-      <div class="card"><h3>What the app has to do in that moment</h3><ul><li>Show her reservation and the open seatings, <b>from the phone</b></li><li>Accept the change and keep it safely, <b>with no network</b></li><li>Send it on its own when a connection returns - <b>no "try again later"</b></li><li>Let the cruise line apply it under its own business rules, and sync the result back</li></ul><span class="tag cb">That is an offline-first database</span></div>
+      <div class="quote"><div class="who">Olivia · Captain's Circle Elite · anniversary sailing</div><p>Olivia and Daniel are on a catamaran off St. Maarten. She opens the app and asks the concierge two things: <b>"What's included in Princess Premier?"</b> and <b>"Can we upgrade to a suite for our anniversary?"</b> There is no signal. The first answer has already been generated for other guests today; the second was assembled for her this morning. Both are on her phone. Neither costs a model call.</p></div>
+      <div class="card"><h3>What the concierge has to do</h3><ul><li>Answer <b>24 hours a day</b>, with no queue and no "try again"</li><li>Answer from <b>this guest's own data</b> and the guest-services playbook - never another guest's</li><li>Answer repeat questions <b>without paying the model again</b></li><li>Answer <b>with no network</b>, from what is already on the phone</li><li>Show the operator <b>what each answer cost</b>, and who it was for</li></ul><span class="tag cb">Couchbase + Agent Operations Manager</span></div>
     </div>
   </div>
 </section>
 
 <!-- 2 -->
-<section class="ch" data-notes="This is the requirements list for an AI-personalized guest app. Four are about the phone, four are about the AI.|Most stacks are built around the bottom row - caching and AI - and treat the top row as an app-team problem. That's where the cost hides.|Everything on this slide is running in the live demo.">
+<section class="ch" data-notes="This is where the LLM bill comes from. Tokens in, tokens out, per question - and the prompt for a personal question is big: profile, policy, chat history, tool results.|The top row is the four cost drivers. The bottom row is what AOM and Couchbase do about each one. Everything on this slide is running in the live demo.|The one most teams miss is the last column: an answer served from the phone costs nothing, and that only works if the cached context is a document that syncs.">
   <div class="wrap">
-    <div class="kicker">Chapter 2 · What the app needs</div>
-    <h2>Eight things have to be true, <span class="accent">on the phone and in the cloud</span>.</h2>
-    <p class="lede">Half of them live on the guest's device. The other half are what make the experience feel personal and intelligent.</p>
+    <div class="kicker">Chapter 2 · Where the LLM bill comes from</div>
+    <h2>Four things make a chatbot expensive. <span class="accent">Each one has a fix.</span></h2>
+    <p class="lede">A model call is priced per token, in and out. The cost of a concierge is the number of calls times the size of each prompt - so the savings are in making fewer calls and smaller ones.</p>
     <div class="grid g4">
-      <div class="card"><div class="num">1</div><h3>On-device data</h3><p>Profile, itinerary, offers, bookings and the dining catalog stored on the phone, so every screen renders with no network.</p><span class="tag cb">Couchbase Lite</span></div>
-      <div class="card"><div class="num">2</div><h3>Offline writes</h3><p>Bids, bookings and changes saved locally first, queued, and never lost.</p><span class="tag cb">Couchbase Lite</span></div>
-      <div class="card"><div class="num">3</div><h3>Automatic sync</h3><p>Only what changed moves, in both directions, resuming where it stopped when the connection is weak.</p><span class="tag cb">Sync Gateway / App Services</span></div>
-      <div class="card"><div class="num">4</div><h3>Per-guest security</h3><p>Each phone receives only its guest's documents, and can only create its own pending requests.</p><span class="tag cb">Channels · sync functions</span></div>
-      <div class="card"><div class="num">5</div><h3>Fresh personalization</h3><p>Every morning's Databricks export of profiles and model scores loaded, re-ranked and pushed to phones.</p><span class="tag cb">Couchbase Server</span></div>
-      <div class="card"><div class="num">6</div><h3>AI grounded in the guest</h3><p>A concierge that answers from this guest's profile and the guest-services playbook, never another guest's data.</p><span class="tag cb">AOM Knowledge Base · RAG app</span></div>
-      <div class="card"><div class="num">7</div><h3>Context &amp; LLM caching</h3><p>Assembled context and model answers reused, so repeat questions are instant and cheap.</p><span class="tag cb">AOM Context &amp; LLM Cache</span></div>
-      <div class="card"><div class="num">8</div><h3>Governed actions</h3><p>Upgrades and bookings run as audited, role-checked agent tool calls, with a person approving the sensitive ones.</p><span class="tag cb">Agent Operations Manager</span></div>
+      <div class="card"><div class="num">1</div><h3>Repeat questions</h3><p>Policy and product questions are the same for every guest: packages, check-in, Wi-Fi, dining times. Generating each one again is pure waste.</p><span class="tag">calls × guests</span></div>
+      <div class="card"><div class="num">2</div><h3>Context rebuilt every turn</h3><p>A personal answer needs the guest's profile, the relevant policy, live inventory and prices. Rebuilding and re-sending that for every question is the largest prompt in the app.</p><span class="tag">tokens per call</span></div>
+      <div class="card"><div class="num">3</div><h3>Ungrounded, unscoped retrieval</h3><p>Searching the whole knowledge store stuffs the prompt with chunks that aren't about this guest - more tokens, worse answers, and a privacy risk.</p><span class="tag">tokens per call</span></div>
+      <div class="card"><div class="num">4</div><h3>No answer offline</h3><p>Every question that can't be answered at sea becomes a call-center minute later, or a lost booking.</p><span class="tag">the hidden cost</span></div>
+      <div class="card"><h3>LLM Cache</h3><p>The second guest to ask a playbook question gets the first guest's answer: an exact or semantic hit, zero tokens. Playbook answers hold no personal data, so sharing them is safe.</p><span class="tag cb">AOM LLM Cache</span></div>
+      <div class="card"><h3>Context Cache</h3><p>The context assembled for a guest and topic is cached in AOM with a key of guest, intent, export date and profile revision. Follow-up questions reuse it; a new export or a booking invalidates it.</p><span class="tag cb">AOM Context Cache</span></div>
+      <div class="card"><h3>Scoped RAG application</h3><p>The concierge is a registered RAG app scoped to today's playbook, and personal retrieval is filtered to this guest's own profile document. Small prompts, grounded answers.</p><span class="tag cb">AOM Knowledge Base · RAG app</span></div>
+      <div class="card"><h3>Answers on the phone</h3><p>The cached context is also a Couchbase document that syncs to the guest's device, so the concierge answers at sea from Couchbase Lite - no call, no cost.</p><span class="tag cb">Couchbase Lite · Sync Gateway</span></div>
     </div>
   </div>
 </section>
 
 <!-- 3 -->
-<section class="ch" data-notes="Be fair to Redis: it's an excellent in-memory cache and it now has vector search and semantic caching. If the app were always online, Redis plus a database would cover much of chapter 2's bottom row.|What it doesn't have is a database for the phone, or a way to sync one. So the app team adds SQLite, writes a sync API, invents conflict rules, and secures it - that's the red dashed path. And Redis still needs a system of record behind it.|Press Transform. Couchbase Lite on the phone, Sync Gateway in the middle, Couchbase Server for data, vectors and caching, AOM for the AI. Same JSON documents end to end.">
+<section class="ch" data-notes="How the chatbot usually gets built: a vector database, a semantic cache, a session store, a primary database, an LLM gateway, and a sync layer the app team writes. Every grey box is a bill and an integration; every red one is code to own.|Press Transform. Couchbase Server is the document store, the vector index and the memory-first cache; AOM is the gateway, the caches, the knowledge base and the governance; Couchbase Lite and Sync Gateway carry the cached context to the phone.|The cost argument is not only tokens: it is the number of systems between the guest's question and the answer.">
   <div class="wrap">
     <div class="kicker">Chapter 3 · How it usually gets built</div>
-    <h2>Redis makes the cloud fast. <span class="accent">It stops at the edge of the network.</span></h2>
-    <p class="lede">A Redis-centered stack covers caching, vectors and semantic caching well. Everything the phone needs gets built and run by the app team. Press <b>Transform</b> to see what one Couchbase data plane replaces.</p>
+    <h2>Every box between the question and the answer <span class="accent">is a bill</span>.</h2>
+    <p class="lede">The usual AI-chat stack spreads one conversation over half a dozen services and a sync layer the app team builds. Press <b>Transform</b> to see what one Couchbase data plane and the Agent Operations Manager replace.</p>
     <div class="diagram">
       <div class="head"><span id="diagHint">Grey dashed boxes are separate services to license, run and keep consistent. Red dashed is code your team writes and maintains.</span><button class="btn primary sm" id="transform">↻ Transform the stack</button></div>
       <svg id="diag" viewBox="0 0 1140 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stack comparison">
@@ -176,27 +176,27 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
         <g id="sprawl" class="fade">
           <rect x="30" y="236" width="122" height="64" rx="10" class="sred"/><text x="91" y="262" text-anchor="middle" class="st">SQLite</text><text x="91" y="280" text-anchor="middle" class="ss">+ your own schema</text>
           <rect x="210" y="40" width="200" height="58" rx="10" class="sred"/><text x="310" y="65" text-anchor="middle" class="st">Custom sync API</text><text x="310" y="83" text-anchor="middle" class="ss">delta tracking, retries, queues</text>
-          <rect x="210" y="116" width="200" height="58" rx="10" class="sred"/><text x="310" y="141" text-anchor="middle" class="st">Conflict + offline rules</text><text x="310" y="159" text-anchor="middle" class="ss">hand-written, per data type</text>
+          <rect x="210" y="116" width="200" height="58" rx="10" class="sred"/><text x="310" y="141" text-anchor="middle" class="st">Prompt assembly code</text><text x="310" y="159" text-anchor="middle" class="ss">profile + policy + history, every turn</text>
           <rect x="210" y="192" width="200" height="58" rx="10" class="sred"/><text x="310" y="217" text-anchor="middle" class="st">Per-guest access layer</text><text x="310" y="235" text-anchor="middle" class="ss">who may read / write what</text>
-          <rect x="210" y="268" width="200" height="58" rx="10" class="sbad"/><text x="310" y="293" text-anchor="middle" class="st">Push / change feed</text><text x="310" y="311" text-anchor="middle" class="ss">tell phones what changed</text>
-          <rect x="460" y="40" width="200" height="58" rx="10" class="sbad"/><text x="560" y="65" text-anchor="middle" class="st">Redis</text><text x="560" y="83" text-anchor="middle" class="ss">cache · vectors · semantic cache</text>
+          <rect x="210" y="268" width="200" height="58" rx="10" class="sbad"/><text x="310" y="293" text-anchor="middle" class="st">Session / chat store</text><text x="310" y="311" text-anchor="middle" class="ss">history re-sent per question</text>
+          <rect x="460" y="40" width="200" height="58" rx="10" class="sbad"/><text x="560" y="65" text-anchor="middle" class="st">Semantic cache</text><text x="560" y="83" text-anchor="middle" class="ss">Redis / LangCache or similar</text>
           <rect x="460" y="116" width="200" height="58" rx="10" class="sbad"/><text x="560" y="141" text-anchor="middle" class="st">Primary database</text><text x="560" y="159" text-anchor="middle" class="ss">system of record for guests</text>
-          <rect x="460" y="192" width="200" height="58" rx="10" class="sbad"/><text x="560" y="217" text-anchor="middle" class="st">Cache sync / CDC</text><text x="560" y="235" text-anchor="middle" class="ss">keep Redis = database</text>
-          <rect x="460" y="268" width="200" height="58" rx="10" class="sbad"/><text x="560" y="293" text-anchor="middle" class="st">Document / RAG store</text><text x="560" y="311" text-anchor="middle" class="ss">playbook + profiles for the LLM</text>
+          <rect x="460" y="192" width="200" height="58" rx="10" class="sbad"/><text x="560" y="217" text-anchor="middle" class="st">Cache sync / CDC</text><text x="560" y="235" text-anchor="middle" class="ss">keep cache = database</text>
+          <rect x="460" y="268" width="200" height="58" rx="10" class="sbad"/><text x="560" y="293" text-anchor="middle" class="st">Vector database</text><text x="560" y="311" text-anchor="middle" class="ss">playbook + profiles for RAG</text>
           <rect x="710" y="116" width="200" height="58" rx="10" class="sbad"/><text x="810" y="141" text-anchor="middle" class="st">LLM gateway + governance</text><text x="810" y="159" text-anchor="middle" class="ss">keys, limits, audit, approvals</text>
-          <rect x="710" y="192" width="200" height="58" rx="10" class="sbad"/><text x="810" y="217" text-anchor="middle" class="st">ETL jobs</text><text x="810" y="235" text-anchor="middle" class="ss">Databricks → DB → Redis → RAG</text>
+          <rect x="710" y="192" width="200" height="58" rx="10" class="sbad"/><text x="810" y="217" text-anchor="middle" class="st">ETL jobs</text><text x="810" y="235" text-anchor="middle" class="ss">Databricks → DB → cache → vectors</text>
           <path d="M166 220 C190 220 190 69 210 69" class="sline x"/><path d="M166 220 C190 220 190 145 210 145" class="sline x"/><path d="M166 220 L210 221" class="sline x"/>
           <path d="M410 69 L460 69 M410 145 L460 145 M410 221 L460 221 M410 297 L460 297 M660 145 L710 145 M660 221 L710 221 M910 221 L964 221" class="sline"/>
-          <text x="91" y="352" text-anchor="middle" class="ss" fill="#c71d22">offline: build it yourself</text>
+          <text x="91" y="352" text-anchor="middle" class="ss" fill="#c71d22">offline: no answers</text>
         </g>
         <g id="cb" class="fade gone">
-          <rect x="26" y="236" width="130" height="64" rx="10" class="scb"/><text x="91" y="262" text-anchor="middle" class="scbt">Couchbase Lite</text><text x="91" y="280" text-anchor="middle" class="scbs">JSON · SQL++ · vectors</text>
-          <rect x="250" y="160" width="190" height="120" rx="14" class="scb"/><text x="345" y="196" text-anchor="middle" class="scbt">Sync Gateway</text><text x="345" y="216" text-anchor="middle" class="scbs">delta sync, both ways</text><text x="345" y="234" text-anchor="middle" class="scbs">channels per guest</text><text x="345" y="252" text-anchor="middle" class="scbs">sync functions · conflicts</text>
+          <rect x="26" y="236" width="130" height="64" rx="10" class="scb"/><text x="91" y="262" text-anchor="middle" class="scbt">Couchbase Lite</text><text x="91" y="280" text-anchor="middle" class="scbs">cached context · catalog</text>
+          <rect x="250" y="160" width="190" height="120" rx="14" class="scb"/><text x="345" y="196" text-anchor="middle" class="scbt">Sync Gateway</text><text x="345" y="216" text-anchor="middle" class="scbs">delta sync, both ways</text><text x="345" y="234" text-anchor="middle" class="scbs">channels per guest</text><text x="345" y="252" text-anchor="middle" class="scbs">context follows the guest</text>
           <rect x="520" y="110" width="260" height="220" rx="16" class="scb"/><text x="650" y="146" text-anchor="middle" class="scbt">Couchbase Server</text><text x="650" y="168" text-anchor="middle" class="scbs">memory-first JSON + key-value</text><text x="650" y="186" text-anchor="middle" class="scbs">SQL++ · indexes · vector search</text><text x="650" y="204" text-anchor="middle" class="scbs">system of record and cache</text>
-          <rect x="545" y="230" width="210" height="80" rx="12" fill="#fff" stroke="#f5b800" stroke-width="2"/><text x="650" y="258" text-anchor="middle" style="fill:#0a1a3f;font-size:12.5px;font-weight:800">Agent Operations Manager</text><text x="650" y="276" text-anchor="middle" style="fill:#3e4a66;font-size:10.5px">Knowledge Base · RAG app</text><text x="650" y="292" text-anchor="middle" style="fill:#3e4a66;font-size:10.5px">Context + LLM Cache · governance</text>
+          <rect x="545" y="230" width="210" height="80" rx="12" fill="#fff" stroke="#f5b800" stroke-width="2"/><text x="650" y="258" text-anchor="middle" style="fill:#0a1a3f;font-size:12.5px;font-weight:800">Agent Operations Manager</text><text x="650" y="276" text-anchor="middle" style="fill:#3e4a66;font-size:10.5px">LLM Cache · Context Cache</text><text x="650" y="292" text-anchor="middle" style="fill:#3e4a66;font-size:10.5px">Knowledge Base · RAG app · governance</text>
           <path d="M166 270 L250 230 M440 220 L520 220 M780 220 L964 220" class="sline" style="opacity:.9;stroke-width:2"/>
           <text x="208" y="236" text-anchor="middle" class="ss">sync</text><text x="872" y="210" text-anchor="middle" class="ss">daily load</text>
-          <text x="91" y="352" text-anchor="middle" class="ss" fill="#13804b">offline: built in</text>
+          <text x="91" y="352" text-anchor="middle" class="ss" fill="#13804b">offline: answers, at no cost</text>
         </g>
       </svg>
       <div class="legend"><span><i style="background:rgba(120,130,160,.25);border:1px dashed #9aa3b8"></i>a separate service</span><span><i style="background:rgba(234,35,40,.08);border:1px dashed #ea2328"></i>custom code to build and own</span><span><i style="background:#ea2328"></i>Couchbase</span></div>
@@ -205,97 +205,114 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
 </section>
 
 <!-- 4 -->
-<section class="ch" data-notes="Walk the dinner change step by step. Press Next for each step.|Left phone is Couchbase Lite: the change is a local write first, so it succeeds immediately and shows 'On device'.|Right phone is the same app built online-only on a Redis-backed API: the tap needs the network, so it fails at sea and the guest has to remember to try again - by which time the 8:30 seating may be gone.|Step 4 is the important architectural point: the phone never talks to the reservation system directly. Sync Gateway checks the request belongs to that guest, and the backend applies it as a governed AOM tool call.">
+<section class="ch" data-notes="Walk the same five questions through two concierges. Press Next for each step. The tally at the bottom of each phone is the running LLM spend.|Left is the AOM-governed concierge: the first playbook answer is generated once; Priya's identical question is an LLM-cache hit; Olivia's personal question builds context once and the follow-up reuses it; at sea, the phone answers from Couchbase Lite.|Right is a plain chatbot: every question is a full-price model call with the whole prompt rebuilt, and at sea it has nothing to say.|The dollar figures are illustrative - about 2,000 tokens per generated answer at a blended $4 per million. The ratio is the point, not the cents.">
   <div class="wrap">
-    <div class="kicker">Chapter 4 · Offline-first, step by step</div>
-    <h2>Changing dinner <span class="accent">from a catamaran</span>.</h2>
-    <p class="lede">The same tap in two apps: one with Couchbase Lite on the phone, one that depends on a live connection to a Redis-backed API.</p>
+    <div class="kicker">Chapter 4 · The same questions, two bills</div>
+    <h2>Five questions: <span class="accent">three model calls instead of five</span>, and an answer at sea.</h2>
+    <p class="lede">The same guests ask the same things of two concierges: one that runs through the Agent Operations Manager with its context on the phone, and one that calls the model every time.</p>
     <div class="sim">
       <div>
         <div class="steps" id="steps">
-          <div class="step"><div class="n">1</div><div><h4>Out of range</h4><p>The catamaran is off St. Maarten. No ship Wi-Fi, roaming off.</p></div></div>
-          <div class="step"><div class="n">2</div><div><h4>Move the table to 8:30</h4><p><b>Couchbase Lite:</b> saved on the phone as a pending request. Itinerary, menus and open seatings all still load. <b>Online-only:</b> the request needs the server.</p></div></div>
-          <div class="step"><div class="n">3</div><div><h4>Back aboard</h4><p>The phone finds the ship's network. The replicator pushes just the new document - no app open, no retry button.</p></div></div>
-          <div class="step"><div class="n">4</div><div><h4>Validated and applied</h4><p>Sync Gateway checks it's this guest's own pending request. The backend runs <code>reserve_specialty_dining</code> as a governed AOM tool call.</p></div></div>
-          <div class="step"><div class="n">5</div><div><h4>Confirmed on the phone</h4><p>The result, the booking and re-ranked offers sync back. Olivia sees "Confirmed".</p></div></div>
+          <div class="step"><div class="n">1</div><div><h4>Olivia: "What's included in Princess Premier?"</h4><p>A playbook question. <b>AOM:</b> the RAG app retrieves the scoped playbook, generates once, and caches the answer. <b>Plain chatbot:</b> generates.</p></div></div>
+          <div class="step"><div class="n">2</div><div><h4>Priya asks the same thing</h4><p><b>AOM:</b> LLM Cache exact hit - no tokens, no latency. Playbook answers carry no personal data, so sharing is safe. <b>Plain chatbot:</b> generates again.</p></div></div>
+          <div class="step"><div class="n">3</div><div><h4>Olivia: "Can we upgrade to a suite?"</h4><p>A personal question. <b>AOM:</b> builds her context once (her KB profile, the playbook, live upgrade offers), stores it in the Context Cache and in Couchbase, then generates. <b>Plain chatbot:</b> rebuilds the whole prompt and generates.</p></div></div>
+          <div class="step"><div class="n">4</div><div><h4>Olivia: "What would the Premium Suite cost?"</h4><p><b>AOM:</b> Context Cache hit - a short call on the cached context, with memory of the earlier turn. <b>Plain chatbot:</b> the full prompt again, plus the history.</p></div></div>
+          <div class="step"><div class="n">5</div><div><h4>At sea, no signal: "Remind me about the upgrade"</h4><p><b>AOM:</b> the cached context already synced to her phone; Couchbase Lite answers. <b>Plain chatbot:</b> can't reach the server.</p></div></div>
         </div>
         <div class="simctl"><button class="btn primary" id="simNext">Next step →</button><button class="btn" id="simReset">Start over</button></div>
       </div>
       <div><div class="phone"><div class="screen">
-        <div class="ph-top"><div class="ph-sb"><span>8:12</span><span id="cbSig">●●● Wi-Fi</span></div><div class="ph-title">Specialty dining</div><div class="ph-sub">Sun Princess · Crown Grill</div></div>
-        <div class="ph-body" id="cbBody"></div></div></div><p class="ph-label">Couchbase Lite on the phone</p></div>
+        <div class="ph-top"><div class="ph-sb"><span>8:12</span><span id="cbSig">●●● Wi-Fi</span></div><div class="ph-title">Concierge</div><div class="ph-sub">Princess Guest Concierge · governed by AOM</div></div>
+        <div class="ph-body" id="cbBody"></div></div></div><p class="ph-label">Through Couchbase AOM</p></div>
       <div><div class="phone"><div class="screen">
-        <div class="ph-top"><div class="ph-sb"><span>8:12</span><span id="rdSig">●●● Wi-Fi</span></div><div class="ph-title">Specialty dining</div><div class="ph-sub">Sun Princess · Crown Grill</div></div>
-        <div class="ph-body" id="rdBody"></div></div></div><p class="ph-label">Online-only app on a Redis-backed API</p></div>
+        <div class="ph-top"><div class="ph-sb"><span>8:12</span><span id="rdSig">●●● Wi-Fi</span></div><div class="ph-title">Chat</div><div class="ph-sub">Plain LLM chatbot</div></div>
+        <div class="ph-body" id="rdBody"></div></div></div><p class="ph-label">A model call per question</p></div>
     </div>
   </div>
 </section>
 
 <!-- 5 -->
-<section class="ch" data-notes="Now the AI half. Follow the data left to right: the Databricks export lands in Couchbase every morning, the Knowledge Base is republished, and the concierge is a registered RAG application in AOM.|The context cache is the interesting one: the context assembled for Olivia's question is cached in AOM - and the same document syncs to her phone. That's why the concierge can still answer at sea. A Redis semantic cache lives in the data center; it can't follow the guest.|Live numbers on this page come from the running demo.">
+<section class="ch" data-notes="Follow the data left to right: the Databricks export lands in Couchbase every morning, the Knowledge Base is republished, and the concierge is a registered RAG application in AOM with its two caches.|The context cache is the one to dwell on: the context assembled for Olivia's question is cached in AOM, and the same document syncs to her phone. That is why the concierge can still answer at sea, for free.|The numbers on this page are live from the running demo: cache hit rates, and the model calls avoided since the backend started. AOM's own RAG Applications page keeps the durable view.">
   <div class="wrap">
     <div class="kicker">Chapter 5 · One data plane for the AI</div>
-    <h2>The AI's context <span class="accent">travels to the phone, too</span>.</h2>
-    <p class="lede">Personalization and the AI concierge run on the same Couchbase documents the phone syncs, so the answer that was cached in the cloud is already on the device when the signal drops.</p>
+    <h2>Build the context once. <span class="accent">Reuse it everywhere</span> - including the phone.</h2>
+    <p class="lede">Personalization and the concierge run on the same Couchbase documents the phone syncs, so an answer paid for once in the cloud is reused by the next guest, the next question, and the same guest with no signal.</p>
     <div class="flow">
       <div class="card"><span class="icon">🧱</span><h3>Databricks export</h3><p>Every morning: one row per passenger with loyalty, preferences, history and model scores.</p></div>
       <div class="card"><span class="icon">🗄️</span><h3>Couchbase Server</h3><p>Profiles upserted, offers re-ranked with live inventory, booking index rebuilt.</p></div>
-      <div class="card"><span class="icon">📚</span><h3>AOM Knowledge Base</h3><p>Today's playbook plus a profile per guest sailing soon. The concierge is a RAG app scoped to the playbook.</p></div>
-      <div class="card"><span class="icon">⚡</span><h3>Context &amp; LLM cache</h3><p>Context per guest and topic, invalidated by the next export or any booking. Shared answers for playbook questions.</p></div>
-      <div class="card"><span class="icon">📱</span><h3>On the phone</h3><p>The same context document syncs through Sync Gateway, so the concierge answers offline.</p></div>
+      <div class="card"><span class="icon">📚</span><h3>AOM Knowledge Base</h3><p>Today's playbook plus a profile per guest sailing soon. The concierge is a RAG app scoped to the playbook; personal retrieval is scoped to the guest.</p></div>
+      <div class="card"><span class="icon">⚡</span><h3>Context &amp; LLM cache</h3><p>Context per guest and topic, invalidated by the next export or any booking. Playbook answers shared across guests.</p></div>
+      <div class="card"><span class="icon">📱</span><h3>On the phone</h3><p>The same context document syncs through Sync Gateway, so the concierge answers offline at no cost.</p></div>
     </div>
     <div class="stats">
-      <div class="stat"><div class="k">Today's export</div><div class="v" id="m_export">-</div><div class="d" id="m_rows">loaded into Couchbase</div></div>
-      <div class="stat"><div class="k">Knowledge Base</div><div class="v" id="m_kb">-</div><div class="d">documents published to AOM</div></div>
-      <div class="stat"><div class="k">Context cache</div><div class="v" id="m_ctx">-</div><div class="d" id="m_ctxd">hit rate this session</div></div>
-      <div class="stat"><div class="k">Queued offline</div><div class="v" id="m_off">-</div><div class="d" id="m_offd">requests made with no signal, then synced</div></div>
+      <div class="stat"><div class="k">Concierge answers</div><div class="v" id="m_turns">-</div><div class="d" id="m_turnsd">since the backend started</div></div>
+      <div class="stat"><div class="k">LLM cache</div><div class="v" id="m_llm">-</div><div class="d" id="m_llmd">of model calls answered from AOM's LLM Cache</div></div>
+      <div class="stat"><div class="k">Context cache</div><div class="v" id="m_ctx">-</div><div class="d" id="m_ctxd">of personal questions reused cached context</div></div>
+      <div class="stat"><div class="k">Model calls avoided</div><div class="v" id="m_saved">-</div><div class="d" id="m_savedd">cache hits plus answers served on the phone</div></div>
     </div>
+    <p class="src" id="m_note">Spend avoided is illustrative: about 2,000 tokens per generated answer at a blended $4 per million tokens. AOM's RAG Applications page shows the measured cache hits and savings for <code>princess-guest-concierge</code>.</p>
   </div>
 </section>
 
 <!-- 6 -->
-<section class="ch" data-notes="The side-by-side. Be precise: Redis has vector search, semantic caching and SSD tiering now - don't claim otherwise.|The rows that decide this use case are the first four: on-device data, offline writes, sync and per-guest security. Redis has no product for them; Couchbase ships them.|The cost row is the quiet one: a Redis-centered design still needs a primary database, plus the sync service the app team builds. Couchbase Server is the system of record and the memory-first cache in one.">
+<section class="ch" data-notes="The summary table. Read it by rows: each kind of question, what it costs with a model call every time, what it costs through AOM.|The first two rows are the LLM cache: the whole fleet shares one generated answer per playbook question, per playbook version.|Rows three and four are the context cache: build once per guest and topic, invalidate on new data. Row five is Couchbase Lite: zero. Row six is governance - AOM also caps what any agent can spend.">
   <div class="wrap">
-    <div class="kicker">Chapter 6 · Side by side</div>
-    <h2>Couchbase vs Redis for an <span class="accent">offline-first AI guest app</span>.</h2>
-    <p class="lede">Both are fast. The difference is how much of the app each one covers.</p>
+    <div class="kicker">Chapter 6 · Where the savings come from</div>
+    <h2>Question by question, <span class="accent">with and without AOM</span>.</h2>
+    <p class="lede">Illustrative per-answer costs for the questions in chapter 4. The ratio is what matters: most of a concierge's traffic is in the cheap rows.</p>
     <table class="cmp">
-      <thead><tr><th>Capability</th><th>Couchbase</th><th>Redis-centered stack</th></tr></thead>
+      <thead><tr><th>Question</th><th>Through Couchbase AOM</th><th>A model call every time</th></tr></thead>
       <tbody>
-        <tr><td>Database on the phone</td><td><span class="y">✓</span>Couchbase Lite: embedded JSON database for iOS, Android and more, with SQL++ queries and vector search on the device.</td><td><span class="x">✗</span>No on-device product.<small>The app team adds SQLite or similar and designs its own schema.</small></td></tr>
-        <tr><td>Offline writes and sync</td><td><span class="y">✓</span>Sync Gateway / Capella App Services: delta sync in both directions, automatic resume, peer-to-peer option.</td><td><span class="x">✗</span>Build a sync API, change tracking and retry queues.<small>Redis Data Integration feeds Redis from databases; it doesn't sync to devices.</small></td></tr>
-        <tr><td>Conflicts</td><td><span class="y">✓</span>Built-in resolution, with custom resolvers where needed.</td><td><span class="x">✗</span>Hand-written rules per data type.</td></tr>
-        <tr><td>Per-guest data on the device</td><td><span class="y">✓</span>Channels and sync functions: a phone gets only its guest's documents, and can only create its own requests.</td><td><span class="p">~</span>An access layer in the custom API.</td></tr>
-        <tr><td>JSON documents and queries</td><td><span class="y">✓</span>SQL++ with indexes over the same JSON on server and phone.</td><td><span class="p">~</span>JSON and the Redis Query Engine in the cloud; nothing shared with the phone.</td></tr>
-        <tr><td>Vector search</td><td><span class="y">✓</span>On Couchbase Server and in Couchbase Lite.</td><td><span class="y">✓</span>In Redis (cloud side).</td></tr>
-        <tr><td>Context and LLM caching</td><td><span class="y">✓</span>Memory-first KV, plus AOM's Context Cache and LLM Cache on Couchbase - and cached context syncs to the phone.</td><td><span class="y">✓</span>A strength: Redis caching and semantic caching (LangCache).<small>Cloud-side only; it can't answer a guest who's offline.</small></td></tr>
-        <tr><td>Durable system of record</td><td><span class="y">✓</span>Couchbase Server is the database and the cache.</td><td><span class="p">~</span>Persistence and SSD tiering exist, but designs usually keep a primary database behind Redis and sync the two.</td></tr>
-        <tr><td>Governed AI actions</td><td><span class="y">✓</span>Agent Operations Manager: identities, RBAC on tools, approvals, traces, audit, budgets.</td><td><span class="p">~</span>A separate gateway and governance product.</td></tr>
+        <tr><td>Playbook question, first time today</td><td><span class="p">~</span>One generated answer from the scoped RAG app: a small prompt (the playbook chunks only), then cached in the LLM Cache.<small>≈ 1,500 tokens</small></td><td><span class="x">✗</span>Generated, with whatever the retriever found across the whole store.<small>≈ 2,000-4,000 tokens</small></td></tr>
+        <tr><td>Same playbook question, any other guest</td><td><span class="y">✓</span>LLM Cache exact hit; a reworded version is a semantic hit. Zero tokens, zero latency.<small>0 tokens</small></td><td><span class="x">✗</span>Generated again, for every guest, every time.<small>≈ 2,000-4,000 tokens</small></td></tr>
+        <tr><td>Personal question, first time</td><td><span class="p">~</span>Context built once: this guest's KB profile, playbook chunks and live tool facts, stored in the Context Cache and in Couchbase.<small>≈ 2,000 tokens</small></td><td><span class="x">✗</span>Profile, policy and history concatenated into the prompt by application code.<small>≈ 3,000-6,000 tokens</small></td></tr>
+        <tr><td>Follow-up on the same topic</td><td><span class="y">✓</span>Context Cache hit plus AOM Agent Memory (what the guest said, and what the upgrade agent did): a short call on cached context. Invalidated only by a new export or a booking.<small>≈ 600 tokens</small></td><td><span class="x">✗</span>The full prompt again, now with the chat history appended.<small>grows every turn</small></td></tr>
+        <tr><td>Any question at sea, no signal</td><td><span class="y">✓</span>Answered from the cached context and catalog in Couchbase Lite.<small>0 tokens, no network</small></td><td><span class="x">✗</span>No answer; a call-center minute later.<small>the hidden cost</small></td></tr>
+        <tr><td>Who gets to spend, and how much</td><td><span class="y">✓</span>AOM identities, RBAC, per-agent budgets and rate limits, traces with cost per answer, audit, human approval for sensitive actions.</td><td><span class="p">~</span>A separate gateway and governance product, or nothing.</td></tr>
       </tbody>
     </table>
-    <p class="src">Redis capabilities as publicly described by Redis: <a href="https://redis.io/docs/latest/operate/rc/langcache" target="_blank" rel="noopener">LangCache semantic caching</a>, <a href="https://redis.io/solutions/flex" target="_blank" rel="noopener">Redis Flex</a> tiering. Couchbase: <a href="https://docs.couchbase.com/couchbase-lite/current" target="_blank" rel="noopener">Couchbase Lite documentation</a>.</p>
+    <p class="src">Token figures are illustrative demo values for a concierge of this shape; AOM's traces show the real count per answer. Couchbase Lite: <a href="https://docs.couchbase.com/couchbase-lite/current" target="_blank" rel="noopener">documentation</a>.</p>
   </div>
 </section>
 
 <!-- 7 -->
-<section class="ch" data-notes="Hand off to the live app, and open AOM next to it.|Run the script: Olivia's upgrade bid, then Profile → 'At sea - no signal', change a dinner reservation, and turn the signal back on. Show it land in AOM's audit log and traces.|Ask the concierge a playbook question twice to show the LLM cache hit, and a personal question to show the context cache.">
+<section class="ch" data-notes="Hand off to the live app, and open AOM next to it.|Run the script: a playbook question as Olivia (miss), the same as Priya (exact hit), a personal question twice (context cache built, then hit), then Profile → 'At sea - no signal' and ask again (answered on device).|Open AOM's RAG Applications page for princess-guest-concierge: queries, cache hits and savings. Then the LLM Cache and Context Cache pages, and a trace for one answer.">
   <div class="wrap">
     <div class="kicker">See it run</div>
-    <h2>Now take it <span class="accent">to sea</span>.</h2>
-    <p class="lede">The live demo runs on exactly the right-hand side of chapter 3: Couchbase Lite (in the browser preview, the same documents over REST), Sync Gateway, Couchbase Server and Agent Operations Manager.</p>
+    <h2>Now watch the <span class="accent">meter not move</span>.</h2>
+    <p class="lede">The live demo runs on the right-hand side of chapter 3: Couchbase Lite (in the browser preview, the same documents over REST), Sync Gateway, Couchbase Server and the Agent Operations Manager.</p>
     <div class="grid g3">
       <div class="card"><h3>The guest app</h3><p>Sign in as Olivia, Carlos or Priya - each from today's Databricks export.</p><a class="btn primary" href="/login" style="margin-top:12px">Open the app →</a></div>
-      <div class="card"><h3>Agent Operations Manager</h3><p>The concierge's identity, its RAG application, the context and LLM caches, traces and the approval queue.</p><a class="btn" id="aomLink" target="_blank" rel="noopener" href="#" style="margin-top:12px">Open AOM ↗</a></div>
+      <div class="card"><h3>Agent Operations Manager</h3><p>The concierge's RAG application with its cache hits and savings, the LLM and Context Cache pages, traces with cost per answer, and the approval queue.</p><a class="btn" id="aomLink" target="_blank" rel="noopener" href="#" style="margin-top:12px">Open AOM ↗</a></div>
       <div class="card"><h3>The demo, live</h3><p id="liveLine">Checking the backend…</p><a class="btn" href="/api/status" target="_blank" style="margin-top:12px">Backend status ↗</a></div>
     </div>
     <div class="card" style="margin-top:14px"><h3 style="margin-bottom:10px">A five-minute script</h3>
       <ol class="script">
-        <li><span><b>Personalized from this morning's data.</b> Sign in as Olivia. For You leads with check-in and a Premium Suite upgrade for her anniversary.</span></li>
-        <li><span><b>A governed upgrade.</b> Place a Princess Upgrade bid. It runs as an AOM tool call - show it in AOM's audit log.</span></li>
-        <li><span><b>Go to sea.</b> Profile → "At sea - no signal". The status bar shows No service.</span></li>
-        <li><span><b>Change dinner offline.</b> Reserve a table: it shows "On device". Ask the concierge something - it answers from Couchbase Lite.</span></li>
-        <li><span><b>Back aboard.</b> Turn the signal back on: the request syncs and is confirmed, and the concierge's playbook answers come from AOM's LLM cache.</span></li>
+        <li><span><b>Pay once.</b> Sign in as Olivia and ask "What's included in Princess Premier?" The chips show <code>LLM cache · miss</code>: the RAG app generated it from the scoped playbook.</span></li>
+        <li><span><b>Share it.</b> Sign in as Priya and ask the same thing: <code>LLM cache · exact hit</code>. Reword it: a semantic hit. Open AOM's RAG Applications page - the hit is counted against the app.</span></li>
+        <li><span><b>Build context once.</b> As Olivia: "Can we upgrade to a suite?" shows <code>Context cache · built</code>. Ask what the Premium Suite would cost: <code>Context cache · hit</code>. Open <b>sources</b>: her own profile and the playbook, nothing else.</span></li>
+        <li><span><b>Go to sea.</b> Profile → "At sea - no signal". Ask about the upgrade again: <b>Answered on device · Couchbase Lite</b>. Place the Princess Upgrade bid; it shows "On device".</span></li>
+        <li><span><b>Back aboard.</b> Turn the signal on: the bid syncs and <b>Confirm</b> triggers the <i>Princess Stateroom Upgrade Agent</i> - a second AOM identity scoped to the upgrade tools. It recalls the guest's stateroom history from <b>AOM Agent Memory</b>, applies the upgrade as a governed tool call, and remembers the outcome, so the concierge's next answer about rooms costs nothing to look up. Open the trace in AOM: one generated answer where a plain chatbot would have made five.</span></li>
       </ol>
+    </div>
+    <div class="card" style="margin-top:14px" id="fleetCard">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div><h3 style="margin-bottom:6px">The whole fleet, at once</h3>
+          <p style="margin:0">Replay a real support queue: guests from all 17 Princess ships ask the concierge what passengers ask - check-in, upgrades, excursions, dining, packages, spa, port times, policies, a noisy cabin - through the same AOM RAG app, Context Cache, LLM Cache and Agent Memory path the phone uses. Then watch AOM's <b>LLM Cache</b> and <b>Context Cache</b> pages.</p></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label style="font-size:13px">guests/ship <input id="wlGuests" type="number" min="1" max="50" value="3" style="width:52px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px"></label>
+          <button class="btn primary" id="wlRun">Run fleet workload</button>
+          <button class="btn" id="wlStop" style="display:none">Stop</button>
+          <button class="btn" id="rsRun" title="Personas back to today's export: requests, chat, cached context, stateroom, offers; AOM memories and the concierge's cache namespaces">Reset demo</button>
+        </div>
+      </div>
+      <p id="wlLine" style="margin:10px 0 0;font-size:14px;color:var(--muted)">Idle. <code>python scripts/run_chatbot_workload.py</code> does the same from a terminal, with a per-ship report.</p>
+      <div class="stats" id="wlStats" style="display:none">
+        <div class="stat"><div class="k">Turns</div><div class="v" id="wl_turns">-</div><div class="d" id="wl_turnsd">guests · ships</div></div>
+        <div class="stat"><div class="k">LLM cache</div><div class="v" id="wl_llm">-</div><div class="d" id="wl_llmd">exact + semantic hits</div></div>
+        <div class="stat"><div class="k">Context cache</div><div class="v" id="wl_ctx">-</div><div class="d" id="wl_ctxd">follow-ups that reused context</div></div>
+        <div class="stat"><div class="k">Tokens saved</div><div class="v" id="wl_tok">-</div><div class="d" id="wl_tokd">as AOM counts them</div></div>
+      </div>
     </div>
   </div>
 </section>
@@ -328,28 +345,32 @@ function transform(){transformed=!transformed; $('#sprawl').classList.toggle('go
   $('#transform').textContent=transformed?'↺ Show the Redis-centered stack':'↻ Transform the stack';
   $('#diagHint').textContent=transformed?'One set of JSON documents from the phone to the cloud: Couchbase Lite, Sync Gateway, Couchbase Server, and AOM for the AI.':'Grey dashed boxes are separate services to license, run and keep consistent. Red dashed is code your team writes and maintains.';}
 $('#transform').onclick=transform;
-// ---- offline simulation
-const S=[ // per step: [cb signal, cb body, redis signal, redis body]
-  ['●●● Wi-Fi', card('Tonight · 7:00 PM','Table for 2 · anniversary noted','Confirmed','ok')+btn('Change time'),
-   '●●● Wi-Fi', card('Tonight · 7:00 PM','Table for 2 · anniversary noted','Confirmed','ok')+btn('Change time')],
-  ['No service', card('Tonight · 7:00 PM','Loaded from Couchbase Lite','Confirmed','ok')+times()+btn('Move to 8:30'),
-   'No service', `<div class="ph-err">Can't load reservations. Check your connection.</div>`+btn('Change time',true)],
-  ['No service', card('Tonight · 8:30 PM','Saved on this phone · sends when connected','On device','warn')+card('Itinerary · boarding pass · menus','All available offline','Couchbase Lite','ocean'),
-   'No service', `<div class="ph-err">Couldn't change your reservation. Try again when you're online.</div>`+card('Tonight · 7:00 PM','The guest has to remember to retry','Not changed','bad')],
-  ['●●● Ship Wi-Fi', card('Tonight · 8:30 PM','Synced to Princess Cruises','Processing','ocean'),
-   '●●● Ship Wi-Fi', card('Tonight · 7:00 PM','Nothing queued - the change was never saved','Not changed','bad')],
-  ['●●● Ship Wi-Fi', card('Tonight · 8:30 PM','Run through Couchbase AOM · Sync Gateway checked guest','Processing','ocean'),
-   '●●● Ship Wi-Fi', card('Tonight · 7:00 PM','If she remembers: retry, and 8:30 may be gone','Not changed','bad')],
-  ['●●● Ship Wi-Fi', card('Tonight · 8:30 PM','Table for 2 at Crown Grill · dietary notes shared','Confirmed','ok')+card('For You','Re-ranked after the booking','Synced','ok'),
-   '●●● Ship Wi-Fi', card('Tonight · 7:00 PM','Olivia misses the dinner','Not changed','bad')],
+// ---- cost simulation: per step [cb signal, cb body, plain signal, plain body]
+const COST_FULL=0.008, COST_PERSONAL=0.012, COST_FOLLOW=0.0024, COST_PLAIN_FOLLOW=0.016; // illustrative USD per answer
+let cbSpend=0, rdSpend=0;
+function tally(spend,calls,label){return `<div class="ph-card" style="margin-top:auto"><b>LLM spend so far: $${spend.toFixed(3)}</b>${calls} model call${calls===1?'':'s'}${label?' · '+label:''}</div>`}
+const S=[
+  ['●●● Wi-Fi', card('Concierge','Ask me about your sailing, packages or upgrades.','Ready','ok')+tally(0,0,''),
+   '●●● Wi-Fi', card('Chat','How can I help?','Ready','ok')+tally(0,0,'')],
+  ['●●● Wi-Fi', q("What's included in Princess Premier?")+card('Premier bundles the Premier drinks package, four-device MedallionNet, unlimited specialty dining…','Scoped RAG app · playbook only','LLM cache · miss','warn')+tally(COST_FULL,1,'cached for everyone'),
+   '●●● Wi-Fi', q("What's included in Princess Premier?")+card('Premier bundles the Premier drinks package, four-device Wi-Fi, specialty dining…','Full prompt generated','Model call','bad')+tally(COST_FULL,1,'')],
+  ['●●● Wi-Fi', q("Priya: What's included in Princess Premier?")+card('Premier bundles the Premier drinks package, four-device MedallionNet…','Same answer, served from AOM','LLM cache · exact hit','ok')+tally(COST_FULL,1,'0 tokens'),
+   '●●● Wi-Fi', q("Priya: What's included in Princess Premier?")+card('Premier bundles the Premier drinks package, four-device Wi-Fi…','Generated again','Model call','bad')+tally(COST_FULL*2,2,'')],
+  ['●●● Wi-Fi', q('Can we upgrade to a suite?')+card('A Premium Suite has 1 left for your anniversary - bid from $60/night or upgrade now for $235.','Your profile + playbook + live offers','Context cache · built','ocean')+tally(COST_FULL+COST_PERSONAL,2,'context stored in AOM + Couchbase'),
+   '●●● Wi-Fi', q('Can we upgrade to a suite?')+card('A Premium Suite is available - bid from $60/night or $235 instantly.','Profile, policy and history re-sent','Model call · 5k tokens','bad')+tally(COST_FULL*2+COST_PERSONAL,3,'')],
+  ['●●● Wi-Fi', q('What would the Premium Suite cost?')+card('$235 per person per night instantly, or a bid from $60 - we\'d suggest $135 for your dates.','Cached context + memory of the last turn','Context cache · hit','ok')+tally(COST_FULL+COST_PERSONAL+COST_FOLLOW,3,'short call'),
+   '●●● Wi-Fi', q('What would the Premium Suite cost?')+card('$235 per person per night, or bid from $60.','Full prompt + history again','Model call · 6k tokens','bad')+tally(COST_FULL*2+COST_PERSONAL+COST_PLAIN_FOLLOW,4,'')],
+  ['No service', q('Remind me about the upgrade')+card('Premium Suite, 1 left: bid from $60/night or $235 instantly. Tap to bid - it will send when you\'re back in range.','Answered from the context on this phone','Couchbase Lite · 0 tokens','ok')+tally(COST_FULL+COST_PERSONAL+COST_FOLLOW,3,'5 questions, 3 calls'),
+   'No service', q('Remind me about the upgrade')+`<div class="ph-err">Can't reach the assistant. Check your connection.</div>`+tally(COST_FULL*2+COST_PERSONAL+COST_PLAIN_FOLLOW,4,'4 answers, 4 calls')],
 ];
+function q(t){return `<div class="ph-card" style="background:#1b4f9c;color:#fff;border-color:#1b4f9c"><b style="color:#fff">${t}</b></div>`}
 function card(t,s,p,tone){return `<div class="ph-card"><b>${t}</b>${s}<br><span class="ph-pill ${tone}">${p}</span></div>`}
 function btn(l,off){return `<div class="ph-btn${off?' off':''}">${l}</div>`}
-function times(){return `<div class="ph-card"><b>Open seatings tonight</b>6:00 · 6:30 · <u>8:30</u> · 9:00</div>`}
 let st=0; const steps=[...document.querySelectorAll('#steps .step')];
 function renderSim(){const s=S[st]; $('#cbSig').textContent=s[0]; $('#cbBody').innerHTML=s[1]; $('#rdSig').textContent=s[2]; $('#rdBody').innerHTML=s[3];
   steps.forEach((el,i)=>{el.classList.toggle('on',i===st-1); el.classList.toggle('done',i<st-1);});
   $('#simNext').disabled=st>=S.length-1; $('#simNext').textContent=st===0?'Start →':'Next step →';}
+document.querySelectorAll('.ph-body').forEach(el=>{el.style.height='100%';});
 function simNext(){if(st<S.length-1){st++;renderSim();}}
 $('#simNext').onclick=simNext; $('#simReset').onclick=()=>{st=0;renderSim();}; renderSim();
 // ---- live data from the running demo
@@ -358,14 +379,40 @@ async function poll(){try{const d=await fetch('/api/status',{cache:'no-store'}).
   $('#health').textContent=ok?'AOM: connected'+(reg==='registered'?' · registered':''):(a.configured?'AOM: connecting…':'AOM: not configured');
   $('#health').className='pill '+(ok?'ok':(a.configured?'warn':'bad'));
   if(a.dashboard_url){$('#aomLink').href=a.dashboard_url;} else {$('#aomLink').style.display='none';}
-  $('#m_export').textContent=d.export_date||'-'; if(l.rows){$('#m_rows').textContent=l.rows.toLocaleString()+' passenger rows loaded into Couchbase';}
-  const kb=l.kb||{}; $('#m_kb').textContent=kb.done!=null?kb.done.toLocaleString():'-'; if(kb.done==null&&kb.state){$('#m_kb').nextElementSibling.textContent='Knowledge Base: '+kb.state;}
-  $('#m_ctx').textContent=m.context_hit_rate!=null?Math.round(m.context_hit_rate)+'%':'-';
-  $('#m_ctxd').textContent=(m.concierge_turns||0)+' concierge answers since '+(m.since||'').slice(0,10);
-  $('#m_off').textContent=(m.requests_queued_offline||0).toLocaleString(); $('#m_offd').textContent='of '+(m.requests||0)+' requests: made with no signal, then synced';
+  const turns=m.concierge_turns||0, llmCalls=m.llm_calls||0, llmHits=m.llm_hits||0, ctxHits=m.context_hits||0;
+  const onDevice=Math.max(0, turns-llmCalls-ctxHits);   // answered without any model call (offline / local)
+  const avoided=llmHits+ctxHits+onDevice;
+  $('#m_turns').textContent=turns.toLocaleString(); $('#m_turnsd').textContent='since '+(m.since||'').slice(0,16).replace('T',' ')+' UTC · export '+(d.export_date||'…');
+  $('#m_llm').textContent=m.llm_hit_rate!=null?Math.round(m.llm_hit_rate)+'%':'-'; $('#m_llmd').textContent=llmHits+' of '+llmCalls+' model calls answered from AOM\'s LLM Cache';
+  $('#m_ctx').textContent=m.context_hit_rate!=null?Math.round(m.context_hit_rate)+'%':'-'; $('#m_ctxd').textContent=ctxHits+' of '+((m.context_hits||0)+(m.context_misses||0))+' personal questions reused cached context';
+  $('#m_saved').textContent=avoided.toLocaleString()+(avoided?' ≈ $'+(avoided*0.008).toFixed(2):''); $('#m_savedd').textContent='full model calls avoided: cache hits plus answers served on the phone';
   const rag=(a.rag_app||{}).state; const ragTxt={registered:'registered',updated:'registered',waiting_for_playbook:'waiting for the playbook'}[rag]||'not registered';
   $('#liveLine').textContent=`${l.state==='loaded'?'Loaded':'Loading'} export ${d.export_date||'…'} · ${(m.requests||0)} bookings and changes processed${a.configured?' through AOM':''} · concierge RAG app ${ragTxt}.`;
 }catch(e){$('#health').textContent='Demo backend: offline'; $('#health').className='pill bad'; $('#liveLine').textContent="The demo backend isn't answering yet.";}}
+// ---- fleet chatbot workload (POST /api/demo/workload)
+const pct=v=>v==null?'-':Math.round(v)+'%';
+function renderWl(w){ if(!w||!w.state||w.state==='idle'){return;}
+  const t=w.total||{}, running=w.state==='running';
+  $('#wlStats').style.display=''; $('#wlStop').style.display=running?'':'none'; $('#wlRun').disabled=running;
+  $('#wl_turns').textContent=(w.done_turns||0)+(running?' / '+w.total_turns:''); $('#wl_turnsd').textContent=(w.done_guests||0)+' of '+(w.total_guests||0)+' guests · '+((w.ships_covered||[]).length)+' of '+(w.fleet_size||17)+' ships';
+  $('#wl_llm').textContent=pct(t.llm_hit_rate); $('#wl_llmd').textContent=(t.llm_exact_hit||0)+' exact + '+(t.llm_semantic_hit||0)+' semantic hits, '+(t.llm_miss||0)+' provider calls';
+  $('#wl_ctx').textContent=pct(t.context_hit_rate); $('#wl_ctxd').textContent=(t.context_hit||0)+' hits, '+(t.context_miss||0)+' contexts built';
+  $('#wl_tok').textContent=(t.tokens_saved||0).toLocaleString(); $('#wl_tokd').textContent='≈ $'+(t.cost_saved_usd||0).toFixed(4)+' at list price'+(t.errors?' · '+t.errors+' errors':'');
+  $('#wlLine').textContent=running?('Running - '+(w.done_turns||0)+' of '+w.total_turns+' turns…'):('Run '+w.run_id+' '+w.state+' in '+w.seconds+'s. Open AOM → LLM Cache and Context Cache to see it.');}
+async function pollWl(){try{const w=await fetch('/api/demo/workload',{cache:'no-store'}).then(r=>r.json()); renderWl(w); if(w.state==='running'){setTimeout(pollWl,1500);}}catch(e){}}
+$('#wlRun').onclick=async()=>{ $('#wlRun').disabled=true; $('#wlLine').textContent='Starting…';
+  const r=await fetch('/api/demo/workload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({guests_per_ship:+$('#wlGuests').value||3,turns_per_guest:6,concurrency:4})});
+  if(!r.ok){$('#wlLine').textContent='Could not start: '+(await r.text()).slice(0,200); $('#wlRun').disabled=false; return;}
+  pollWl();};
+$('#wlStop').onclick=async()=>{await fetch('/api/demo/workload',{method:'DELETE'}); pollWl();};
+$('#rsRun').onclick=async()=>{ if(!confirm('Reset the demo? Personas go back to today\'s export, their AOM memories are deleted and the concierge\'s AOM cache namespaces are purged.')) return;
+  $('#rsRun').disabled=true; $('#wlLine').textContent='Resetting…';
+  const r=await fetch('/api/demo/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  const d=await r.json().catch(()=>({})); $('#rsRun').disabled=false;
+  if(!r.ok){$('#wlLine').textContent='Reset failed: '+(d.detail||r.status); return;}
+  const s=d.summary||{}; $('#wlStats').style.display='none';
+  $('#wlLine').textContent='Reset done: '+s.guests+' guests back to export '+d.export_date+', '+s.requests_removed+' requests removed, '+s.memories_deleted+' AOM memories deleted. Reload the app.'; poll();};
+pollWl();
 poll(); setInterval(poll,10000);
 </script>
 </body></html>

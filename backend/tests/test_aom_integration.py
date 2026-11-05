@@ -33,7 +33,7 @@ def stack(tmp_path_factory):
     subprocess.run([sys.executable, os.path.join(ROOT, "databricks", "generate_mock_dump.py"), "--export-date",
                     "2026-10-09", "--target-mb", "2", "--out", str(dump)], check=True, capture_output=True)
     env = {**os.environ, "STORE_DRIVER": "memory", "DUMP_DIR": str(dump), "AOM_URL": AOM,
-           "AOM_AGENT_API_KEY": "fake-agent-key", "AOM_ADMIN_PASSWORD": "x", "KB_PROFILE_LIMIT": "10",
+           "AOM_AGENT_API_KEY": "fake-agent-key", "AOM_UPGRADE_AGENT_API_KEY": "fake-agent-key", "AOM_ADMIN_PASSWORD": "x", "KB_PROFILE_LIMIT": "10",
            "SG_ADMIN_URL": "", "REQUEST_POLL_SECONDS": "0.3", "FAKE_MCP_URL": f"{API}/pcl/mcp"}
     uv = [sys.executable, "-m", "uvicorn"]
     procs = [subprocess.Popen(uv + ["tests.fake_aom:app", "--port", "18090"], cwd=BACKEND, env=env,
@@ -136,3 +136,75 @@ def test_goodwill_upgrade_waits_for_human(stack):
             break
         time.sleep(0.2)
     assert req()["status"] == "confirmed"
+
+
+def test_confirm_upgrade_runs_the_upgrade_agent_with_memory(stack):
+    """Confirm on the upgrade screen -> a purchase_cabin_upgrade request -> the
+    Stateroom Upgrade Agent runs it through AOM and writes to Agent Memory, which
+    the concierge then recalls."""
+    h, gid = login("4830303", "Natarajan")
+    before = httpx.get(f"{AOM}/test/state").json()["memory"]
+    rid = f"req::{gid}::{uuid.uuid4().hex[:8]}"
+    httpx.post(f"{API}/api/sync/push", headers=h, json={"docs": [{"collection": "requests", "id": rid, "doc": {
+        "type": "request", "guest_id": gid, "tool": "purchase_cabin_upgrade", "title": "Upgrade now",
+        "args": {"category_code": "PS"}, "created_at": "2026-10-09T15:00:00Z"}}]})
+
+    def req():
+        docs = httpx.get(f"{API}/api/sync/pull", headers=h).json()["docs"]
+        return next(d["doc"] for d in docs if d["id"] == rid)
+
+    for _ in range(40):
+        if req()["status"] in ("confirmed", "failed"):
+            break
+        time.sleep(0.2)
+    doc = req()
+    assert doc["status"] == "confirmed", doc
+    assert doc["governed"] and doc["agent"] == "princess-upgrade-agent" and doc["remembered"] is True
+    assert httpx.get(f"{AOM}/test/state").json()["memory"] > before
+    a = ask(h, "Can we upgrade our stateroom again next time?")
+    assert a["memory_recalled"] >= 1
+
+
+def test_fleet_workload_hits_aom_caches(stack):
+    """The fleet workload through the fake AOM: playbook questions repeat
+    across guests (exact LLM hits), personal follow-ups reuse the guest's
+    context (context hits), and the CLI reports it."""
+    body = {"guests_per_ship": 1, "turns_per_guest": 6, "concurrency": 4, "window_days": 150, "seed": 11}
+    r = httpx.post(f"{API}/api/demo/workload", json=body, timeout=30)
+    assert r.status_code == 200, r.text
+    for _ in range(600):
+        run = httpx.get(f"{API}/api/demo/workload").json()
+        if run["state"] != "running":
+            break
+        time.sleep(0.2)
+    assert run["state"] == "done", run.get("error")
+    t = run["total"]
+    assert t["errors"] == 0 and t["turns"] == 17 * 6
+    assert t["llm_exact_hit"] > 0, t           # the same playbook question from a second guest
+    assert t["llm_miss"] > 0                    # the first guest paid for it
+    assert t["context_hit"] > 0                 # follow-ups in the same intent reuse the guest's context
+    assert t["rag_app"] > 0                     # playbook questions went to the RAG application
+    assert len(run["by_ship"]) == 17
+    # the CLI summarizes the same run
+    out = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "run_chatbot_workload.py"),
+                          "--backend", API, "--status"], capture_output=True, text=True, check=True).stdout
+    assert '"state": "done"' in out
+
+
+def test_demo_reset_clears_aom_memory_and_caches(stack):
+    """After the workload and a chat that wrote a memory, the reset deletes
+    the guests' AOM memories, purges the concierge namespaces, and the next
+    question is a cache miss again."""
+    h, gid = login("4810101", "Bennett")
+    ask(h, "We're vegetarian and my wife loves sushi.")          # -> AOM Agent Memory
+    assert httpx.get(f"{AOM}/v1/memory", params={"user_id": gid}, headers={"Authorization": "Bearer fake-agent-key"}).json()["count"] >= 1
+    ask(h, "What's included in Princess Premier?")
+    res = httpx.post(f"{API}/api/demo/reset", json={}, timeout=60).json()
+    assert res["state"] == "done", res
+    me = next(g for g in res["guests"] if g["guest_id"] == gid)
+    assert me["memories"] >= 1 and "memory_error" not in me
+    assert httpx.get(f"{AOM}/v1/memory", params={"user_id": gid}, headers={"Authorization": "Bearer fake-agent-key"}).json()["count"] == 0
+    assert "error" not in res["aom_caches"], res["aom_caches"]
+    assert sum(v.get("llm_purged", 0) for v in res["aom_caches"].values()) >= 1
+    a = ask(h, "What's included in Princess Premier?")
+    assert a["llm"]["status"] == "miss"

@@ -124,6 +124,10 @@ export type ActionRequest = {
   charge_usd?: number;
   governed?: boolean;
   trace_id?: string | null;
+  /** AOM agent identity that ran it: the concierge, or the Stateroom Upgrade Agent for upgrades. */
+  agent?: 'princess-guest-concierge' | 'princess-upgrade-agent' | string;
+  memories_recalled?: number;
+  remembered?: boolean;
   approval_id?: string | null;
   completed_at?: string | null;
   _local?: boolean; // created on this device, not yet acknowledged by the server

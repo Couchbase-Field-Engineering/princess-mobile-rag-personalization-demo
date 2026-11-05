@@ -89,9 +89,9 @@ function SidePanel() {
         an agent governed by the Couchbase Agent Operations Manager.
       </Text>
       {[
-        ['phone-portrait-outline', 'Couchbase Lite', 'Offline-first: bookings queue on the phone at sea'],
-        ['sparkles-outline', 'AOM RAG Application', 'Knowledge Base, Context Cache and LLM Cache'],
-        ['shield-checkmark-outline', 'Governed actions', 'Upgrades and bookings run as audited AOM tool calls'],
+        ['phone-portrait-outline', 'Couchbase Lite', 'Offline-first: bookings queue on the phone while on excursions and sync when online'],
+        ['sparkles-outline', 'LLM and Context Caching', 'Answers and guest context cached in the Agent Operations Manager'],
+        ['shield-checkmark-outline', 'Governed agents', 'Confirm runs the Stateroom Upgrade agent, with Couchbase Agent Memory'],
       ].map(([icon, title, body]) => (
         <View key={title} style={styles.point}>
           <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={18} color={theme.color.gold} />
@@ -103,7 +103,7 @@ function SidePanel() {
       ))}
       <Pressable onPress={() => window.location.assign('/story')} style={styles.storyBtn}>
         <Ionicons name="book-outline" size={16} color={theme.color.navy} />
-        <Text style={styles.storyText}>The story: why Couchbase, not Redis</Text>
+        <Text style={styles.storyText}>The story: Why Couchbase lowers costs</Text>
       </Pressable>
       <Text style={styles.panelFoot}>
         Try Profile → "At sea - no signal", then book something.{'\n'}Backend: {API_URL.replace(/^https?:\/\//, '')} ·

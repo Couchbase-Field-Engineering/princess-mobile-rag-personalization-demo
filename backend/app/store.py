@@ -120,6 +120,18 @@ class MemoryStore:
         with self.lock:
             return len(self.data[col])
 
+    async def guests_sailing_between(self, start: str, end: str, limit: int = 20000) -> list[dict]:
+        with self.lock:
+            out = []
+            for v in self.data["profiles"].values():
+                r = v.get("reservation") or {}
+                if start <= str(r.get("embark_date")) <= end:
+                    out.append({"guest_id": v["guest_id"], "ship_code": r.get("ship_code"),
+                                "embark_date": r.get("embark_date"), "lead_guest": bool(r.get("lead_guest"))})
+                    if len(out) >= limit:
+                        break
+            return out
+
 
 class CouchbaseStore:
     driver = "couchbase"
@@ -242,6 +254,14 @@ class CouchbaseStore:
     async def count(self, col):
         rows = await self._query(f"SELECT RAW COUNT(*) FROM {self._ks(col)}")
         return rows[0] if rows else 0
+
+    async def guests_sailing_between(self, start: str, end: str, limit: int = 20000) -> list[dict]:
+        """Guests embarking in [start, end] (uses idx_profiles_embark) - the
+        fleet workload picks its passengers from this."""
+        return await self._query(
+            f"SELECT p.guest_id, p.reservation.ship_code, p.reservation.embark_date, "
+            f"IFMISSINGORNULL(p.reservation.lead_guest, false) AS lead_guest FROM {self._ks('profiles')} p "
+            f"WHERE p.reservation.embark_date BETWEEN $a AND $b LIMIT {int(limit)}", a=start, b=end)
 
 
 def make_store():

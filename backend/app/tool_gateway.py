@@ -39,12 +39,14 @@ async def run_local(name: str, args: dict) -> dict:
     return res
 
 
-async def invoke(name: str, args: dict, approval_id: str | None = None) -> dict:
+async def invoke(name: str, args: dict, approval_id: str | None = None, client=None) -> dict:
     """Returns the tool result plus `governed`, `trace_id`, and - when AOM
-    holds the call - status `awaiting_approval` with `approval_id`."""
-    if aom.enabled:
+    holds the call - status `awaiting_approval` with `approval_id`. `client`
+    picks the AOM agent identity the call runs as (default: the concierge)."""
+    client = client or aom
+    if client.enabled:
         try:
-            resp = await aom.invoke(tool_id(name), args, approval_id=approval_id)
+            resp = await client.invoke(tool_id(name), args, approval_id=approval_id)
             result = resp.get("result") or {}
             if isinstance(result, dict) and "ok" not in result:
                 result = {"ok": True, "status": "ok", "data": result}

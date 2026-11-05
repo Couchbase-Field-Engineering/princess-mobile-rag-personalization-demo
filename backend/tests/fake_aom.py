@@ -153,8 +153,58 @@ def kb_search(body: dict, authorization: str = Header(None)):
 @app.post("/v1/memory")
 def mem_add(body: dict, authorization: str = Header(None)):
     auth(authorization)
-    S["memory"].append(body)
-    return {"memory_id": f"m{len(S['memory'])}", "user_id": body["user_id"]}
+    S["memory"].append({**body, "memory_id": f"m{len(S['memory']) + 1}"})
+    return {"memory_id": S["memory"][-1]["memory_id"], "user_id": body["user_id"]}
+
+
+@app.get("/v1/memory")
+def mem_list(user_id: str, limit: int = 100, authorization: str = Header(None)):
+    auth(authorization)
+    entries = [m for m in S["memory"] if m["user_id"] == user_id][-limit:]
+    return {"user_id": user_id, "entries": entries, "count": len(entries)}
+
+
+@app.delete("/v1/memory/{memory_id}")
+def mem_delete(memory_id: str, authorization: str = Header(None)):
+    auth(authorization)
+    before = len(S["memory"])
+    S["memory"] = [m for m in S["memory"] if m["memory_id"] != memory_id]
+    if len(S["memory"]) == before:
+        raise HTTPException(404, "Memory entry not found")
+    return {"deleted": True, "memory_id": memory_id}
+
+
+# Operator cache listing + purges (dashboard session), as the demo reset calls them.
+@app.get("/v1/llm/cache")
+def llm_list(limit: int = 100):
+    entries = [{"entry_id": f"{ns}|{i}", "namespace": ns, "prompt_preview": prompt[:40]}
+               for i, (ns, prompt) in enumerate(S["cache"])][:limit]
+    return {"entries": entries, "count": len(entries), "total_entries": len(S["cache"])}
+
+
+@app.get("/v1/context/cache")
+def ctx_list(limit: int = 100):
+    entries = [{"entry_id": f"{ns}|{key}", "namespace": ns, "key_preview": str(key)[:40]} for ns, key in S["ctx"]][:limit]
+    return {"entries": entries, "count": len(entries), "total_entries": len(S["ctx"])}
+
+
+
+@app.post("/v1/llm/cache/purge")
+def llm_purge(body: dict):
+    ns = body.get("namespace")
+    keys = [k for k in S["cache"] if ns is None or k[0] == ns]
+    for k in keys:
+        del S["cache"][k]
+    return {"purged": len(keys), "namespace": ns}
+
+
+@app.post("/v1/context/cache/purge")
+def ctx_purge(body: dict):
+    ns = body.get("namespace")
+    keys = [k for k in S["ctx"] if ns is None or k[0] == ns]
+    for k in keys:
+        del S["ctx"][k]
+    return {"purged": len(keys), "namespace": ns}
 
 
 @app.post("/v1/memory/search")

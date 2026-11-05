@@ -7,4 +7,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 ADD dist.tgz /usr/share/nginx/html/
 # The story that opens the demo: http://<host>:8081/story
 COPY story.html /usr/share/nginx/html/story.html
+# Files checked out or built on a workstation can carry 0600 modes; nginx's
+# worker runs as `nginx` and would answer 403. Normalize everything it serves.
+RUN chmod -R a+rX /usr/share/nginx/html
 EXPOSE 80
