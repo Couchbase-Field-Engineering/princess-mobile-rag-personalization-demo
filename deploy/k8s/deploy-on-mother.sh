@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy the Princess Cruises demo ON mother itself, straight from the public
+# Deploy the Princess Cruises demo ON the K3s node itself (mother, hal, ...), straight from the public
 # GitHub repository - no Mac, no image copy over ssh. Pulls (or clones) the
 # repo into ~/pcl-deploy/src, builds the two demo images there with Docker,
 # imports them into K3s and runs the Helm install, i.e. deploy.sh with
@@ -14,10 +14,13 @@
 # Environment (all optional except the password):
 #   AOM_ADMIN_PASSWORD  the in-cluster AOM's admin password (https://192.168.111.4:3111); prompted if unset
 #   BRANCH              branch or tag to deploy (default main)
-#   ONLY                princess (default) | aom - "aom" also pulls couchbaselabs/couchbase-agent-operations-manager
+#   ONLY                princess (default) | aom | all - "aom" and "all" also pull
+#                       couchbaselabs/couchbase-agent-operations-manager and deploy the AOM chart
 #   FORCE_DUMP=true     re-export today's Real-Time CDP partition on start (after a catalog change)
 #   SKIP_BUILD=1 TAG=.. reuse images already imported into K3s
 #   SRC                 where the checkout lives (default ~/pcl-deploy/src)
+#   VALUES_FILE         per-node chart values; defaults to deploy/k8s/values-<hostname>.yaml when that
+#                       file exists (values-mother.yaml on mother, values-hal.yaml on hal), else mother's
 #
 # Needs on mother: git, docker (with buildx) for the builds, sudo for `k3s ctr images import`,
 # kubectl (K3s) and helm (installed into ~/.local/bin by deploy.sh if missing).
@@ -61,11 +64,17 @@ if [ "$ONLY" != princess ]; then
   sync_repo "$AOM_REPO_URL" "$AOM_BRANCH" "$AOM_SRC"
 fi
 
-if [ "$ONLY" = princess ] && [ -z "${AOM_ADMIN_PASSWORD:-}" ]; then
+if [ "$ONLY" != aom ] && [ -z "${AOM_ADMIN_PASSWORD:-}" ]; then
   read -r -s -p "AOM admin password (the in-cluster AOM, https://$(hostname -I | awk '{print $1}'):3111): " AOM_ADMIN_PASSWORD; echo
   export AOM_ADMIN_PASSWORD
 fi
 
 say "Deploying from $SRC"
 cd "$SRC"
-MOTHER=local AOM_DIR="$AOM_SRC" ONLY="$ONLY" exec ./deploy/k8s/deploy.sh
+[ "$ONLY" = all ] && ONLY=""   # deploy.sh: empty ONLY = both charts
+if [ -z "${VALUES_FILE:-}" ]; then
+  VALUES_FILE="deploy/k8s/values-$(hostname -s).yaml"
+  [ -f "$VALUES_FILE" ] || VALUES_FILE="deploy/k8s/values-mother.yaml"
+fi
+echo "  chart values: $VALUES_FILE"
+MOTHER=local AOM_DIR="$AOM_SRC" ONLY="$ONLY" VALUES_FILE="$VALUES_FILE" exec ./deploy/k8s/deploy.sh

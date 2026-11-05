@@ -27,6 +27,7 @@
 #                       first-login password; on an existing AOM it must be the current one. Prompted if unset.
 #   ANTHROPIC_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY   optional LLM keys for AOM (else labelled stubs)
 #   ONLY                "aom" or "princess" to deploy just one of them
+#   VALUES_FILE         per-node chart values (default deploy/k8s/values-mother.yaml; deploy/k8s/values-hal.yaml for hal)
 #   SKIP_BUILD=1        reuse the images already on mother (set TAG to the tag to deploy)
 #   FORCE_DUMP=true     re-export today's Real-Time CDP partition on start (after a catalog change,
 #                       e.g. the fleet grew to 17 ships) - the backend reloads it automatically
@@ -38,6 +39,7 @@ MOTHER="${MOTHER:-ehind@192.168.111.4}"
 AOM_DIR="${AOM_DIR:-$HOME/github-couchbaselabs/couchbase-agent-operations-manager}"
 TAG="${TAG:-$(date +%Y%m%d-%H%M%S)}"
 ONLY="${ONLY:-}"
+VALUES_FILE="${VALUES_FILE:-deploy/k8s/values-mother.yaml}"
 AOM_NS=agent-ops
 PRINCESS_NS=princess-app
 REMOTE_DIR='~/pcl-deploy'
@@ -98,7 +100,7 @@ cp couchbase-init/init.sh sync-gateway/db-config.json adobe/generate_mock_export
 STAGE=$(mktemp -d)
 mkdir -p "$STAGE/charts"
 cp -R helm/princess-app "$STAGE/charts/princess-app"
-cp deploy/k8s/values-mother.yaml "$STAGE/princess-values.yaml"
+cp "$VALUES_FILE" "$STAGE/princess-values.yaml"
 want aom && cp -R "$AOM_DIR/helm/couchbase-agent-operations-manager" "$STAGE/charts/agent-ops"
 if [ "$MOTHER" = local ]; then
   mkdir -p ~/pcl-deploy && cp -R "$STAGE"/. ~/pcl-deploy/
@@ -159,7 +161,7 @@ kubectl get pods,svc -n $PRINCESS_NS 2>/dev/null || true
 "
 
 HOST="${MOTHER#*@}"; [ "$MOTHER" = local ] && HOST=$(remote "hostname -I | awk '{print \$1}'")
-port() { python3 -c 'import re,sys; t=open(sys.argv[1]).read(); m=re.search(sys.argv[2]+r":\s*\n\s*service:.*?port:\s*(\d+)", t, re.S); print(m.group(1) if m else sys.argv[3])' deploy/k8s/values-mother.yaml "$1" "$2"; }
+port() { python3 -c 'import re,sys; t=open(sys.argv[1]).read(); m=re.search(sys.argv[2]+r":\s*\n\s*service:.*?port:\s*(\d+)", t, re.S); print(m.group(1) if m else sys.argv[3])' "$VALUES_FILE" "$1" "$2"; }
 WEB_PORT=$(port web 8081); API_PORT=$(port backend 8200); SG_PORT=$(port syncGateway 4984)
 say "Done"
 cat <<MSG
