@@ -223,7 +223,7 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
       </div>
       <div><div class="phone"><div class="screen">
         <div class="ph-top"><div class="ph-sb"><span>8:12</span><span id="cbSig">●●● Wi-Fi</span></div><div class="ph-title">Concierge</div><div class="ph-sub">Princess Guest Concierge · governed by AOM</div></div>
-        <div class="ph-body" id="cbBody"></div></div></div><p class="ph-label">Through Couchbase AOM</p></div>
+        <div class="ph-body" id="cbBody"></div></div></div><p class="ph-label">With Couchbase AIDP</p></div>
       <div><div class="phone"><div class="screen">
         <div class="ph-top"><div class="ph-sb"><span>8:12</span><span id="rdSig">●●● Wi-Fi</span></div><div class="ph-title">Chat</div><div class="ph-sub">Plain LLM chatbot</div></div>
         <div class="ph-body" id="rdBody"></div></div></div><p class="ph-label">A model call per question</p></div>
@@ -261,7 +261,7 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
     <h2>Question by question, <span class="accent">with and without AOM</span>.</h2>
     <p class="lede">Illustrative per-answer costs for the questions in chapter 4. The ratio is what matters: most of a concierge's traffic is in the cheap rows.</p>
     <table class="cmp">
-      <thead><tr><th>Question</th><th>Through Couchbase AOM</th><th>A model call every time</th></tr></thead>
+      <thead><tr><th>Question</th><th>With Couchbase AIDP</th><th>A model call every time</th></tr></thead>
       <tbody>
         <tr><td>Playbook question, first time today</td><td><span class="p">~</span>One generated answer from the scoped RAG app: a small prompt (the playbook chunks only), then cached in the LLM Cache.<small>≈ 1,500 tokens</small></td><td><span class="x">✗</span>Generated, with whatever the retriever found across the whole store.<small>≈ 2,000-4,000 tokens</small></td></tr>
         <tr><td>Same playbook question, any other guest</td><td><span class="y">✓</span>LLM Cache exact hit; a reworded version is a semantic hit. Zero tokens, zero latency.<small>0 tokens</small></td><td><span class="x">✗</span>Generated again, for every guest, every time.<small>≈ 2,000-4,000 tokens</small></td></tr>
