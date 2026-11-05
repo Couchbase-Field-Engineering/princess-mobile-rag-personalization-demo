@@ -344,7 +344,7 @@ $('#theme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'
 // ---- diagram
 let transformed=false;
 function transform(){transformed=!transformed; $('#sprawl').classList.toggle('gone',transformed); $('#cb').classList.toggle('gone',!transformed);
-  $('#transform').textContent=transformed?'↺ Show the Redis-centered stack':'↻ Transform the stack';
+  $('#transform').textContent=transformed?'↺ Show the mixed product stack':'↻ Transform the stack';
   $('#diagHint').textContent=transformed?'One set of JSON documents from the phone to the cloud: Couchbase Lite, Sync Gateway, Couchbase Server, and AOM for the AI.':'Grey dashed boxes are separate services to license, run and keep consistent. Red dashed is code your team writes and maintains.';}
 $('#transform').onclick=transform;
 // ---- cost simulation: per step [cb signal, cb body, plain signal, plain body]
