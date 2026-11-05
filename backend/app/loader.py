@@ -66,10 +66,13 @@ def latest_partition(export_dir: str) -> str | None:
 
 
 def partition_id(partition: str) -> str:
-    """Identifies one export: the part file names carry the Spark job's UUID,
-    so a re-exported partition for the same date has a different id."""
-    names = sorted(os.path.basename(p) for p in glob.glob(os.path.join(partition, "part-*.json")))
-    return hashlib.sha1("|".join(names).encode()).hexdigest()[:12]
+    """Identifies one export's contents: folder name, part file names and
+    sizes. A re-exported partition (new generator, new catalog, same date -
+    even with the same deterministic file names) gets a different id, so the
+    backend reloads it instead of trusting the previous load."""
+    parts = sorted(glob.glob(os.path.join(partition, "part-*.json")))
+    sig = [os.path.basename(partition)] + [f"{os.path.basename(p)}:{os.path.getsize(p)}" for p in parts]
+    return hashlib.sha1("|".join(sig).encode()).hexdigest()[:12]
 
 
 def read_rows(partition: str):
