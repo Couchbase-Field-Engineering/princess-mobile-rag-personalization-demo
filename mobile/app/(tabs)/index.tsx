@@ -107,7 +107,7 @@ function OfferCard({ o }: { o: Offer }) {
         <GradientArt palette={o.palette} icon={KIND_ICON[o.kind] ?? 'sparkles'} height={o.rank === 1 ? 118 : 92}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Pill label={KIND_LABEL[o.kind] ?? o.kind} tone="dark" icon={KIND_ICON[o.kind]} />
-            {o.rank <= 2 ? <Pill label={o.rank === 1 ? 'Top pick' : 'For you'} tone="gold" icon="sparkles" /> : null}
+            {o.rank <= 2 ? <Pill label={o.rank === 1 ? 'Top pick' : 'For you'} tone="accent" icon="sparkles" /> : null}
           </View>
           <Text style={styles.offerTitle} numberOfLines={2}>{o.title}</Text>
         </GradientArt>
@@ -135,11 +135,11 @@ function OfferCard({ o }: { o: Offer }) {
 const styles = StyleSheet.create({
   hero: { paddingHorizontal: 20, paddingBottom: 26, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  greet: { color: theme.color.onDark, fontSize: theme.type.title, fontWeight: '900', marginTop: 22 },
+  greet: { color: theme.color.onDark, fontSize: theme.type.title, fontWeight: '700', fontFamily: theme.font.display, marginTop: 22 },
   countRow: { flexDirection: 'row', gap: 18, marginTop: 14, alignItems: 'center' },
-  countNum: { color: theme.color.gold, fontSize: 52, fontWeight: '900', lineHeight: 56 },
+  countNum: { color: theme.color.onDark, fontSize: 52, fontWeight: '700', fontFamily: theme.font.display, lineHeight: 56 },
   countLbl: { color: theme.color.onDarkMuted, fontSize: theme.type.xs, fontWeight: '800', letterSpacing: 1.4 },
-  ship: { color: theme.color.onDark, fontSize: theme.type.xl, fontWeight: '800' },
+  ship: { color: theme.color.onDark, fontSize: theme.type.xl, fontWeight: '700', fontFamily: theme.font.display },
   itin: { color: theme.color.onDarkMuted, fontSize: theme.type.sm },
   body: { padding: 16, maxWidth: 640, width: '100%', alignSelf: 'center' },
   req: { flexDirection: 'row', gap: 10, alignItems: 'center', padding: 12 },
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   offerSub: { color: theme.color.text, fontSize: theme.type.md },
   reason: { color: theme.color.ocean, fontSize: theme.type.sm, fontWeight: '700', flex: 1 },
   price: { color: theme.color.text, fontWeight: '800' },
-  cta: { flexDirection: 'row', gap: 6, alignItems: 'center', backgroundColor: theme.color.gold, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
-  ctaText: { color: theme.color.navy, fontWeight: '800', fontSize: theme.type.sm },
+  cta: { flexDirection: 'row', gap: 6, alignItems: 'center', backgroundColor: theme.color.accent, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
+  ctaText: { color: theme.color.onDark, fontWeight: '800', fontSize: theme.type.sm },
   footnote: { color: theme.color.faint, fontSize: theme.type.xs, textAlign: 'center', marginVertical: 18, lineHeight: 16 },
 });

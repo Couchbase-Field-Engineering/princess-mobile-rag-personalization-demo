@@ -159,7 +159,7 @@ function Bubble({ m }: { m: ChatMessage }) {
 const styles = StyleSheet.create({
   header: { backgroundColor: theme.color.navy, paddingHorizontal: 16, paddingBottom: 14 },
   bot: { width: 36, height: 36, borderRadius: 18, backgroundColor: theme.color.gold, alignItems: 'center', justifyContent: 'center' },
-  title: { color: theme.color.onDark, fontSize: theme.type.xl, fontWeight: '900' },
+  title: { color: theme.color.onDark, fontSize: theme.type.xl, fontWeight: '700', fontFamily: theme.font.display },
   subtitle: { color: theme.color.onDarkMuted, fontSize: theme.type.xs },
   list: { padding: 14, gap: 10, maxWidth: 680, width: '100%', alignSelf: 'center' },
   intro: { backgroundColor: theme.color.surface, borderRadius: theme.radius, padding: 16, gap: 6 },

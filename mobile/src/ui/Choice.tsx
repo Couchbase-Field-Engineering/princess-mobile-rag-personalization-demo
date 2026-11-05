@@ -37,6 +37,6 @@ export function ChoiceRow<T extends string>({ options, value, onChange }: {
 
 const styles = StyleSheet.create({
   chip: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 999, borderWidth: 1, borderColor: theme.color.border, backgroundColor: theme.color.surface },
-  on: { backgroundColor: theme.color.gold, borderColor: theme.color.gold },
+  on: { backgroundColor: theme.color.princess, borderColor: theme.color.princess },
   text: { fontWeight: '700', color: theme.color.muted },
 });

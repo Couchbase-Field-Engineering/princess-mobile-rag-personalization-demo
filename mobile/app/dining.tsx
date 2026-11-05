@@ -53,7 +53,7 @@ export default function Dining() {
           <Card style={{ padding: 16, gap: 6, marginTop: 10 }}>
             <Text style={styles.h2}>{sel.name}</Text>
             <Text style={styles.meta}>{sel.cuisine} · {money(sel.price_pp)} per guest</Text>
-            {p.preferences.celebration && sel.tags.includes('celebration') ? <Pill label={`Great for your ${p.preferences.celebration}`} tone="gold" icon="gift" /> : null}
+            {p.preferences.celebration && sel.tags.includes('celebration') ? <Pill label={`Great for your ${p.preferences.celebration}`} tone="accent" icon="gift" /> : null}
             {p.preferences.dietary.length ? <Text style={styles.meta}>We'll share your dietary notes: {p.preferences.dietary.join(', ')}</Text> : null}
           </Card>
           <SectionTitle title="Night" />
@@ -78,7 +78,7 @@ export default function Dining() {
 
 const styles = StyleSheet.create({
   body: { padding: 16, maxWidth: 640, width: '100%', alignSelf: 'center', paddingBottom: 40 },
-  h2: { fontSize: theme.type.xl, fontWeight: '900', color: theme.color.navy },
+  h2: { fontSize: theme.type.xl, fontWeight: '700', fontFamily: theme.font.display, color: theme.color.princess },
   meta: { color: theme.color.muted, fontSize: theme.type.sm },
   total: { fontSize: 30, fontWeight: '900', color: theme.color.navy, textAlign: 'center' },
   tiny: { color: theme.color.faint, fontSize: theme.type.xs, textAlign: 'center' },

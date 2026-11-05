@@ -91,7 +91,7 @@ export default function Profile() {
             <Text style={{ fontWeight: '800', color: theme.color.text }}>At sea - no signal</Text>
             <Text style={styles.meta}>Pause replication to demo offline: browse, book and ask the concierge from Couchbase Lite. Bookings queue and send when you switch back.</Text>
           </View>
-          <Switch value={offline} onValueChange={setOffline} trackColor={{ true: theme.color.gold, false: theme.color.border }} thumbColor={theme.color.surface} />
+          <Switch value={offline} onValueChange={setOffline} trackColor={{ true: theme.color.princess, false: theme.color.border }} thumbColor={theme.color.surface} />
         </View>
       </Card>
 
@@ -125,7 +125,7 @@ function Row({ icon, label, value }: { icon: IconName; label: string; value: str
 const styles = StyleSheet.create({
   body: { padding: 16, maxWidth: 640, width: '100%', alignSelf: 'center' },
   h1: { fontSize: theme.type.title, fontWeight: '900', color: theme.color.navy },
-  avatar: { width: 52, height: 52, borderRadius: 26, backgroundColor: theme.color.gold, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 52, height: 52, borderRadius: 26, backgroundColor: theme.color.oceanSoft, alignItems: 'center', justifyContent: 'center' },
   name: { fontSize: theme.type.xl, fontWeight: '900', color: theme.color.navy },
   meta: { color: theme.color.muted, fontSize: theme.type.sm },
   tiny: { color: theme.color.faint, fontSize: theme.type.xs },

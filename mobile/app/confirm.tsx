@@ -47,7 +47,7 @@ export default function Confirm() {
 
 const styles = StyleSheet.create({
   body: { padding: 16, maxWidth: 640, width: '100%', alignSelf: 'center' },
-  h2: { fontSize: theme.type.xl, fontWeight: '900', color: theme.color.navy },
+  h2: { fontSize: theme.type.xl, fontWeight: '700', fontFamily: theme.font.display, color: theme.color.princess },
   price: { fontSize: theme.type.lg, fontWeight: '800', color: theme.color.princess },
   meta: { color: theme.color.muted, fontSize: theme.type.sm, lineHeight: 19 },
 });

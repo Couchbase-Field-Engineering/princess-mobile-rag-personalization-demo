@@ -72,7 +72,7 @@ export default function Login() {
           {personas.map((p) => (
             <Pressable key={p.guest_id} onPress={() => void go(p.booking_id, p.last_name)} style={({ pressed }) => [styles.persona, pressed && { opacity: 0.8 }]}>
               <View style={styles.avatar}>
-                <Text style={{ color: theme.color.navy, fontWeight: '900' }}>{p.name.split(' ').map((s) => s[0]).join('')}</Text>
+                <Text style={{ color: theme.color.princess, fontWeight: '900' }}>{p.name.split(' ').map((s) => s[0]).join('')}</Text>
               </View>
               <View style={{ flex: 1, gap: 3 }}>
                 <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -96,7 +96,7 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   wrap: { paddingHorizontal: 22, gap: 10, maxWidth: 520, width: '100%', alignSelf: 'center' },
-  hero: { color: theme.color.onDark, fontSize: theme.type.hero, fontWeight: '900', marginTop: 28, lineHeight: 40 },
+  hero: { color: theme.color.onDark, fontSize: theme.type.hero, fontWeight: '700', fontFamily: theme.font.display, marginTop: 28, lineHeight: 40 },
   sub: { color: theme.color.onDarkMuted, fontSize: theme.type.md, lineHeight: 21 },
   form: { backgroundColor: theme.color.surface, borderRadius: theme.radius, padding: 18, gap: 8, marginTop: 18 },
   label: { color: theme.color.muted, fontSize: theme.type.xs, fontWeight: '800', letterSpacing: 1.3 },
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   notice: { flexDirection: 'row', gap: 8, alignItems: 'center', backgroundColor: '#FFF4D6', borderRadius: theme.radiusSm, padding: 10, marginBottom: 6 },
   noticeText: { flex: 1, color: theme.color.navy, fontWeight: '600', fontSize: theme.type.sm },
   persona: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: theme.radius, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' },
-  avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: theme.color.gold, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: theme.color.oceanSoft, alignItems: 'center', justifyContent: 'center' },
   pname: { color: theme.color.onDark, fontWeight: '800', fontSize: theme.type.md },
   pmeta: { color: theme.color.onDarkMuted, fontSize: theme.type.sm },
   pblurb: { color: 'rgba(255,255,255,0.88)', fontSize: theme.type.sm },

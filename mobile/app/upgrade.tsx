@@ -54,7 +54,7 @@ export default function Upgrade() {
                 <View style={{ flex: 1, gap: 4 }}>
                   <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                     <Text style={styles.h3}>{o.category_name}</Text>
-                    {o.recommended ? <Pill label="Recommended for you" tone="gold" icon="sparkles" /> : null}
+                    {o.recommended ? <Pill label="Recommended for you" tone="accent" icon="sparkles" /> : null}
                     <Pill label={o.available > 0 ? `${o.available} left` : 'Sold out'} tone={o.available <= 2 ? 'warn' : 'neutral'} />
                   </View>
                   <Text style={styles.meta}>{o.perks.join(' · ')}</Text>
@@ -108,17 +108,17 @@ export default function Upgrade() {
 
 const styles = StyleSheet.create({
   body: { padding: 16, maxWidth: 640, width: '100%', alignSelf: 'center', paddingBottom: 40 },
-  h2: { fontSize: theme.type.xl, fontWeight: '900', color: theme.color.navy },
+  h2: { fontSize: theme.type.xl, fontWeight: '700', fontFamily: theme.font.display, color: theme.color.princess },
   h3: { fontSize: theme.type.lg, fontWeight: '800', color: theme.color.navy },
   meta: { color: theme.color.muted, fontSize: theme.type.sm },
   tiny: { color: theme.color.faint, fontSize: theme.type.xs, textAlign: 'center' },
   opt: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, marginBottom: 10, borderWidth: 2, borderColor: 'transparent' },
-  optSel: { borderColor: theme.color.gold },
+  optSel: { borderColor: theme.color.princess },
   seg: { flexDirection: 'row', backgroundColor: theme.color.surface, borderRadius: 999, padding: 4, marginVertical: 12, borderWidth: 1, borderColor: theme.color.border },
   segBtn: { flex: 1, paddingVertical: 10, borderRadius: 999, alignItems: 'center' },
-  segOn: { backgroundColor: theme.color.gold },
+  segOn: { backgroundColor: theme.color.princess },
   segText: { fontWeight: '800', color: theme.color.muted },
   stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 22 },
-  step: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.color.goldSoft, alignItems: 'center', justifyContent: 'center' },
+  step: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.color.oceanSoft, alignItems: 'center', justifyContent: 'center' },
   bid: { fontSize: 38, fontWeight: '900', color: theme.color.navy, textAlign: 'center' },
 });

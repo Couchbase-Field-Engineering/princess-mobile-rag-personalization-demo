@@ -48,10 +48,11 @@ export function GradientArt({ palette, icon, height = 96, children }: { palette:
   );
 }
 
-export function Pill({ label, tone = 'neutral', icon }: { label: string; tone?: 'neutral' | 'gold' | 'ok' | 'warn' | 'danger' | 'ocean' | 'dark'; icon?: IconName }) {
+export function Pill({ label, tone = 'neutral', icon }: { label: string; tone?: 'neutral' | 'gold' | 'accent' | 'ok' | 'warn' | 'danger' | 'ocean' | 'dark'; icon?: IconName }) {
   const map = {
     neutral: [theme.color.bg, theme.color.muted],
     gold: [theme.color.goldSoft, '#7A5A00'],
+    accent: [theme.color.accentSoft, theme.color.accent],
     ok: [theme.color.okSoft, theme.color.ok],
     warn: [theme.color.warnSoft, theme.color.warn],
     danger: [theme.color.dangerSoft, theme.color.danger],
@@ -70,8 +71,9 @@ export function Pill({ label, tone = 'neutral', icon }: { label: string; tone?: 
 export function Button({ label, onPress, kind = 'gold', icon, disabled, busy, small }: {
   label: string; onPress: () => void; kind?: 'gold' | 'navy' | 'ghost' | 'light'; icon?: IconName; disabled?: boolean; busy?: boolean; small?: boolean;
 }) {
-  const bg = { gold: theme.color.gold, navy: theme.color.navy, ghost: 'transparent', light: theme.color.surface }[kind];
-  const fg = { gold: theme.color.navy, navy: theme.color.onDark, ghost: theme.color.princess, light: theme.color.navy }[kind];
+  // princess.com's primary call to action: a magenta pill with white text.
+  const bg = { gold: theme.color.accent, navy: theme.color.princess, ghost: 'transparent', light: theme.color.surface }[kind];
+  const fg = { gold: theme.color.onDark, navy: theme.color.onDark, ghost: theme.color.princess, light: theme.color.princess }[kind];
   return (
     <Pressable
       onPress={onPress}
@@ -112,7 +114,7 @@ const SYNC_LABEL: Record<SyncState['status'], [string, 'ok' | 'warn' | 'danger' 
 export function SyncBadge({ sync, dark }: { sync: SyncState; dark?: boolean }) {
   const [label, tone] = SYNC_LABEL[sync.status];
   const text = sync.pendingPush ? `${label} · ${sync.pendingPush} to send` : label;
-  const dot = { ok: '#3DDC84', warn: theme.color.gold, danger: '#FF6B6B', neutral: theme.color.faint, ocean: '#5CC8FF' }[tone];
+  const dot = { ok: '#3DDC84', warn: '#F5B800', danger: '#FF6B6B', neutral: theme.color.faint, ocean: '#5CC8FF' }[tone];
   return (
     <View style={[styles.sync, dark ? { backgroundColor: 'rgba(255,255,255,0.12)' } : { backgroundColor: theme.color.bg }]}>
       <View style={[styles.dot, { backgroundColor: dot }]} />
@@ -124,10 +126,10 @@ export function SyncBadge({ sync, dark }: { sync: SyncState; dark?: boolean }) {
   );
 }
 
-export const STATUS_UI: Record<RequestStatus, { label: string; tone: 'neutral' | 'gold' | 'ok' | 'warn' | 'danger' | 'ocean'; icon: IconName }> = {
+export const STATUS_UI: Record<RequestStatus, { label: string; tone: 'neutral' | 'gold' | 'accent' | 'ok' | 'warn' | 'danger' | 'ocean'; icon: IconName }> = {
   pending: { label: 'Waiting to sync', tone: 'warn', icon: 'cloud-upload-outline' },
   processing: { label: 'Processing', tone: 'ocean', icon: 'sync' },
-  awaiting_approval: { label: 'Awaiting supervisor', tone: 'gold', icon: 'shield-checkmark-outline' },
+  awaiting_approval: { label: 'Awaiting supervisor', tone: 'warn', icon: 'shield-checkmark-outline' },
   confirmed: { label: 'Confirmed', tone: 'ok', icon: 'checkmark-circle' },
   accepted: { label: 'Accepted', tone: 'ok', icon: 'checkmark-circle' },
   submitted: { label: 'Bid submitted', tone: 'ocean', icon: 'time-outline' },

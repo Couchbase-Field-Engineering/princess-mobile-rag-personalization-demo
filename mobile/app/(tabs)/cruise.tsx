@@ -112,7 +112,7 @@ export default function MyCruise() {
 
 const styles = StyleSheet.create({
   body: { padding: 16, maxWidth: 640, width: '100%', alignSelf: 'center' },
-  h1: { fontSize: theme.type.title, fontWeight: '900', color: theme.color.navy },
+  h1: { fontSize: theme.type.title, fontWeight: '700', fontFamily: theme.font.display, color: theme.color.princess },
   sub: { color: theme.color.muted, marginTop: 2 },
   passTitle: { color: theme.color.onDark, fontSize: theme.type.lg, fontWeight: '800' },
   room: { fontSize: theme.type.xl, fontWeight: '900', color: theme.color.navy },

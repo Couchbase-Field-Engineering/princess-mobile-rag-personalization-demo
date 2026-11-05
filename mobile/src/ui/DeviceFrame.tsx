@@ -90,11 +90,11 @@ function SidePanel() {
       </Text>
       {[
         ['phone-portrait-outline', 'Couchbase Lite', 'Offline-first: bookings queue on the phone while on excursions and sync when online'],
-        ['sparkles-outline', 'LLM and Context Caching', 'Answers and guest context cached in the Agent Operations Manager'],
+        ['sparkles-outline', 'LLM and Context Caching', 'Answers and guest context cached in Couchbase Agent Operations Manager'],
         ['shield-checkmark-outline', 'Governed agents', 'Confirm runs the Stateroom Upgrade agent, with Couchbase Agent Memory'],
       ].map(([icon, title, body]) => (
         <View key={title} style={styles.point}>
-          <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={18} color={theme.color.gold} />
+          <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={18} color={theme.color.accent} />
           <View style={{ flex: 1 }}>
             <Text style={styles.pointTitle}>{title}</Text>
             <Text style={styles.pointBody}>{body}</Text>
@@ -102,7 +102,7 @@ function SidePanel() {
         </View>
       ))}
       <Pressable onPress={() => window.location.assign('/story')} style={styles.storyBtn}>
-        <Ionicons name="book-outline" size={16} color={theme.color.navy} />
+        <Ionicons name="book-outline" size={16} color={theme.color.onDark} />
         <Text style={styles.storyText}>The story: Why Couchbase lowers costs</Text>
       </Pressable>
       <Text style={styles.panelFoot}>
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#E9EDF5',
+    backgroundColor: theme.color.bg,
     backgroundImage: 'radial-gradient(1200px 700px at 30% 20%, #FFFFFF 0%, #E9EDF5 55%, #D8DFEC 100%)',
   } as object,
   row: { flexDirection: 'row', alignItems: 'center' },
@@ -195,12 +195,12 @@ const styles = StyleSheet.create({
   },
   panel: { width: 340, gap: 14 },
   kicker: { color: theme.color.princess, fontSize: 12, fontWeight: '800', letterSpacing: 2 },
-  panelTitle: { color: theme.color.navy, fontSize: 34, fontWeight: '900', lineHeight: 40 },
+  panelTitle: { color: theme.color.princess, fontSize: 40, fontWeight: '700', fontFamily: theme.font.display, lineHeight: 46 },
   panelBody: { color: theme.color.muted, fontSize: 15, lineHeight: 22, marginBottom: 6 },
   point: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', backgroundColor: '#FFFFFF', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: theme.color.border },
-  pointTitle: { color: theme.color.text, fontWeight: '800', fontSize: 15 },
+  pointTitle: { color: theme.color.princess, fontWeight: '800', fontSize: 15 },
   pointBody: { color: theme.color.muted, fontSize: 13, lineHeight: 18, marginTop: 2 },
-  storyBtn: { flexDirection: 'row', gap: 8, alignItems: 'center', alignSelf: 'flex-start', backgroundColor: theme.color.gold, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10, marginTop: 4 },
-  storyText: { color: theme.color.navy, fontWeight: '800', fontSize: 14 },
+  storyBtn: { flexDirection: 'row', gap: 8, alignItems: 'center', alignSelf: 'flex-start', backgroundColor: theme.color.accent, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10, marginTop: 4 },
+  storyText: { color: theme.color.onDark, fontWeight: '800', fontSize: 14 },
   panelFoot: { color: theme.color.faint, fontSize: 12, lineHeight: 18, marginTop: 6 },
 });
