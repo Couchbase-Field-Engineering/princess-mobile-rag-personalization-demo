@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Deploy the Princess Cruises demo ON mother itself, straight from the public
+# GitHub repository - no Mac, no image copy over ssh. Pulls (or clones) the
+# repo into ~/pcl-deploy/src, builds the two demo images there with Docker,
+# imports them into K3s and runs the Helm install, i.e. deploy.sh with
+# MOTHER=local.
+#
+# First time, on mother:
+#   curl -fsSL https://raw.githubusercontent.com/Couchbase-Field-Engineering/princess-mobile-rag-personalization-demo/main/deploy/k8s/deploy-on-mother.sh \
+#     | AOM_ADMIN_PASSWORD='<AOM admin password>' bash
+# After that (the checkout is kept):
+#   AOM_ADMIN_PASSWORD='<AOM admin password>' ~/pcl-deploy/src/deploy/k8s/deploy-on-mother.sh
+#
+# Environment (all optional except the password):
+#   AOM_ADMIN_PASSWORD  the in-cluster AOM's admin password (https://192.168.111.4:3111); prompted if unset
+#   BRANCH              branch or tag to deploy (default main)
+#   ONLY                princess (default) | aom - "aom" also pulls couchbaselabs/couchbase-agent-operations-manager
+#   FORCE_DUMP=true     re-export today's Databricks partition on start (after a catalog change)
+#   SKIP_BUILD=1 TAG=.. reuse images already imported into K3s
+#   SRC                 where the checkout lives (default ~/pcl-deploy/src)
+#
+# Needs on mother: git, docker (with buildx) for the builds, sudo for `k3s ctr images import`,
+# kubectl (K3s) and helm (installed into ~/.local/bin by deploy.sh if missing).
+set -euo pipefail
+
+REPO_URL="${REPO_URL:-https://github.com/Couchbase-Field-Engineering/princess-mobile-rag-personalization-demo.git}"
+AOM_REPO_URL="${AOM_REPO_URL:-https://github.com/couchbaselabs/couchbase-agent-operations-manager.git}"
+BRANCH="${BRANCH:-main}"
+AOM_BRANCH="${AOM_BRANCH:-main}"
+SRC="${SRC:-$HOME/pcl-deploy/src}"
+AOM_SRC="${AOM_SRC:-$HOME/pcl-deploy/aom-src}"
+ONLY="${ONLY:-princess}"
+
+say() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
+need() { command -v "$1" >/dev/null 2>&1 || { echo "missing: $1 - $2"; exit 1; }; }
+
+need git "sudo apt-get install -y git"
+if [ -z "${SKIP_BUILD:-}" ]; then
+  need docker "install Docker Engine (https://docs.docker.com/engine/install/ubuntu/) and add yourself to the docker group"
+  docker buildx version >/dev/null 2>&1 || { echo "docker buildx is missing: sudo apt-get install -y docker-buildx-plugin"; exit 1; }
+fi
+need kubectl "this should be the K3s node"
+
+sync_repo() { # url branch dir
+  local url="$1" branch="$2" dir="$3"
+  if [ -d "$dir/.git" ]; then
+    say "Updating $dir ($branch)"
+    git -C "$dir" fetch --depth 1 origin "$branch"
+    # The checkout on mother is deploy-only: no local edits to preserve.
+    git -C "$dir" checkout -q -B "$branch" FETCH_HEAD
+  else
+    say "Cloning $url ($branch) into $dir"
+    mkdir -p "$(dirname "$dir")"
+    git clone --depth 1 --branch "$branch" "$url" "$dir"
+  fi
+  echo "  at $(git -C "$dir" log -1 --format='%h %cd %s' --date=short)"
+}
+
+sync_repo "$REPO_URL" "$BRANCH" "$SRC"
+if [ "$ONLY" != princess ]; then
+  sync_repo "$AOM_REPO_URL" "$AOM_BRANCH" "$AOM_SRC"
+fi
+
+if [ "$ONLY" = princess ] && [ -z "${AOM_ADMIN_PASSWORD:-}" ]; then
+  read -r -s -p "AOM admin password (the in-cluster AOM, https://$(hostname -I | awk '{print $1}'):3111): " AOM_ADMIN_PASSWORD; echo
+  export AOM_ADMIN_PASSWORD
+fi
+
+say "Deploying from $SRC"
+cd "$SRC"
+MOTHER=local AOM_DIR="$AOM_SRC" ONLY="$ONLY" exec ./deploy/k8s/deploy.sh

@@ -13,6 +13,8 @@
 #
 # Usage, from this repository on your Mac:
 #   AOM_ADMIN_PASSWORD='<12+ chars>' ./deploy/k8s/deploy.sh
+# Or on mother itself, straight from the public GitHub repo (no Mac involved):
+#   deploy/k8s/deploy-on-mother.sh   (pulls the repo, then runs this script with MOTHER=local)
 #
 # mother already runs AOM (agent-ops) and the Royal Caribbean demo (royal-app). To add
 # this demo next to them, deploy only it, with the current AOM admin password:

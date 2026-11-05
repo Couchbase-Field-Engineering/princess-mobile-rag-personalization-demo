@@ -295,6 +295,18 @@ Ports are published by K3s's built-in ServiceLB. If a Service stays `<pending>`,
 
 ---
 
+**Deploying on the node itself from GitHub.** The repository is public, so a node that can reach GitHub can deploy without a workstation: `deploy/k8s/deploy-on-mother.sh` clones or fast-forwards the repo into `~/pcl-deploy/src` (and, with `ONLY=aom`, the AOM repo into `~/pcl-deploy/aom-src`), builds the images there with Docker, imports them into K3s and runs the Helm install - `deploy.sh` with `MOTHER=local`.
+
+```bash
+# first time, on mother
+curl -fsSL https://raw.githubusercontent.com/Couchbase-Field-Engineering/princess-mobile-rag-personalization-demo/main/deploy/k8s/deploy-on-mother.sh \
+  | AOM_ADMIN_PASSWORD='<AOM admin password>' bash
+# afterwards
+AOM_ADMIN_PASSWORD='<AOM admin password>' ~/pcl-deploy/src/deploy/k8s/deploy-on-mother.sh
+```
+
+`BRANCH`, `FORCE_DUMP=true`, `SKIP_BUILD=1 TAG=<tag>` and `ONLY` work as for `deploy.sh`. The node needs git, Docker with buildx, and sudo for `k3s ctr images import`.
+
 ## Demo script (about 10 minutes)
 
 1. **Olivia Bennett** (Captain's Circle Elite, anniversary, *Sun Princess*, Balcony, 9 days out)
