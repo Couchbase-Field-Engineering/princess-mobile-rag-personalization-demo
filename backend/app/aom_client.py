@@ -191,7 +191,7 @@ class AOMClient:
                 raise AOMError(f"AOM {method} {path} -> HTTP {r.status_code}: {r.text[:300]}", r.status_code, r.text)
             return r.json() if r.content else {}
 
-    async def kb_ingest(self, title, content, metadata, source="databricks-daily-dump", filename=None) -> dict:
+    async def kb_ingest(self, title, content, metadata, source="adobe-rtcdp-export", filename=None) -> dict:
         return await self.admin("POST", "/v1/knowledge", {
             "title": title, "content": content, "encoding": "text", "filename": filename or f"{title}.md",
             "source": source, "allowed_roles": config.KB_ALLOWED_ROLES, "metadata": metadata,

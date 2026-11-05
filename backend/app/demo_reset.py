@@ -1,13 +1,13 @@
-"""Reset the demo: put guests back to the state of today's Databricks export
+"""Reset the demo: put guests back to the state of today's Adobe Real-Time CDP export
 and clear what they left behind, here and in AOM.
 
 `POST /api/demo/reset` (the story page's **Reset demo** button, or
 scripts/reset_demo.py). For each guest - by default the three personas plus
-every guest who changed something since the dump loaded:
+every guest who changed something since the export loaded:
 
 1. **Couchbase**: delete their `requests` (the upgrade/booking queue the phone
    shows), `concierge` chat, `context_cache` and `bookings` documents; reload
-   their `profiles` document from the dump partition (stateroom, check-in,
+   their `profiles` document from the export partition (stateroom, check-in,
    purchases, `rev` back to the export); release the sold staterooms of their
    sailing (`inventory`, rebuilt from the catalog on next use); re-rank their
    offers; drop them from `live_guests` so the next daily load doesn't carry
@@ -21,7 +21,7 @@ every guest who changed something since the dump loaded:
    history) is left alone - that is the record.
 4. The backend's in-process counters and the last fleet-workload report.
 
-Nothing here touches the dump, the Knowledge Base or the RAG application.
+Nothing here touches the export files, the Knowledge Base or the RAG application.
 """
 from __future__ import annotations
 
@@ -45,9 +45,9 @@ async def default_guests() -> list[str]:
     return list(dict.fromkeys(loader.PERSONAS + list(live)))
 
 
-def _dump_rows(guest_ids: set[str]) -> dict[str, dict]:
+def _export_rows(guest_ids: set[str]) -> dict[str, dict]:
     """The export rows of these guests (personas are first in part-00000)."""
-    part = loader.latest_partition(os.path.abspath(config.DUMP_DIR))
+    part = loader.latest_partition(os.path.abspath(config.RTCDP_EXPORT_DIR))
     found: dict[str, dict] = {}
     if not part:
         return found
@@ -79,7 +79,7 @@ async def _reset_guest(gid: str, row: dict | None, aom_memory: bool) -> dict:
             await store.remove("inventory", inventory_id(sailing))   # rebuilt from the catalog on next use
             out["inventory"] = sailing
     elif prev:
-        out["profile"] = "not in dump"
+        out["profile"] = "not in export"
     if await store.get("profiles", profile_id(gid)):
         await personalization.refresh_offers(gid)
     if aom_memory and aom.enabled:
@@ -122,7 +122,7 @@ async def run(guests: list[str] | None = None, aom_memory: bool = True, aom_cach
               counters: bool = True) -> dict:
     t0 = time.time()
     gids = list(dict.fromkeys(guests)) if guests else await default_guests()
-    rows = await asyncio.to_thread(_dump_rows, set(gids))
+    rows = await asyncio.to_thread(_export_rows, set(gids))
     results = [await _reset_guest(g, rows.get(g), aom_memory) for g in gids]
     live = await store.get("lookups", "live_guests")
     if live:

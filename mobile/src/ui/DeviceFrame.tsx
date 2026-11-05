@@ -85,12 +85,12 @@ function SidePanel() {
       <Text style={styles.kicker}>PRINCESS CRUISES · DEMO</Text>
       <Text style={styles.panelTitle}>Personalized guest app</Text>
       <Text style={styles.panelBody}>
-        Every screen renders from the guest's on-device database, synced from a daily Databricks dump. The concierge is
-        an agent governed by the Couchbase Agent Operations Manager.
+        Every screen renders from the guest's on-device database, synced from Adobe Real-Time CDP's daily guest profile export. The
+        concierge is an agent governed by the Couchbase Agent Operations Manager.
       </Text>
       {[
         ['phone-portrait-outline', 'Couchbase Lite', 'Offline-first: bookings queue on the phone while on excursions and sync when online'],
-        ['sparkles-outline', 'LLM and Context Caching', 'Answers and guest context cached in Couchbase Agent Operations Manager'],
+        ['sparkles-outline', 'LLM and Context Caching', 'Answers, and guest context from Adobe Real-Time CDP, cached in Couchbase Agent Operations Manager'],
         ['shield-checkmark-outline', 'Governed agents', 'Confirm runs the Stateroom Upgrade agent, with Couchbase Agent Memory'],
       ].map(([icon, title, body]) => (
         <View key={title} style={styles.point}>

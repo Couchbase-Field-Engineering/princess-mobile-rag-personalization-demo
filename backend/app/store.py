@@ -6,7 +6,7 @@ Collections
 Replicated to the phone's Couchbase Lite database through Sync Gateway
 (every document carries `channels`):
 
-  profiles       one per guest - the Databricks personalization row, plus `rev`
+  profiles       one per guest - the Adobe Real-Time CDP profile row, plus `rev`
   offers         one per guest - ranked "For You" offers
   bookings       one per guest - confirmed upgrades, excursions, dining, packages, spa
   requests       action requests; CREATED ON THE PHONE (offline-first), processed here

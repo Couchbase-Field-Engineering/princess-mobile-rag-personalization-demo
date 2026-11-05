@@ -1,6 +1,6 @@
 # Princess Cruises · Mobile RAG Personalization Demo
 
-A guest-facing cruise app that personalizes itself from a **daily Databricks dump** of passenger reservation data. It keeps working **at sea with no signal** because the data lives on the phone in **Couchbase Lite**. Its concierge agent is **registered with, and governed by, the Couchbase Agent Operations Manager (AOM)**:
+A guest-facing cruise app that personalizes itself from the guest context Princess keeps in **Adobe Experience Platform**: a **daily Adobe Real-Time CDP profile export** (unified guest profile, audiences, Customer AI scores) for the data on the phone, the **Real-Time CDP Profile Access API** for the guest's current audiences when the concierge builds context, and **AEM content fragments** for the Guest Services Playbook. It keeps working **at sea with no signal** because the data lives on the phone in **Couchbase Lite**. Its concierge agent is **registered with, and governed by, the Couchbase Agent Operations Manager (AOM)**:
 
 * answers are grounded in AOM's **Knowledge Base**
 * it is registered as an AOM **RAG Application** (`princess-guest-concierge`), so its queries, cache hits and cost savings show on AOM's *RAG Applications* page
@@ -22,7 +22,7 @@ The app's structure is based on [Fujio-Turner/mobile_field_service](https://gith
 2. **Where the LLM bill comes from.** Four cost drivers (repeat questions, context rebuilt every turn, unscoped retrieval, no answer offline) and the fix for each: AOM's LLM Cache, Context Cache, scoped RAG application, and cached context synced to Couchbase Lite.
 3. **How it usually gets built.** Every box between the question and the answer is a bill. Press **Transform the stack**, or **T**.
 4. **The same questions, two bills.** Five questions walked through an AOM-governed concierge and a plain chatbot, with a running LLM spend on each phone. Press **Next step**, or Space.
-5. **One data plane for the AI.** Databricks to Couchbase to the AOM Knowledge Base, RAG app and caches, and on to the phone, with live cache hit rates and model calls avoided from the running backend.
+5. **One data plane for the AI.** Adobe Real-Time CDP and AEM to Couchbase to the AOM Knowledge Base, RAG app and caches, and on to the phone, with live cache hit rates and model calls avoided from the running backend.
 6. **Where the savings come from.** Question by question, with and without AOM.
 7. **See it run.** Links to the app and the AOM dashboard, plus a five-minute script that ends with Confirm triggering the Stateroom Upgrade Agent and Agent Memory.
 
@@ -32,12 +32,12 @@ The phone frame's side panel links back to the story. The page is served by the 
 
 | Concept | Where you see it |
 |---|---|
-| **Personalization from Databricks** | *For You* ranks upgrades, packages, excursions, dining and spa offers per guest. The ranking uses the model scores and preferences from that morning's dump, plus live inventory. The feed re-ranks after every booking. |
+| **Personalization from Adobe Real-Time CDP** | *For You* ranks upgrades, packages, excursions, dining and spa offers per guest. The ranking uses the Customer AI scores, audiences and preferences from that morning's Real-Time CDP export, plus live inventory. The feed re-ranks after every booking. |
 | **Couchbase Lite: offline and online** | Every screen renders from the on-device database. Turning on *Profile → At sea - no signal* pauses replication. You can still browse, place a Princess Upgrade bid or book an excursion: it's saved as a `requests` document marked **On device**, and when you turn the switch off it syncs and is confirmed. |
 | **Registered with AOM** | `scripts/register_with_aom.py` sets up four things in AOM: the **Princess Guest Concierge** agent identity (role `support_agent`, scoped to 11 tools), the **`pcl-guest-services`** MCP server, the approval tier for goodwill upgrades, and the **`princess-guest-concierge` RAG Application**. |
 | **AOM RAG Application** | Playbook questions ("How does Princess Upgrade work?") go to `POST /v1/agent/rag/princess-guest-concierge/query`. AOM retrieves behind its Context Cache, generates behind its LLM Cache, and counts the query on the *RAG Applications* page. The app is scoped to the one *Guest Services Playbook* document, so a generic question can never retrieve another guest's profile. The loader re-scopes it to each day's new playbook. |
-| **Knowledge Base fed by the daily dump** | The loader publishes the *Guest Services Playbook* plus one *Guest profile* document for each passenger sailing soon. The concierge always searches with a `document_id` filter, so a guest's answer can only be grounded in **their own** profile. |
-| **Context Caching** | For personal questions the concierge assembles context (the guest's own KB profile chunks, playbook chunks and live tool facts) and caches it in **AOM's Context Cache** (`/v1/context/set`, namespace `rag:princess-guest-concierge:guest-context`, key `<guest>:<intent>:<export_date>:r<profile rev>`, with the real build time as `source_latency_ms`). The next question is a `/v1/context/get` hit, shown as a `Context cache · hit` chip and as latency avoided on AOM's *Context Cache* page. The next dump or any booking by that guest changes the key, so the entry is never served stale. The same context is written to Couchbase as `ctx::<guest>::<intent>`, which syncs to the phone; that copy is what the offline concierge answers from. |
+| **Knowledge Base fed by Adobe** | The loader publishes the *Guest Services Playbook*, rendered from the AEM `guest-services-playbook-entry` content fragments (`adobe/aem/`), plus one *Guest profile* document from the Real-Time CDP export for each passenger sailing soon. The concierge always searches with a `document_id` filter, so a guest's answer can only be grounded in **their own** profile. |
+| **Context Caching** | For personal questions the concierge assembles context - the guest's **current Adobe Real-Time CDP profile view** (Profile Access API: audience memberships and Customer AI scores, a 120-350 ms round trip shown as an `Adobe Real-Time CDP · …ms` chip), their own KB profile chunks, playbook chunks and live tool facts - and caches it in **AOM's Context Cache** (`/v1/context/set`, namespace `rag:princess-guest-concierge:guest-context`, key `<guest>:<intent>:<export_date>:r<profile rev>`, with the real build time as `source_latency_ms`). The next question is a `/v1/context/get` hit, shown as a `Context cache · hit` chip and as latency avoided on AOM's *Context Cache* page. The next export or any booking by that guest changes the key, so the entry is never served stale. The same context is written to Couchbase as `ctx::<guest>::<intent>`, which syncs to the phone; that copy is what the offline concierge answers from. |
 | **LLM Caching** | Every completion goes through AOM's LLM cache. Playbook questions contain no personal data, so the second guest to ask the same question gets `LLM cache · exact hit` from the RAG application. Personal questions go through `/v1/llm/complete` in the `rag:princess-guest-concierge:personal` namespace, which AOM also attributes to the RAG application. |
 | **Governed actions** | Upgrades (Princess Upgrade bid, instant, goodwill), excursions, specialty dining, packages, spa and online check-in all run as `POST /v1/tools/invoke`. AOM re-checks RBAC and the agent's tool scope, traces and audits the call, scans the response, and holds goodwill upgrades for a person to approve. |
 | **Stateroom Upgrade Agent + Agent Memory** | **Confirm** on the upgrade screen creates a `purchase_cabin_upgrade`, `place_upgrade_bid` or `apply_goodwill_upgrade` request. The worker hands those to a second AOM identity, the **Princess Stateroom Upgrade Agent** (`backend/app/upgrade_agent.py`, scoped to the 5 upgrade tools). It first recalls the guest's stateroom history and preferences from **AOM Agent Memory** (`POST /v1/memory/search`), applies the upgrade as a governed tool call attributed to itself, then writes what happened back to memory (`POST /v1/memory`: from/to category and stateroom, sailing, what was paid or bid, the occasion). The request card shows *Run by the Stateroom Upgrade agent · Remembered in AOM Agent Memory*, and the concierge recalls the same memory on its next answer about rooms. |
@@ -46,11 +46,11 @@ The phone frame's side panel links back to the story. The page is served by the 
 
 ## Architecture
 
-![Architecture: Databricks dump, phone with Couchbase Lite, demo stack (backend, Couchbase Server, Sync Gateway) and the Agent Operations Manager](docs/images/architecture.svg)
+![Architecture: Adobe Real-Time CDP export, phone with Couchbase Lite, demo stack (backend, Couchbase Server, Sync Gateway) and the Agent Operations Manager](docs/images/architecture.svg)
 
 | # | Flow |
 |---|---|
-| **1** | Every morning the Databricks job drops a `dt=YYYY-MM-DD` JSON Lines partition, and the loader picks up the newest one with a `_SUCCESS` marker. |
+| **1** | Every morning the Real-Time CDP dataset export lands an `exportTime=YYYYMMDD` JSON Lines partition, and the loader picks up the newest one with a `_SUCCESS` marker. |
 | **2** | The loader upserts every passenger profile, re-ranks offers and publishes the catalog in Couchbase Server. The concierge reads and writes its **context cache** there, the worker reads pending requests, and the MCP tools apply bookings. |
 | **3** | The loader replaces the AOM **Knowledge Base** documents (the Guest Services Playbook and one profile per passenger sailing soon), then re-scopes the **RAG Application** to the new playbook. |
 | **4** | Sign-in: the backend creates the guest's Sync Gateway user (channels `guest:<id>`, `catalog`) and mints a session. The concierge is called over `/api`. |
@@ -137,18 +137,20 @@ A goodwill upgrade follows the same path. The difference is that AOM answers `20
 ```mermaid
 sequenceDiagram
   autonumber
-  participant DBX as Databricks job
-  participant DROP as data/databricks-dump
+  participant DBX as Adobe Real-Time CDP export
+  participant AEM as AEM content fragments
+  participant DROP as data/adobe-rtcdp-export
   participant L as Backend loader
   participant CB as Couchbase Server
   participant AOM as AOM Knowledge Base
   participant SG as Sync Gateway → phones
 
-  DBX->>DROP: dt=2026-10-09/part-0000[0-3].json + _SUCCESS + _manifest.json
-  L->>DROP: poll for newer dt=*/_SUCCESS
+  DBX->>DROP: exportTime=20261009/part-0000[0-3].json + _SUCCESS + _manifest.json
+  L->>DROP: poll for newer exportTime=*/_SUCCESS
   L->>CB: upsert ~24k passenger profiles (carry forward live bookings)
   L->>CB: booking index, catalog, re-ranked offers (sailing ≤ 45 days)
   Note over CB: context caches built from yesterday's export_date are now stale
+  L->>AEM: GraphQL guest-services-playbook (persisted query)
   L->>AOM: replace "Guest Services Playbook <date>"
   L->>AOM: replace "Guest profile <guest> <date>" (sailing ≤ KB_WINDOW_DAYS)
   CB->>SG: import changed docs
@@ -181,7 +183,7 @@ stateDiagram-v2
 The backend can run on an in-memory store, and the app has a browser preview engine that syncs the same documents over REST. Use this to look at the UX. Couchbase Lite needs a device build (step 3).
 
 ```bash
-python3 databricks/generate_mock_dump.py            # ~100 MB dump → data/databricks-dump/dt=<today>/
+python3 adobe/generate_mock_export.py               # ~100 MB export → data/adobe-rtcdp-export/exportTime=<today>/
 cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
 uvicorn app.main:app --port 8200                    # STORE_DRIVER=memory by default
 # new terminal
@@ -196,7 +198,7 @@ You need Docker Desktop, and the [Couchbase Agent Operations Manager](https://gi
 cp .env.example .env
 ./scripts/setup-corporate-ca.sh            # only behind a TLS-inspecting proxy (Zscaler etc.)
 docker compose up -d --build               # couchbase, init, sync-gateway, sg-init, backend, web
-docker compose logs -f backend             # wait for "Loaded dump 2026-10-09: … rows"
+docker compose logs -f backend             # wait for "Loaded Real-Time CDP export 2026-10-09: … rows"
 
 python3 scripts/register_with_aom.py --admin-password '<AOM admin password>'
 docker compose up -d --build backend       # picks up AOM_* from .env, publishes the KB, scopes the RAG app
@@ -268,9 +270,9 @@ It runs four steps:
 |---|---|
 | `couchbase` StatefulSet + `couchbase-init` hook Job | Couchbase Server EE 8.0.2. The Job runs the same `init.sh` as Compose |
 | `sync-gateway` + `sg-init` hook Job | Sync Gateway 4.0.4. `sync-gateway-public` exposes 4984 for Couchbase Lite |
-| `backend` | Loads the dump into Couchbase and serves the MCP server. Self-registers with AOM (`AOM_AUTO_REGISTER`, see below) |
-| `databricks-dump` PVC | Holds the dump. The backend's init container exports today's 100 MiB partition on first start |
-| `databricks-daily-export` CronJob | 05:00 America/New_York: exports a new partition and keeps the newest 2. The backend picks it up within 5 minutes |
+| `backend` | Loads the Real-Time CDP export into Couchbase and serves the MCP server. Self-registers with AOM (`AOM_AUTO_REGISTER`, see below) |
+| `rtcdp-export` PVC | Holds the export. The backend's init container writes today's 100 MiB mock partition on first start |
+| `rtcdp-daily-export` CronJob | 05:00 America/New_York: writes a new partition (as the Real-Time CDP destination would) and keeps the newest 2. The backend picks it up within 5 minutes |
 | `web` | The phone-framed app on 8082 (8081 in Compose). nginx proxies `/api` to the backend, so the browser needs only one URL |
 
 **Self-registration.** No register script is needed in the cluster. With `AOM_AUTO_REGISTER=true`, the backend does the following on startup and retries until AOM is up:
@@ -310,7 +312,7 @@ AOM_ADMIN_PASSWORD='<AOM admin password>' ~/pcl-deploy/src/deploy/k8s/deploy-on-
 ## Demo script (about 10 minutes)
 
 1. **Olivia Bennett** (Captain's Circle Elite, anniversary, *Sun Princess*, Balcony, 9 days out)
-   * *For You*: check-in first, then **Upgrade to a Premium Suite** ("Only 1 left · Perfect for your anniversary"), then Love by Britto and a Couples Massage at the Lotus Spa. Point out the footnote: the ranking comes from the Databricks model and the data lives in Couchbase Lite.
+   * *For You*: check-in first, then **Upgrade to a Premium Suite** ("Only 1 left · Perfect for your anniversary"), then Love by Britto and a Couples Massage at the Lotus Spa. Point out the footnote: the scores come from Adobe Customer AI via Real-Time CDP and the data lives in Couchbase Lite.
    * *Concierge*: "Can we upgrade to a suite?" shows `Context cache · built` and `LLM cache · miss`. Ask it again: `Context cache · hit` and `LLM cache · exact hit`. Open **sources**: Olivia's KB profile and the playbook.
    * *Profile → At sea - no signal* **on**. Place a Princess Upgrade bid (**On device**), then ask "What's included in Princess Premier?" (**Answered on device · Couchbase Lite**). Switch it **off**: the bid syncs and comes back **Accepted - Premium Suite**. In AOM, show the trace and audit entry for `pcl-guest-services::place_upgrade_bid`.
    * "Our room is noisy and the AC is broken" offers **Request complimentary upgrade**, which shows **Awaiting supervisor**. Approve it in AOM → *Approvals*, and the phone flips to **Confirmed**.
@@ -336,31 +338,29 @@ What a passenger asks (`backend/app/workload.py`, `USE_CASES`): check-in, arriva
 * **Personal questions** build a per-guest, per-intent context once (`Context cache: built`); the follow-up in the same intent reuses it (**hit**); `--repeat-ratio` of guests ask the same thing again (**exact LLM hit**, same prompt).
 * **Statements** ("we're vegetarian") go to Agent Memory and are recalled on that guest's later turns.
 
-The run reports per ship, per use case and per cache outcome (`GET /api/demo/workload`), and the story page shows it live. Guests are picked from the loaded dump among those sailing within `--window-days` (default 45), lead guests first, so every ship in the catalog gets passengers.
+The run reports per ship, per use case and per cache outcome (`GET /api/demo/workload`), and the story page shows it live. Guests are picked from the loaded export among those sailing within `--window-days` (default 45), lead guests first, so every ship in the catalog gets passengers.
 
 ## Reset the demo
 
-`POST /api/demo/reset` (the **Reset demo** button on the story page, or `python scripts/reset_demo.py`) puts the demo back to the state of today's export. For the three personas plus every guest who changed something since the load (or `--guests G00000201`): their `requests`, chat and cached context are deleted, their profile is reloaded from the dump partition (stateroom, check-in, purchases, `rev` 0), the sold staterooms of their sailing are released, their offers re-ranked, and they are dropped from `live_guests`. Sync Gateway replicates the deletes and the fresh profile to the phone. In AOM, their Agent Memory entries are deleted and the concierge's cache namespaces (`rag:princess-guest-concierge*`, including the RAG application's own) are purged, so the next demo starts with a visible `miss` again; traces, audit log and approvals history are left alone. `--keep-aom-memory` / `--keep-aom-caches` / `--keep-counters` narrow it.
+`POST /api/demo/reset` (the **Reset demo** button on the story page, or `python scripts/reset_demo.py`) puts the demo back to the state of today's export. For the three personas plus every guest who changed something since the load (or `--guests G00000201`): their `requests`, chat and cached context are deleted, their profile is reloaded from the export partition (stateroom, check-in, purchases, `rev` 0), the sold staterooms of their sailing are released, their offers re-ranked, and they are dropped from `live_guests`. Sync Gateway replicates the deletes and the fresh profile to the phone. In AOM, their Agent Memory entries are deleted and the concierge's cache namespaces (`rag:princess-guest-concierge*`, including the RAG application's own) are purged, so the next demo starts with a visible `miss` again; traces, audit log and approvals history are left alone. `--keep-aom-memory` / `--keep-aom-caches` / `--keep-counters` narrow it.
 
 ---
 
-## The Databricks dump
+## The Adobe Real-Time CDP export
 
-`databricks/generate_mock_dump.py` writes the exact layout the Databricks notebook produces: Spark JSON Lines part files, `_SUCCESS`, and a `_manifest.json`.
+`adobe/generate_mock_export.py` writes the layout the Real-Time CDP dataset-export destination delivers (`adobe/rtcdp/dataset-export-destination.json`): JSON Lines part files under `exportTime=YYYYMMDD/`, `_SUCCESS`, and a `_manifest.json` with the dataset, sandbox and schema ids.
 
 ```bash
-python3 databricks/generate_mock_dump.py --export-date 2026-10-09 --target-mb 100 --parts 4
+python3 adobe/generate_mock_export.py --export-date 2026-10-09 --target-mb 100 --parts 4
 ```
 
-* **About 24,000 passenger reservations** (about 8,300 bookings) over the 17-ship fleet (Caribbean, Mexican Riviera, Panama Canal, Australia, Japan and Southeast Asia home ports) and 150 days of sailings, 100 MiB, deterministic for a given `--seed` on a given Python version. Each part is about 25 MB, under GitHub's 50 MB warning.
-* One line is **one passenger on one upcoming reservation**: identity and loyalty (Captain's Circle tier and points), the reservation (ship, itinerary with port days, stateroom, party, check-in status), preferences, up to 12 past sailings, onboard spend mix, what's already purchased for this sailing, and **`ml_scores`** from `pcl-personalization-v4.2`.
+* **About 22,000 guest profiles** (about 7,600 bookings) over the 17-ship fleet (Caribbean, Mexican Riviera, Panama Canal, Australia, Japan and Southeast Asia home ports) and 150 days of sailings, 100 MiB, deterministic for a given `--seed` on a given Python version. Each part is about 25 MB, under GitHub's 50 MB warning.
+* One line is **one guest on one upcoming reservation**: the stitched `identity` (ECID, CRM id, guest id namespace), Captain's Circle tier and points, the reservation (ship, itinerary with port days, stateroom, party, check-in status), preferences, up to 12 past sailings, onboard spend mix, what's already purchased for this sailing, the **`audiences`** the profile qualifies for (Upgrade propensity - high, Celebrating on board, Wellness escapers, Families with children, ...) and **`ml_scores`** from Customer AI (`customer-ai-propensity-v2`).
 * `ml_scores` holds the propensities (upgrade, beverage, dining, excursion, spa, internet, Princess Premier), price sensitivity, segment, next best action, recommended upgrade category and suggested Princess Upgrade bid.
 * Three hand-built **demo personas**, with sailings relative to the export date, are always the first rows.
-* `databricks/notebooks/guest_personalization_daily_export.py` is the production equivalent: Guest 360 joins, MLflow model scoring, a Delta table, and the JSON export to a Unity Catalog volume. `databricks/jobs/…job.json` schedules it daily at 05:00 America/New_York.
+* `adobe/rtcdp/README.md` describes the two production integrations: the scheduled dataset export (batch, 05:00 America/New_York) and the Profile Access API the concierge calls for the current profile when it builds context. `adobe/aem/` holds the playbook's content-fragment model and persisted GraphQL query.
 
-The loader only needs a folder with a newer `dt=*/_SUCCESS` to appear. You can sync the Volume down with `databricks fs cp -r`, or mount the cloud storage behind it into the backend container at `/data/databricks-dump`.
-
----
+The loader only needs a folder with a newer `exportTime=*/_SUCCESS` to appear: point the destination's cloud storage (or a sync of it) at the backend container's `/data/adobe-rtcdp-export`.
 
 ## Data model
 
@@ -368,7 +368,7 @@ Bucket `princess`, scope `pcl`. Sync Gateway replicates the first seven collecti
 
 | Collection | Document | Written by | Notes |
 |---|---|---|---|
-| `profiles` | `profile::<guest>` | loader, actions | The dump row + `rev` (bumped on every booking) |
+| `profiles` | `profile::<guest>` | loader, actions | The Real-Time CDP profile row (+ `identity`, `audiences`) + `rev` (bumped on every booking) |
 | `offers` | `offers::<guest>` | personalization | Ranked *For You*, including upgrade options for offline use |
 | `bookings` | `bookings::<guest>` | actions | Confirmed items shown day by day |
 | `requests` | `req::<guest>::<uuid>` | **the phone** (create), worker (status) | Offline-first queue. The sync function allows `requireUser(guest_id)`, `status: pending` and creation only |
@@ -394,11 +394,14 @@ Backend variables go in `.env` (see `.env.example`); `docker-compose.yml` sets t
 | `AOM_ADMIN_USERNAME`, `AOM_ADMIN_PASSWORD` | — | Used only to publish KB documents |
 | `AOM_LLM_PROVIDER`, `AOM_LLM_MODEL` | AOM default | Pin the model completions use |
 | `KB_WINDOW_DAYS`, `KB_PROFILE_LIMIT` | `10`, `150` | Which passengers get a KB profile each day |
-| `CONTEXT_CACHE_TTL_SECONDS` | `21600` | Upper bound; the dump date and profile rev invalidate it sooner |
+| `CONTEXT_CACHE_TTL_SECONDS` | `21600` | Upper bound; the export date and profile rev invalidate it sooner |
 | `RAG_APP_ID` | `princess-guest-concierge` | AOM RAG Application id; `RAG_APP_ENABLED=false` skips it |
 | `LLM_NAMESPACE_PERSONAL` / `_PLAYBOOK` | `rag:princess-guest-concierge:personal` / `:playbook` | Keep the `rag:<app_id>:` prefix so AOM attributes the activity to the app |
 | `CONTEXT_NAMESPACE` | `rag:princess-guest-concierge:guest-context` | AOM Context Cache namespace for personal context |
-| `DEMO_TODAY` | dump's `export_date` | Keeps "9 days to sail" stable whenever you demo |
+| `DEMO_TODAY` | export's `export_date` | Keeps "9 days to sail" stable whenever you demo |
+| `RTCDP_EXPORT_DIR`, `RTCDP_POLL_SECONDS` | `data/adobe-rtcdp-export`, `600` | Where the Real-Time CDP export lands and how often to look |
+| `ADOBE_IMS_CLIENT_ID` / `_SECRET` / `ADOBE_IMS_ORG_ID`, `ADOBE_SANDBOX` | — | Real-Time CDP Profile Access API (blank = mock mode from the exported profile, `ADOBE_MOCK_LATENCY_MS=120,350`) |
+| `AEM_GRAPHQL_ENDPOINT`, `AEM_TOKEN` | — | AEM publish host for the playbook content fragments (blank = bundled fragments) |
 | `SG_PUBLIC_URL` | — | Replication URL handed to phones |
 
 App variables (`mobile/.env`): `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_SG_URL`, `EXPO_PUBLIC_DB_ENGINE` (`auto` · `cbl` · `preview`).
@@ -427,19 +430,20 @@ backend/            FastAPI API, MCP server, loader, worker, concierge (Python)
   app/workload.py       fleet chatbot workload: every ship's guests × passenger use cases → the concierge → AOM caches
   app/demo_reset.py     back to today's export: guest docs, profile, inventory, offers; AOM memories and cache namespaces
   app/rag_app.py        the concierge's AOM RAG Application definition, re-scoped daily
-  app/loader.py         daily dump → Couchbase + AOM Knowledge Base
+  app/loader.py         daily Real-Time CDP export → Couchbase + AOM Knowledge Base
+  app/adobe.py          Adobe clients: Real-Time CDP Profile Access (context) and AEM GraphQL (playbook), mock or live
   app/worker.py         offline-first requests → AOM tools/invoke (upgrades → the upgrade agent)
   app/upgrade_agent.py  Stateroom Upgrade Agent: Agent Memory recall → governed upgrade → remember the outcome
   app/aom_bootstrap.py  self-registration with AOM (Kubernetes)
 mobile/             Expo app (Couchbase Lite engine + browser preview engine)
-databricks/         mock dump generator, PySpark notebook, daily job
+adobe/              mock Real-Time CDP export generator; rtcdp/ destination + Profile API notes; aem/ playbook content-fragment model + query
 couchbase-init/     bucket / scope / collections / indexes
 sync-gateway/       bootstrap + database config with per-collection sync functions
 scripts/            register_with_aom.py, run_chatbot_workload.py, reset_demo.py, setup-corporate-ca.sh
 web/                nginx image serving the browser build of the app on :8081 (proxies /api to the backend)
 helm/princess-app/     Helm chart for the demo (Couchbase, Sync Gateway, backend, daily export CronJob, web)
 deploy/k8s/         deploy.sh + values for the K3s node "mother" (AOM and the demo)
-data/               the daily dump drop folder
+data/               the Real-Time CDP export landing folder
 ```
 
 ## Notes

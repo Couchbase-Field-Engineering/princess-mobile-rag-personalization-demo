@@ -41,7 +41,7 @@ def definition(playbook_document_id: str | None) -> dict:
         "name": "Princess Guest Concierge (mobile)",
         "description": ("Princess Cruises mobile app concierge. Playbook questions are answered here from the "
                         "daily Guest Services Playbook. Personal answers use the guest's own profile from the "
-                        "Databricks dump, cached in the guest-context namespace."),
+                        "Adobe Real-Time CDP export, cached in the guest-context namespace."),
         "owner": "Princess Digital Guest Experience",
         "enabled": bool(playbook_document_id),
         "allowed_roles": ["support_agent", "admin"],

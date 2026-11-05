@@ -53,6 +53,8 @@ def test_concierge_context_cache_and_playbook(client):
     h, gid = login(client, "4830303", "Natarajan")
     a = client.post("/api/concierge", headers=h, json={"message": "Can I upgrade my room?"}).json()
     assert a["intent"] == "upgrade" and a["personal"] and a["context"]["status"] == "miss"
+    # the context was built with the guest's current Adobe Real-Time CDP profile view
+    assert a["context"]["rtcdp"]["mode"] == "mock" and "Wellness escapers" in a["context"]["rtcdp"]["audiences"]
     assert any(x["tool"] == "place_upgrade_bid" for x in a["actions"])
     b = client.post("/api/concierge", headers=h, json={"message": "What would an upgrade cost me?"}).json()
     assert b["context"]["status"] == "hit"

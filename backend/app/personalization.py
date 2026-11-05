@@ -1,7 +1,7 @@
 """Ranks the "For You" offers for one guest.
 
-Inputs are the Databricks model scores and preferences from the daily dump,
-plus live state the dump can't know about: what the guest has booked since
+Inputs are the Customer AI scores and preferences from the daily Adobe
+Real-Time CDP export, plus live state the export can't know about: what the guest has booked since
 (bookings), unsold stateroom inventory, and how close the sailing is.
 The result is written to `offers::<guest_id>`, which Sync Gateway replicates
 to the guest's phone - so the For You feed renders from Couchbase Lite, even
@@ -49,7 +49,7 @@ async def compute_offers(profile: dict) -> list[dict]:
     rec = s.get("recommended_upgrade_category")
     cur_rank = C.CATEGORY_BY_CODE[r["stateroom"]["category_code"]]["rank"]
     if rec and C.CATEGORY_BY_CODE[rec]["rank"] <= cur_rank:
-        # Already upgraded past the model's pick since the dump - offer the next step up instead.
+        # Already upgraded past the model's pick since the export - offer the next step up instead.
         rec = C.CABIN_CATEGORIES[cur_rank]["code"] if cur_rank < len(C.CABIN_CATEGORIES) else None
         s = {**s, "recommended_bid_per_night_usd": None}
     if rec and dts >= 0:

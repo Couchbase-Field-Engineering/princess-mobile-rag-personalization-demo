@@ -4,7 +4,7 @@
                   and a REST "preview sync" used only by the browser preview build
   /pcl/mcp/      the pcl-guest-services MCP server AOM governs
 
-Background tasks: the Databricks dump loader/poller and the offline-first
+Background tasks: the Adobe Real-Time CDP export loader/poller and the offline-first
 request worker.
 """
 from __future__ import annotations
@@ -22,7 +22,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import aom_bootstrap, concierge, config, demo_reset, loader, metrics, personalization, rag_app, sgw, worker, workload
+from . import adobe, aom_bootstrap, concierge, config, demo_reset, loader, metrics, personalization, rag_app, sgw, worker, workload
 from .aom_client import aom
 from .docs import (CATALOG_ID, STATE, bookings_id, chat_id, ctx_id, days_to_sail, guest_channel,
                    now_iso, offers_id, profile_id)
@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
             # With self-registration the KB is published once AOM sign-in works.
             await loader.load(kb=not auto_register)
         except Exception:  # noqa: BLE001
-            log.exception("initial dump load failed")
+            log.exception("initial export load failed")
 
     first = asyncio.create_task(initial_load())
     _bg.append(first)
@@ -103,7 +103,7 @@ async def index():
     rows = [
         ("http://localhost:8081/story", "The story: why Couchbase, not Redis, for an offline-first AI guest app (start here)"),
         ("http://localhost:8081", "The app in a browser (docker compose service <code>web</code>)"),
-        ("http://localhost:8200/api/status", "Backend status: dump load, Knowledge Base publishing, AOM, Sync Gateway"),
+        ("http://localhost:8200/api/status", "Backend status: Real-Time CDP export load, AEM playbook, Knowledge Base publishing, AOM, Sync Gateway"),
         ("http://localhost:8200/docs", "Backend API (OpenAPI)"),
         ("http://localhost:8200/pcl/mcp", "MCP server <code>pcl-guest-services</code> (called by AOM)"),
         ("http://localhost:18091", "Couchbase Web Console (Administrator / password123)"),
@@ -116,7 +116,7 @@ async def index():
 h1{{color:#0A1A3F}} li{{margin:10px 0}} a{{color:#16357A;font-weight:600}}</style></head>
 <body><h1>Princess Cruises personalization demo</h1>
 <p>This is the backend. Open the app at <a href="http://localhost:8081">http://localhost:8081</a>.
-Loaded dump: <b>{STATE.get("export_date") or "loading..."}</b> ({loader.STATUS.get("state")}).</p>
+Loaded Real-Time CDP export: <b>{STATE.get("export_date") or "loading..."}</b> ({loader.STATUS.get("state")}).</p>
 <ul>{items}</ul></body></html>"""
 
 
@@ -137,7 +137,11 @@ async def status():
         except Exception as exc:  # noqa: BLE001
             aom_state["health"] = {"error": str(exc)[:200]}
     return {"store": store.driver, "export_date": STATE.get("export_date"),
-            "load": {k: v for k, v in loader.STATUS.items()}, "aom": aom_state, "metrics": metrics.snapshot(),
+            "load": {k: v for k, v in loader.STATUS.items()},
+            "adobe": {"rtcdp": {**adobe.STATUS["rtcdp"], "export_dir": config.RTCDP_EXPORT_DIR, "sandbox": config.ADOBE_SANDBOX,
+                                "identity_namespace": config.ADOBE_RTCDP_IDENTITY_NAMESPACE},
+                      "aem": {**adobe.STATUS["aem"], "endpoint": config.AEM_GRAPHQL_ENDPOINT or None}},
+            "aom": aom_state, "metrics": metrics.snapshot(),
             "sync_gateway": {"configured": sgw.enabled(), "public_url": config.SG_PUBLIC_URL or None, "db": config.SG_DB},
             "mcp_server": {"server_id": config.AOM_MCP_SERVER_ID, "registered_url": config.AOM_MCP_PUBLIC_URL},
             "workload": {k: v for k, v in workload.status().items()
@@ -350,5 +354,5 @@ async def demo_reset_last():
 
 
 @app.post("/api/admin/reload")
-async def reload_dump(force: bool = True):
+async def reload_export(force: bool = True):
     return {k: v for k, v in (await loader.load(force=force)).items()}

@@ -3,14 +3,15 @@
 Two kinds:
 
 * **Guest profile** - one per passenger sailing soon, rendered from that
-  morning's Databricks row as plain prose. The concierge retrieves it with a
+  morning's Adobe Real-Time CDP profile export as plain prose. The concierge retrieves it with a
   `document_id`-scoped search, so a guest's question can only ever be
   grounded in *their own* profile, never a neighbour's that happens to be
   semantically close.
 * **Guest Services Playbook** - fleet, policy and product knowledge (Princess Upgrade
-  rules, packages, check-in, dining, ports). Contains no personal data, so
-  answers grounded only in it are safe to share across guests through AOM's
-  LLM cache.
+  rules, packages, check-in, dining, ports). Its FAQ entries are AEM content
+  fragments (adobe/aem/README.md; `FAQ` below is the bundled copy served when
+  no AEM endpoint is configured). Contains no personal data, so answers
+  grounded only in it are safe to share across guests through AOM's LLM cache.
 
 FAQ entries are also synced to the phone inside the catalog document, so the
 app can answer the common questions offline from Couchbase Lite.
@@ -69,11 +70,12 @@ FAQ = [
 ]
 
 
-def playbook_markdown(export_date: str) -> str:
+def playbook_markdown(export_date: str, entries: list[dict] | None = None) -> str:
     lines = [f"# Princess Cruises Guest Services Playbook (published {export_date})", "",
-             "Fleet, policy and product knowledge for the Princess Guest Concierge agent. Contains no guest data.", ""]
+             "Fleet, policy and product knowledge for the Princess Guest Concierge agent, from the AEM "
+             "guest-services-playbook content fragments and the fleet catalog. Contains no guest data.", ""]
     lines += ["## Frequently asked questions", ""]
-    for f in FAQ:
+    for f in entries or FAQ:
         lines += [f"**{f['q']}** {f['a']}", ""]
     lines += ["## Stateroom categories and upgrade policy", ""]
     for c in C.CABIN_CATEGORIES:
@@ -125,7 +127,8 @@ def guest_profile_markdown(p: dict) -> str:
     owned = p.get("purchased_for_sailing", {})
     return "\n".join([
         f"# Guest profile {p['guest_id']}: {p['first_name']} {p['last_name']}",
-        f"Source: Databricks daily dump {p['export_date']}, model {s.get('model_version')}.",
+        f"Source: Adobe Real-Time CDP profile export {p['export_date']}, scores by {s.get('model_version')}"
+        + (f"; audiences: {', '.join(a['name'] for a in p['audiences'])}" if p.get("audiences") else "") + ".",
         "",
         "## Upcoming sailing",
         f"{p['first_name']} sails on {r['ship_name']} - {r['itinerary_name']} - from {r['embark_port']} on "

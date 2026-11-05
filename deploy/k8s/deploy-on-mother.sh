@@ -15,7 +15,7 @@
 #   AOM_ADMIN_PASSWORD  the in-cluster AOM's admin password (https://192.168.111.4:3111); prompted if unset
 #   BRANCH              branch or tag to deploy (default main)
 #   ONLY                princess (default) | aom - "aom" also pulls couchbaselabs/couchbase-agent-operations-manager
-#   FORCE_DUMP=true     re-export today's Databricks partition on start (after a catalog change)
+#   FORCE_DUMP=true     re-export today's Real-Time CDP partition on start (after a catalog change)
 #   SKIP_BUILD=1 TAG=.. reuse images already imported into K3s
 #   SRC                 where the checkout lives (default ~/pcl-deploy/src)
 #

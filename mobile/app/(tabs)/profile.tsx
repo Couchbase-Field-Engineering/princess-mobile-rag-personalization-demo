@@ -56,8 +56,11 @@ export default function Profile() {
 
           <SectionTitle title="How we personalize" />
           <Card style={{ padding: 16, gap: 8 }}>
-            <Row icon="analytics-outline" label="Source" value={`Databricks daily export · ${p.export_date}`} />
-            <Row icon="git-branch-outline" label="Model" value={String(s?.model_version)} />
+            <Row icon="analytics-outline" label="Source" value={`Adobe Real-Time CDP export · ${p.export_date}`} />
+            <Row icon="git-branch-outline" label="Scores" value={`Adobe Customer AI · ${String(s?.model_version)}`} />
+            {p.audiences?.length ? (
+              <Row icon="layers-outline" label="Audiences" value={p.audiences.map((a) => a.name).join(' · ')} />
+            ) : null}
             <Row icon="people-circle-outline" label="Segment" value={String(s?.segment)} />
             <Row icon="navigate-outline" label="Next best action" value={String(s?.next_best_action).replace(/_/g, ' ')} />
             {SCORES.map(([k, label]) => {

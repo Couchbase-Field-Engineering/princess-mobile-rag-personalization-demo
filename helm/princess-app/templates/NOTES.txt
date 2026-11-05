@@ -1,7 +1,7 @@
 Princess Cruises personalization demo is deploying to namespace {{ .Release.Namespace }}.
 
-First start takes a few minutes: Couchbase initializes, today's mock Databricks
-export ({{ .Values.dump.targetMb }} MiB) is generated, loaded into Couchbase{{ if .Values.aom.enabled }}, and the
+First start takes a few minutes: Couchbase initializes, today's mock Adobe Real-Time CDP
+export ({{ .Values.rtcdpExport.targetMb }} MiB) is generated, loaded into Couchbase{{ if .Values.aom.enabled }}, and the
 backend registers itself with AOM and publishes the Knowledge Base{{ end }}.
 
   kubectl -n {{ .Release.Namespace }} get pods -w

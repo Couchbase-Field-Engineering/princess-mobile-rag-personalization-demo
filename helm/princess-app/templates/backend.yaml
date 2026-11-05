@@ -4,18 +4,18 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: databricks-dump
+  name: rtcdp-export
   labels: {{- include "princess.labels" . | nindent 4 }}
   annotations:
     helm.sh/resource-policy: keep
 spec:
   accessModes: ["ReadWriteOnce"]
-  {{- with .Values.dump.persistence.storageClassName }}
+  {{- with .Values.rtcdpExport.persistence.storageClassName }}
   storageClassName: {{ . }}
   {{- end }}
   resources:
     requests:
-      storage: {{ .Values.dump.persistence.size }}
+      storage: {{ .Values.rtcdpExport.persistence.size }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -35,18 +35,18 @@ spec:
     spec:
       initContainers:
         {{- include "princess.waitForCouchbase" . | nindent 8 }}
-        # First start: export today's mock Databricks partition into the volume.
-        - name: databricks-export
+        # First start: write today's mock Real-Time CDP export partition into the volume.
+        - name: rtcdp-export
           image: {{ include "princess.image" (dict "root" . "image" .Values.backend.image) }}
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
-          command: ["sh", "/scripts/dump.sh"]
+          command: ["sh", "/scripts/export.sh"]
           env:
-            - { name: DUMP_TZ, value: {{ .Values.dump.daily.timeZone | quote }} }
+            - { name: EXPORT_TZ, value: {{ .Values.rtcdpExport.daily.timeZone | quote }} }
             # Regenerate today's partition even if it exists (after a catalog change,
             # e.g. new ships): the backend reloads it because the part files are new.
-            - { name: FORCE, value: {{ if .Values.dump.forceExportOnStart }}"1"{{ else }}"0"{{ end }} }
+            - { name: FORCE, value: {{ if .Values.rtcdpExport.forceExportOnStart }}"1"{{ else }}"0"{{ end }} }
           volumeMounts:
-            - { name: dump, mountPath: /data }
+            - { name: export, mountPath: /data }
             - { name: scripts, mountPath: /scripts, readOnly: true }
       containers:
         - name: backend
@@ -63,7 +63,7 @@ spec:
               valueFrom: { secretKeyRef: { name: princess-app-secrets, key: COUCHBASE_USERNAME } }
             - name: COUCHBASE_PASSWORD
               valueFrom: { secretKeyRef: { name: princess-app-secrets, key: COUCHBASE_PASSWORD } }
-            - { name: DUMP_DIR, value: /data/databricks-dump }
+            - { name: RTCDP_EXPORT_DIR, value: /data/adobe-rtcdp-export }
             - { name: SG_ADMIN_URL, value: "http://sync-gateway:4985" }
             - { name: SG_DB, value: {{ .Values.syncGateway.database | quote }} }
             - { name: SG_PUBLIC_URL, value: {{ printf "ws://%s:%v/%s" .Values.publicHost .Values.syncGateway.service.port .Values.syncGateway.database | quote }} }
@@ -106,10 +106,10 @@ spec:
             failureThreshold: 6
           resources: {{- toYaml .Values.backend.resources | nindent 12 }}
           volumeMounts:
-            - { name: dump, mountPath: /data, readOnly: true }
+            - { name: export, mountPath: /data, readOnly: true }
       volumes:
-        - name: dump
-          persistentVolumeClaim: { claimName: databricks-dump }
+        - name: export
+          persistentVolumeClaim: { claimName: rtcdp-export }
         - name: scripts
           configMap: { name: princess-app-scripts }
 ---
@@ -139,18 +139,19 @@ spec:
   ports:
     - { name: http, port: {{ .Values.backend.service.port }}, targetPort: http }
 {{- end }}
-{{- if .Values.dump.daily.enabled }}
+{{- if .Values.rtcdpExport.daily.enabled }}
 ---
-# The "daily Databricks job": a new dt= partition every morning. The backend
-# notices it within DUMP_POLL_SECONDS and reloads profiles, offers and the KB.
+# The daily Real-Time CDP dataset export: a new exportTime= partition every
+# morning. The backend notices it within RTCDP_POLL_SECONDS and reloads
+# profiles, offers and the Knowledge Base.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: databricks-daily-export
+  name: rtcdp-daily-export
   labels: {{- include "princess.labels" . | nindent 4 }}
 spec:
-  schedule: {{ .Values.dump.daily.schedule | quote }}
-  {{- with .Values.dump.daily.timeZone }}
+  schedule: {{ .Values.rtcdpExport.daily.schedule | quote }}
+  {{- with .Values.rtcdpExport.daily.timeZone }}
   timeZone: {{ . | quote }}
   {{- end }}
   concurrencyPolicy: Forbid
@@ -161,10 +162,10 @@ spec:
       backoffLimit: 2
       template:
         metadata:
-          labels: {{- include "princess.selector" "databricks-export" | nindent 12 }}
+          labels: {{- include "princess.selector" "rtcdp-export" | nindent 12 }}
         spec:
           restartPolicy: OnFailure
-          # Same node as the backend: the dump volume is ReadWriteOnce (local-path).
+          # Same node as the backend: the export volume is ReadWriteOnce (local-path).
           affinity:
             podAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
@@ -175,15 +176,15 @@ spec:
             - name: export
               image: {{ include "princess.image" (dict "root" . "image" .Values.backend.image) }}
               imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
-              command: ["sh", "/scripts/dump.sh"]
+              command: ["sh", "/scripts/export.sh"]
               env:
-                - { name: DUMP_TZ, value: {{ .Values.dump.daily.timeZone | quote }} }
+                - { name: EXPORT_TZ, value: {{ .Values.rtcdpExport.daily.timeZone | quote }} }
               volumeMounts:
-                - { name: dump, mountPath: /data }
+                - { name: export, mountPath: /data }
                 - { name: scripts, mountPath: /scripts, readOnly: true }
           volumes:
-            - name: dump
-              persistentVolumeClaim: { claimName: databricks-dump }
+            - name: export
+              persistentVolumeClaim: { claimName: rtcdp-export }
             - name: scripts
               configMap: { name: princess-app-scripts }
 {{- end }}

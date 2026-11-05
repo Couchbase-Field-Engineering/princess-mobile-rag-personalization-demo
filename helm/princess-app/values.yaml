@@ -63,7 +63,7 @@ backend:
   env:
     KB_WINDOW_DAYS: "10"
     KB_PROFILE_LIMIT: "150"
-    DUMP_POLL_SECONDS: "300"
+    RTCDP_POLL_SECONDS: "300"
     DEMO_TODAY: ""
   extraEnv: []
   resources:
@@ -96,10 +96,11 @@ aom:
   llmProvider: ""
   llmModel: ""
 
-# The mock Databricks export: generated into a volume on first start (about
-# a minute for 100 MiB) and again every morning by a CronJob, as the real
-# Databricks job would. The backend picks up the new partition on its own.
-dump:
+# The mock Adobe Real-Time CDP profile export (adobe/rtcdp/README.md): generated
+# into a volume on first start (about a minute for 100 MiB) and again every
+# morning by a CronJob, as the real dataset-export destination would deliver it.
+# The backend picks up the new partition on its own.
+rtcdpExport:
   targetMb: 100
   parts: 4
   keepPartitions: 2

@@ -1,0 +1,35 @@
+{
+  "name": "Princess guest profile - daily export to Couchbase landing zone",
+  "description": "Real-Time CDP dataset export: one JSON Lines file set per day, consumed by the Princess guest-app backend loader.",
+  "sandbox": "prod",
+  "sourceConnection": {
+    "dataset": "guest_profile_personalization",
+    "datasetId": "68f1c2a9b7d4e3001a2b3c4d",
+    "schema": "Princess Guest Profile (XDM Individual Profile)",
+    "schemaVersion": "guest_profile_personalization_v3",
+    "fields": [
+      "identity", "loyalty", "preferences", "reservation", "sailing_history", "onboard_spend_mix",
+      "purchased_for_sailing", "ml_scores", "audiences", "consent"
+    ]
+  },
+  "targetConnection": {
+    "destination": "Azure Blob Storage",
+    "container": "pcl-guest-context",
+    "path": "adobe-rtcdp-export/exportTime=%Y%m%d/",
+    "fileType": "JSON",
+    "compression": "none",
+    "manifest": true,
+    "successMarker": "_SUCCESS"
+  },
+  "schedule": {
+    "frequency": "daily",
+    "time": "05:00",
+    "timeZone": "America/New_York",
+    "exportMode": "FULL_FILES"
+  },
+  "notes": [
+    "The backend loader (backend/app/loader.py) treats a partition as complete when _SUCCESS is present.",
+    "Guests sailing within 10 days are also published to the AOM Knowledge Base; the rest stay in Couchbase only.",
+    "adobe/generate_mock_export.py produces the same layout for environments without an AEP sandbox."
+  ]
+}

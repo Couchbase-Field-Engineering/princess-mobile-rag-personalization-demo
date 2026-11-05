@@ -1,26 +1,31 @@
 #!/usr/bin/env python3
-"""Generate a mock Databricks daily dump of cruise passenger reservation data.
+"""Generate a mock Adobe Real-Time CDP daily profile export for the demo.
 
-Writes the exact layout a Databricks job produces with
-`df.repartition(n).write.mode("overwrite").json(path)`:
+Princess's guest context lives in Adobe Experience Platform: Real-Time CDP
+holds the unified guest profile (identity-stitched across the booking system,
+the app and the web), audience memberships, and the propensity scores
+Customer AI produces. A scheduled **dataset export** of the
+`guest_profile_personalization` dataset to a cloud-storage destination lands
+every morning as JSON Lines, one profile per line, in a time-stamped folder.
+This script writes that layout:
 
-    data/databricks-dump/dt=2026-10-09/
-        part-00000-<uuid>-c000.json      # JSON Lines, one passenger reservation per line
+    data/adobe-rtcdp-export/exportTime=20261009/
+        part-00000-<uuid>-c000.json      # JSON Lines, one guest profile + upcoming reservation per line
         part-00001-<uuid>-c000.json
         ...
         _SUCCESS
-        _manifest.json                   # row/byte counts + schema version (written by the notebook)
+        _manifest.json                   # row/byte counts, schema + dataset ids
 
-Each line is one passenger on one upcoming reservation, joined with that
-guest's loyalty status, preferences, sailing history, onboard-spend profile,
-what they've already purchased for this sailing, and the scores the
-personalization model (pcl-personalization-v4.2) produced in Databricks.
+Each line is one guest on one upcoming reservation, joined with their
+Captain's Circle status, preferences, sailing history, onboard-spend profile,
+what they've already purchased for this sailing, their Real-Time CDP identity
+and audience memberships, and the scores Customer AI produced.
 
 Fully deterministic for a given --seed and --export-date, and standard
 library only (runs anywhere Python 3.9+ does). Default target is 100 MiB.
 
-    python databricks/generate_mock_dump.py                 # today, 100 MiB
-    python databricks/generate_mock_dump.py --export-date 2026-10-09 --target-mb 100
+    python adobe/generate_mock_export.py                 # today, 100 MiB
+    python adobe/generate_mock_export.py --export-date 2026-10-09 --target-mb 100
 """
 from __future__ import annotations
 
@@ -36,8 +41,44 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "backend"))
 from app import catalog as C  # noqa: E402
 
-SCHEMA_VERSION = "guest_personalization_v3"
-MODEL_VERSION = "pcl-personalization-v4.2"
+SCHEMA_VERSION = "guest_profile_personalization_v3"   # XDM schema: Princess Guest Profile (profile class)
+MODEL_VERSION = "customer-ai-propensity-v2"             # Adobe Customer AI propensity model
+DATASET_ID = "68f1c2a9b7d4e3001a2b3c4d"                   # the exported AEP dataset
+SANDBOX = "prod"
+
+# Real-Time CDP audiences (segments) a guest can belong to; membership is
+# derived from the same scores, the way Customer AI feeds segmentation.
+AUDIENCES = {
+    "aud-upgrade-high": "Upgrade propensity - high",
+    "aud-celebration": "Celebrating on board",
+    "aud-wellness": "Wellness escapers",
+    "aud-families": "Families with children",
+    "aud-elite": "Captain's Circle Elite & Platinum",
+    "aud-first-cruise": "First-time cruisers",
+    "aud-foodies": "Specialty dining enthusiasts",
+    "aud-package-ready": "Package ready (Plus / Premier)",
+}
+
+
+def audiences_for(scores: dict, tier: str, cruises: int, has_kids: bool, celebration) -> list[dict]:
+    ids = []
+    if scores.get("upgrade_propensity", 0) >= 0.6:
+        ids.append("aud-upgrade-high")
+    if celebration:
+        ids.append("aud-celebration")
+    if scores.get("spa_propensity", 0) >= 0.6:
+        ids.append("aud-wellness")
+    if has_kids:
+        ids.append("aud-families")
+    if tier in ("Elite", "Platinum"):
+        ids.append("aud-elite")
+    if cruises == 0:
+        ids.append("aud-first-cruise")
+    if scores.get("specialty_dining_propensity", 0) >= 0.65:
+        ids.append("aud-foodies")
+    if max(scores.get("beverage_package_propensity", 0), scores.get("premier_propensity", 0)) >= 0.6:
+        ids.append("aud-package-ready")
+    return [{"id": a, "name": AUDIENCES[a], "status": "realized"} for a in ids]
 
 FIRST = ["Olivia", "Liam", "Emma", "Noah", "Ava", "Elijah", "Sophia", "James", "Isabella", "Lucas", "Mia", "Mason",
          "Amelia", "Ethan", "Harper", "Logan", "Evelyn", "Aiden", "Abigail", "Jackson", "Emily", "Sebastian", "Ella",
@@ -287,12 +328,19 @@ class Gen:
             "onboard_spend_mix": dict(zip(["beverage", "dining", "excursions", "spa", "casino", "retail"], spend_mix)),
             "purchased_for_sailing": purchased,
             "ml_scores": scores,
+            # Adobe Experience Platform: the stitched identity and the audiences this profile qualifies for.
+            "identity": {"ecid": f"{(int(me['guest_id'][1:]) * 2654435761) % 10**38:038d}",
+                         "guest_id": me["guest_id"], "crm_id": f"PCL-{me['guest_id']}", "namespace": "guestId"},
+            "audiences": audiences_for(scores, tier, cruises, has_kids, me.get("celebration")),
             "consent": {"personalization_opt_in": r.random() > 0.03, "marketing_opt_in": r.random() > 0.2},
-            "_ingest": {"source_table": "pcl_prod.guest360.passenger_reservation_personalization",
-                        "pipeline": "guest_personalization_daily_export", "dbr_version": "16.4 LTS"},
+            "_ingest": {"system": "adobe-experience-platform", "sandbox": SANDBOX, "dataset_id": DATASET_ID,
+                        "dataset": "guest_profile_personalization", "flow": "rtcdp-daily-profile-export"},
         }
         if overrides:
             deep_update(row, overrides)
+            # Persona overrides change the scores, so re-derive the audiences from them.
+            row["audiences"] = audiences_for(row["ml_scores"], row["loyalty"]["tier"], cruises, has_kids,
+                                             row["preferences"].get("celebration"))
         return row
 
     def person(self, last=None, age_band=None, relationship="self", city=None, first=None):
@@ -345,7 +393,7 @@ class Gen:
     # -- personas -------------------------------------------------------------
     def personas(self):
         """Hand-built demo guests. Their sailings are relative to the export
-        date so the demo story stays the same whenever the dump is generated."""
+        date so the demo story stays the same whenever the export is generated."""
         rows = []
 
         # 1. Olivia Bennett - Captain's Circle Elite, anniversary, Sun Princess in 9 days,
@@ -430,14 +478,14 @@ def main(argv=None):
     ap.add_argument("--target-mb", type=float, default=100.0, help="approximate total size in MiB")
     ap.add_argument("--parts", type=int, default=4, help="number of part files (keep each under GitHub's 50MB warning)")
     ap.add_argument("--seed", type=int, default=20261009)
-    ap.add_argument("--out", default=os.path.join(HERE, "..", "data", "databricks-dump"))
+    ap.add_argument("--out", default=os.path.join(HERE, "..", "data", "adobe-rtcdp-export"))
     args = ap.parse_args(argv)
 
     export_date = dt.date.fromisoformat(args.export_date)
     g = Gen(export_date, args.seed)
     target = int(args.target_mb * 1024 * 1024)
     per_part = target // args.parts + 1
-    out_dir = os.path.abspath(os.path.join(args.out, f"dt={export_date.isoformat()}"))
+    out_dir = os.path.abspath(os.path.join(args.out, f"exportTime={export_date:%Y%m%d}"))
     os.makedirs(out_dir, exist_ok=True)
     for f in os.listdir(out_dir):
         if f.startswith("part-") or f in ("_SUCCESS", "_manifest.json"):
@@ -469,10 +517,12 @@ def main(argv=None):
     guests_total = rows
 
     manifest = {
-        "table": "pcl_prod.guest360.passenger_reservation_personalization",
-        "export_date": export_date.isoformat(), "schema_version": SCHEMA_VERSION, "model_version": MODEL_VERSION,
+        "system": "adobe-experience-platform", "sandbox": SANDBOX,
+        "dataset": "guest_profile_personalization", "dataset_id": DATASET_ID, "flow": "rtcdp-daily-profile-export",
+        "export_time": f"{export_date:%Y%m%d}", "export_date": export_date.isoformat(),
+        "schema_version": SCHEMA_VERSION, "model_version": MODEL_VERSION,
         "format": "jsonl", "rows": rows, "bookings": bookings, "bytes": written, "files": files,
-        "sailings": len(g.sailings), "generator": "databricks/generate_mock_dump.py", "seed": args.seed,
+        "sailings": len(g.sailings), "generator": "adobe/generate_mock_export.py", "seed": args.seed,
         "demo_personas": ["G00000101", "G00000201", "G00000301"],
     }
     with open(os.path.join(out_dir, "_manifest.json"), "w") as fh:

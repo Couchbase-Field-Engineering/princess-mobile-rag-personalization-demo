@@ -57,6 +57,9 @@ export type Profile = {
   history: { avg_onboard_spend_usd: number; lifetime_value_usd: number; past_sailings: unknown[] };
   purchased_for_sailing: { packages: string[]; excursions: string[]; dining: string[]; spa: string[] };
   ml_scores: Record<string, number | string | null> & { model_version: string; segment: string; next_best_action: string };
+  // Adobe Real-Time CDP: stitched identity and realized audience memberships
+  identity?: { ecid?: string; guest_id: string; crm_id?: string; namespace?: string };
+  audiences?: { id: string; name: string; status?: string }[];
 };
 
 export type UpgradeOption = {
@@ -140,7 +143,11 @@ export type ChatMessage = {
   at: string;
   intent?: string;
   actions?: SuggestedAction[];
-  context?: { status: string; latency_ms: number; kb_mode?: string; build_ms?: number };
+  context?: {
+    status: string; latency_ms: number; kb_mode?: string; build_ms?: number;
+    // the Adobe Real-Time CDP Profile Access round trip made while building this context
+    rtcdp?: { mode: string; latency_ms: number; audiences: string[] } | null;
+  };
   llm?: { status: string; namespace?: string; similarity?: number | null; latency_ms?: number | null; stub?: boolean; composed_locally?: boolean };
   sources?: { title: string; snippet: string; kind: string }[];
   offline?: boolean;

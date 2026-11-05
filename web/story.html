@@ -171,8 +171,8 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
       <svg id="diag" viewBox="0 0 1140 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stack comparison">
         <!-- phone -->
         <g><rect x="16" y="120" width="150" height="200" rx="22" class="sb"/><text x="91" y="150" text-anchor="middle" class="st">Guest's phone</text><text x="91" y="170" text-anchor="middle" class="ss">iOS / Android app</text></g>
-        <!-- databricks -->
-        <g><rect x="964" y="176" width="160" height="88" rx="12" class="sb"/><text x="1044" y="208" text-anchor="middle" class="st">Databricks</text><text x="1044" y="228" text-anchor="middle" class="ss">daily guest export</text><text x="1044" y="246" text-anchor="middle" class="ss">profiles · model scores</text></g>
+        <!-- adobe -->
+        <g><rect x="964" y="156" width="160" height="128" rx="12" class="sb"/><text x="1044" y="184" text-anchor="middle" class="st">Adobe Experience Platform</text><text x="1044" y="204" text-anchor="middle" class="ss">Real-Time CDP: guest profile,</text><text x="1044" y="220" text-anchor="middle" class="ss">audiences, Customer AI scores</text><text x="1044" y="240" text-anchor="middle" class="ss">daily export + Profile API</text><text x="1044" y="262" text-anchor="middle" class="ss">AEM: playbook content</text></g>
         <g id="sprawl" class="fade">
           <rect x="30" y="236" width="122" height="64" rx="10" class="sred"/><text x="91" y="262" text-anchor="middle" class="st">SQLite</text><text x="91" y="280" text-anchor="middle" class="ss">+ your own schema</text>
           <rect x="210" y="40" width="200" height="58" rx="10" class="sred"/><text x="310" y="65" text-anchor="middle" class="st">Custom sync API</text><text x="310" y="83" text-anchor="middle" class="ss">delta tracking, retries, queues</text>
@@ -184,7 +184,7 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
           <rect x="460" y="192" width="200" height="58" rx="10" class="sbad"/><text x="560" y="217" text-anchor="middle" class="st">Cache sync / CDC</text><text x="560" y="235" text-anchor="middle" class="ss">keep cache = database</text>
           <rect x="460" y="268" width="200" height="58" rx="10" class="sbad"/><text x="560" y="293" text-anchor="middle" class="st">Vector database</text><text x="560" y="311" text-anchor="middle" class="ss">playbook + profiles for RAG</text>
           <rect x="710" y="116" width="200" height="58" rx="10" class="sbad"/><text x="810" y="141" text-anchor="middle" class="st">LLM gateway + governance</text><text x="810" y="159" text-anchor="middle" class="ss">keys, limits, audit, approvals</text>
-          <rect x="710" y="192" width="200" height="58" rx="10" class="sbad"/><text x="810" y="217" text-anchor="middle" class="st">ETL jobs</text><text x="810" y="235" text-anchor="middle" class="ss">Databricks → DB → cache → vectors</text>
+          <rect x="710" y="192" width="200" height="58" rx="10" class="sbad"/><text x="810" y="217" text-anchor="middle" class="st">ETL jobs</text><text x="810" y="235" text-anchor="middle" class="ss">Adobe → DB → cache → vectors</text>
           <path d="M166 220 C190 220 190 69 210 69" class="sline x"/><path d="M166 220 C190 220 190 145 210 145" class="sline x"/><path d="M166 220 L210 221" class="sline x"/>
           <path d="M410 69 L460 69 M410 145 L460 145 M410 221 L460 221 M410 297 L460 297 M660 145 L710 145 M660 221 L710 221 M910 221 L964 221" class="sline"/>
           <text x="91" y="352" text-anchor="middle" class="ss" fill="#c71d22">offline: no answers</text>
@@ -195,7 +195,7 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
           <rect x="520" y="110" width="260" height="220" rx="16" class="scb"/><text x="650" y="146" text-anchor="middle" class="scbt">Couchbase Server</text><text x="650" y="168" text-anchor="middle" class="scbs">memory-first JSON + key-value</text><text x="650" y="186" text-anchor="middle" class="scbs">SQL++ · indexes · vector search</text><text x="650" y="204" text-anchor="middle" class="scbs">system of record and cache</text>
           <rect x="545" y="230" width="210" height="80" rx="12" fill="#fff" stroke="#f5b800" stroke-width="2"/><text x="650" y="258" text-anchor="middle" style="fill:#0a1a3f;font-size:12.5px;font-weight:800">Agent Operations Manager</text><text x="650" y="276" text-anchor="middle" style="fill:#3e4a66;font-size:10.5px">LLM Cache · Context Cache</text><text x="650" y="292" text-anchor="middle" style="fill:#3e4a66;font-size:10.5px">Knowledge Base · RAG app · governance</text>
           <path d="M166 270 L250 230 M440 220 L520 220 M780 220 L964 220" class="sline" style="opacity:.9;stroke-width:2"/>
-          <text x="208" y="236" text-anchor="middle" class="ss">sync</text><text x="872" y="210" text-anchor="middle" class="ss">daily load</text>
+          <text x="208" y="236" text-anchor="middle" class="ss">sync</text><text x="872" y="210" text-anchor="middle" class="ss">daily export · live profile</text>
           <text x="91" y="352" text-anchor="middle" class="ss" fill="#13804b">offline: answers, at no cost</text>
         </g>
       </svg>
@@ -232,16 +232,16 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
 </section>
 
 <!-- 5 -->
-<section class="ch" data-notes="Follow the data left to right: the Databricks export lands in Couchbase every morning, the Knowledge Base is republished, and the concierge is a registered RAG application in AOM with its two caches.|The context cache is the one to dwell on: the context assembled for Olivia's question is cached in AOM, and the same document syncs to her phone. That is why the concierge can still answer at sea, for free.|The numbers on this page are live from the running demo: cache hit rates, and the model calls avoided since the backend started. AOM's own RAG Applications page keeps the durable view.">
+<section class="ch" data-notes="Follow the data left to right: the Adobe Real-Time CDP profile export lands in Couchbase every morning, the AEM playbook is republished to the Knowledge Base, the Knowledge Base is republished, and the concierge is a registered RAG application in AOM with its two caches.|The context cache is the one to dwell on: the context assembled for Olivia's question is cached in AOM, and the same document syncs to her phone. That is why the concierge can still answer at sea, for free.|The numbers on this page are live from the running demo: cache hit rates, and the model calls avoided since the backend started. AOM's own RAG Applications page keeps the durable view.">
   <div class="wrap">
     <div class="kicker">Chapter 5 · One data plane for the AI</div>
     <h2>Build the context once. <span class="accent">Reuse it everywhere</span> - including the phone.</h2>
     <p class="lede">Personalization and the concierge run on the same Couchbase documents the phone syncs, so an answer paid for once in the cloud is reused by the next guest, the next question, and the same guest with no signal.</p>
     <div class="flow">
-      <div class="card"><span class="icon">🧱</span><h3>Databricks export</h3><p>Every morning: one row per passenger with loyalty, preferences, history and model scores.</p></div>
+      <div class="card"><span class="icon">🅰️</span><h3>Adobe Real-Time CDP</h3><p>Every morning the dataset export lands: one unified guest profile per row with loyalty, preferences, audiences and Customer AI scores. During the day the Profile Access API supplies the current audiences when a context is built. The playbook comes from AEM content fragments.</p></div>
       <div class="card"><span class="icon">🗄️</span><h3>Couchbase Server</h3><p>Profiles upserted, offers re-ranked with live inventory, booking index rebuilt.</p></div>
       <div class="card"><span class="icon">📚</span><h3>AOM Knowledge Base</h3><p>Today's playbook plus a profile per guest sailing soon. The concierge is a RAG app scoped to the playbook; personal retrieval is scoped to the guest.</p></div>
-      <div class="card"><span class="icon">⚡</span><h3>Context &amp; LLM cache</h3><p>Context per guest and topic, invalidated by the next export or any booking. Playbook answers shared across guests.</p></div>
+      <div class="card"><span class="icon">⚡</span><h3>Context &amp; LLM cache</h3><p>Context per guest and topic - the Adobe profile round trip, retrieval and live inventory, assembled once - invalidated by the next export or any booking. Playbook answers shared across guests.</p></div>
       <div class="card"><span class="icon">📱</span><h3>On the phone</h3><p>The same context document syncs through Sync Gateway, so the concierge answers offline at no cost.</p></div>
     </div>
     <div class="stats">
@@ -282,7 +282,7 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
     <h2>Now watch the <span class="accent">meter not move</span>.</h2>
     <p class="lede">The live demo runs on the right-hand side of chapter 3: Couchbase Lite (in the browser preview, the same documents over REST), Sync Gateway, Couchbase Server and the Agent Operations Manager.</p>
     <div class="grid g3">
-      <div class="card"><h3>The guest app</h3><p>Sign in as Olivia, Carlos or Priya - each from today's Databricks export.</p><a class="btn primary" href="/login" style="margin-top:12px">Open the app →</a></div>
+      <div class="card"><h3>The guest app</h3><p>Sign in as Olivia, Carlos or Priya - each from today's Adobe Real-Time CDP export.</p><a class="btn primary" href="/login" style="margin-top:12px">Open the app →</a></div>
       <div class="card"><h3>Agent Operations Manager</h3><p>The concierge's RAG application with its cache hits and savings, the LLM and Context Cache pages, traces with cost per answer, and the approval queue.</p><a class="btn" id="aomLink" target="_blank" rel="noopener" href="#" style="margin-top:12px">Open AOM ↗</a></div>
       <div class="card"><h3>The demo, live</h3><p id="liveLine">Checking the backend…</p><a class="btn" href="/api/status" target="_blank" style="margin-top:12px">Backend status ↗</a></div>
     </div>

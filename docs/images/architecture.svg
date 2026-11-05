@@ -26,18 +26,18 @@
 
   <rect width="1240" height="800" fill="#FFFFFF"/>
 
-  <!-- Databricks -->
+  <!-- Adobe Experience Platform -->
   <rect x="20" y="50" width="230" height="250" rx="14" fill="#FFF4E8" stroke="#F0B27A"/>
-  <text x="34" y="74" class="h">DATABRICKS · DAILY 05:00 ET</text>
+  <text x="34" y="74" class="h">ADOBE REAL-TIME CDP · DAILY 05:00 ET</text>
   <rect x="38" y="92" width="194" height="62" rx="9" class="box"/>
-  <text x="50" y="116" class="t">Guest 360 + model scoring</text>
-  <text x="50" y="134" class="s">guest_personalization_daily_export</text>
+  <text x="50" y="116" class="t">Unified guest profile + Customer AI</text>
+  <text x="50" y="134" class="s">dataset export · Profile Access API</text>
   <path d="M135,154 V190" stroke="#16357A" stroke-width="1.6" fill="none" marker-end="url(#ah)"/>
   <ellipse cx="135" cy="200" rx="97" ry="10" fill="#FFFFFF" stroke="#C9D2E3"/>
   <rect x="38" y="200" width="194" height="70" fill="#FFFFFF" stroke="none"/>
   <path d="M38,200 V270 A97,10 0 0 0 232,270 V200" fill="#FFFFFF" stroke="#C9D2E3"/>
-  <text x="56" y="226" class="t">JSON Lines dump</text>
-  <text x="56" y="244" class="s">dt=YYYY-MM-DD/part-*.json</text>
+  <text x="56" y="226" class="t">JSON Lines export</text>
+  <text x="56" y="244" class="s">exportTime=YYYYMMDD/part-*.json</text>
   <text x="56" y="260" class="s">~100 MB · ~24k passengers</text>
 
   <!-- Phone -->

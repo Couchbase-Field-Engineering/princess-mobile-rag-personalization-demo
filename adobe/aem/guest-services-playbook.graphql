@@ -1,0 +1,17 @@
+# Persisted query: /graphql/execute.json/princess/guest-services-playbook
+query GuestServicesPlaybook($today: String!) {
+  guestServicesPlaybookEntryList(
+    filter: { effectiveFrom: { _expressions: [{ value: $today, _operator: AT_OR_BEFORE }] } }
+    sort: "section ASC, order ASC"
+  ) {
+    items {
+      _path
+      section
+      question
+      answer { plaintext }
+      keywords
+      effectiveFrom
+      effectiveTo
+    }
+  }
+}

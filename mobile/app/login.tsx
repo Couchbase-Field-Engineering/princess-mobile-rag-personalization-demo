@@ -68,7 +68,7 @@ export default function Login() {
             <Button label="Find my cruise" onPress={() => void go()} busy={busy} disabled={!booking || !last} icon="search" />
           </View>
 
-          <Text style={[styles.label, { color: theme.color.onDarkMuted, marginTop: 28 }]}>DEMO GUESTS · FROM TODAY'S DATABRICKS DUMP</Text>
+          <Text style={[styles.label, { color: theme.color.onDarkMuted, marginTop: 28 }]}>DEMO GUESTS · FROM TODAY'S ADOBE REAL-TIME CDP EXPORT</Text>
           {personas.map((p) => (
             <Pressable key={p.guest_id} onPress={() => void go(p.booking_id, p.last_name)} style={({ pressed }) => [styles.persona, pressed && { opacity: 0.8 }]}>
               <View style={styles.avatar}>

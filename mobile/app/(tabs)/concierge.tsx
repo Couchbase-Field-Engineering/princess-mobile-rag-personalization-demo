@@ -137,6 +137,9 @@ function Bubble({ m }: { m: ChatMessage }) {
             icon={ctx.status === 'hit' ? 'flash' : 'layers-outline'}
           />
         ) : null}
+        {ctx?.rtcdp && ctx.status !== 'hit' && !m.offline ? (
+          <Pill label={`Adobe Real-Time CDP · ${Math.round(ctx.rtcdp.latency_ms)}ms`} tone="neutral" icon="cloud-download-outline" />
+        ) : null}
         {llm ? <Pill label={llm.label} tone={llm.tone} icon={m.offline ? 'airplane' : 'hardware-chip-outline'} /> : null}
         {m.sources?.length ? (
           <Pressable onPress={() => setOpen(!open)}>

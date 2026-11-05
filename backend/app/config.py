@@ -18,13 +18,30 @@ COUCHBASE_PASSWORD = os.getenv("COUCHBASE_PASSWORD", "password123")
 COUCHBASE_BUCKET = os.getenv("COUCHBASE_BUCKET", "princess")
 COUCHBASE_SCOPE = os.getenv("COUCHBASE_SCOPE", "pcl")
 
-# --- Databricks dump ------------------------------------------------------------
-DUMP_DIR = os.getenv("DUMP_DIR", os.path.join(os.path.dirname(__file__), "..", "..", "data", "databricks-dump"))
-# How often the backend checks the dump folder for a newer dt= partition.
-DUMP_POLL_SECONDS = int(os.getenv("DUMP_POLL_SECONDS", "600"))
+# --- Adobe Experience Platform -------------------------------------------------
+# Guest context comes from Adobe Real-Time CDP (adobe/rtcdp/README.md):
+#  1. the daily dataset export, landing as exportTime=YYYYMMDD/ partitions here;
+RTCDP_EXPORT_DIR = os.getenv("RTCDP_EXPORT_DIR", os.getenv("DUMP_DIR", os.path.join(os.path.dirname(__file__), "..", "..", "data", "adobe-rtcdp-export")))
+# How often the backend checks the landing folder for a newer partition.
+RTCDP_POLL_SECONDS = int(os.getenv("RTCDP_POLL_SECONDS", os.getenv("DUMP_POLL_SECONDS", "600")))
+#  2. the Profile Access API for the guest's current audiences and scores when
+#     the concierge builds context. Blank credentials = mock mode (answers from
+#     the exported profile with a realistic latency).
+ADOBE_IMS_CLIENT_ID = os.getenv("ADOBE_IMS_CLIENT_ID", "")
+ADOBE_IMS_CLIENT_SECRET = os.getenv("ADOBE_IMS_CLIENT_SECRET", "")
+ADOBE_IMS_ORG_ID = os.getenv("ADOBE_IMS_ORG_ID", "")
+ADOBE_IMS_SCOPES = os.getenv("ADOBE_IMS_SCOPES", "")
+ADOBE_SANDBOX = os.getenv("ADOBE_SANDBOX", "prod")
+ADOBE_RTCDP_IDENTITY_NAMESPACE = os.getenv("ADOBE_RTCDP_IDENTITY_NAMESPACE", "guestId")
+ADOBE_TIMEOUT_SECONDS = float(os.getenv("ADOBE_TIMEOUT_SECONDS", "8"))
+ADOBE_MOCK_LATENCY_MS = tuple(int(x) for x in os.getenv("ADOBE_MOCK_LATENCY_MS", "120,350").split(","))
+# The Guest Services Playbook is authored in AEM as content fragments
+# (adobe/aem/README.md). Blank = the bundled fragments in knowledge.py.
+AEM_GRAPHQL_ENDPOINT = os.getenv("AEM_GRAPHQL_ENDPOINT", "")
+AEM_TOKEN = os.getenv("AEM_TOKEN", "")
 # Memory driver only: keep guests sailing within this many days (personas always kept).
 MEMORY_WINDOW_DAYS = int(os.getenv("MEMORY_WINDOW_DAYS", "21"))
-# "Today" for the demo. Empty = the export_date of the loaded dump, so the
+# "Today" for the demo. Empty = the export_date of the loaded export, so the
 # story (days-to-sail, check-in windows) stays the same whenever it's run.
 DEMO_TODAY = os.getenv("DEMO_TODAY", "")
 

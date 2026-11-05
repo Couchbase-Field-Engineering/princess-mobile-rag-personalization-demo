@@ -41,7 +41,7 @@ TOOLS = ["get_guest_context", "get_upgrade_offers", "place_upgrade_bid", "purcha
 APPROVAL_TOOLS = ["apply_goodwill_upgrade"]
 KEY_DOC = "aom_agent"
 UPGRADE_KEY_DOC = "aom_upgrade_agent"
-AGENT_DESCRIPTION = ("Princess Cruises mobile app concierge: personalization, RAG over the daily Databricks guest "
+AGENT_DESCRIPTION = ("Princess Cruises mobile app concierge: personalization, RAG over the daily Adobe Real-Time CDP guest "
                      "profiles, and guest-service actions (upgrades, excursions, dining, packages, check-in).")
 
 STATUS: dict = {"state": "off"}

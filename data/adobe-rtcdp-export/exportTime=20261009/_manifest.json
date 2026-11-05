@@ -1,0 +1,45 @@
+{
+  "system": "adobe-experience-platform",
+  "sandbox": "prod",
+  "dataset": "guest_profile_personalization",
+  "dataset_id": "68f1c2a9b7d4e3001a2b3c4d",
+  "flow": "rtcdp-daily-profile-export",
+  "export_time": "20261009",
+  "export_date": "2026-10-09",
+  "schema_version": "guest_profile_personalization_v3",
+  "model_version": "customer-ai-propensity-v2",
+  "format": "jsonl",
+  "rows": 21690,
+  "bookings": 7604,
+  "bytes": 104859629,
+  "files": [
+    {
+      "file": "part-00000-33218a5e-c81d-850b-ee66-8de6aac93a05-c000.json",
+      "rows": 5431,
+      "bytes": 26216804
+    },
+    {
+      "file": "part-00001-33218a5e-c81d-850b-ee66-8de6aac93a05-c000.json",
+      "rows": 5405,
+      "bytes": 26216745
+    },
+    {
+      "file": "part-00002-33218a5e-c81d-850b-ee66-8de6aac93a05-c000.json",
+      "rows": 5429,
+      "bytes": 26217570
+    },
+    {
+      "file": "part-00003-33218a5e-c81d-850b-ee66-8de6aac93a05-c000.json",
+      "rows": 5425,
+      "bytes": 26208510
+    }
+  ],
+  "sailings": 371,
+  "generator": "adobe/generate_mock_export.py",
+  "seed": 20261009,
+  "demo_personas": [
+    "G00000101",
+    "G00000201",
+    "G00000301"
+  ]
+}

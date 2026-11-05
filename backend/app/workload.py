@@ -258,7 +258,7 @@ class _Plan:
 async def pick_guests(guests_per_ship: int, ships: list[str] | None, window_days: int, seed: int) -> list[dict]:
     export_date = STATE.get("export_date")
     if not export_date:
-        raise RuntimeError("no dump loaded yet")
+        raise RuntimeError("no Real-Time CDP export loaded yet")
     today = dt.date.fromisoformat(config.DEMO_TODAY or export_date)
     rows = await store.guests_sailing_between(today.isoformat(), (today + dt.timedelta(days=window_days)).isoformat())
     rng = random.Random(seed)

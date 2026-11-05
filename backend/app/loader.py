@@ -1,24 +1,27 @@
-"""Daily Databricks dump -> Couchbase + AOM Knowledge Base.
+"""Daily Adobe Real-Time CDP profile export -> Couchbase + AOM Knowledge Base.
 
-Run by the backend on startup and every DUMP_POLL_SECONDS (it only does work
-when a newer `dt=YYYY-MM-DD/_SUCCESS` partition appears), or by hand:
+Run by the backend on startup and every RTCDP_POLL_SECONDS (it only does work
+when a newer `exportTime=YYYYMMDD/_SUCCESS` partition lands), or by hand:
 
-    python -m app.loader [--dump-dir PATH] [--force] [--no-kb]
+    python -m app.loader [--export-dir PATH] [--force] [--no-kb]
 
-1. Stream every JSON Lines part file of the newest complete partition.
-2. Upsert one `profiles` document per passenger (all ~100MB in Couchbase
-   mode). Live state the guest changed since the last dump (stateroom moves,
+1. Stream every JSON Lines part file of the newest complete partition - the
+   Real-Time CDP dataset export of `guest_profile_personalization`
+   (adobe/rtcdp/README.md).
+2. Upsert one `profiles` document per guest (all ~100MB in Couchbase
+   mode). Live state the guest changed since the last export (stateroom moves,
    check-in, purchases) is carried forward - in production that state would
-   already be in the next Databricks export.
+   already be in the next day's profile.
 3. Index bookings for login, publish the catalog, re-rank offers for guests
    inside the planning window.
-4. Publish to the AOM Knowledge Base: the Guest Services Playbook, and one
-   profile document per passenger sailing within KB_WINDOW_DAYS (demo
-   personas always), replacing yesterday's version of each. The concierge's
-   AOM RAG Application is then re-scoped to the new playbook document.
+4. Publish to the AOM Knowledge Base: the Guest Services Playbook, rendered
+   from the AEM content fragments (adobe/aem/README.md), and one profile
+   document per guest sailing within KB_WINDOW_DAYS (demo personas always),
+   replacing yesterday's version of each. The concierge's AOM RAG Application
+   is then re-scoped to the new playbook document.
 
 Context caches need no sweep: every cached context records the export date it
-was built from, so the new dump makes them all stale at once.
+was built from, so the new export makes them all stale at once.
 """
 from __future__ import annotations
 
@@ -33,7 +36,7 @@ import os
 import time
 
 from . import catalog as C
-from . import config, knowledge, personalization, rag_app
+from . import adobe, config, knowledge, personalization, rag_app
 from .aom_client import AOMError, aom
 from .docs import CATALOG_CHANNEL, CATALOG_ID, STATE, guest_channel, now_iso, profile_id
 from .store import store
@@ -45,8 +48,20 @@ STATUS = {"state": "idle"}
 _TASKS: list = []  # keep a reference so background KB publishing is not garbage-collected
 
 
-def latest_partition(dump_dir: str) -> str | None:
-    parts = sorted(p for p in glob.glob(os.path.join(dump_dir, "dt=*")) if os.path.exists(os.path.join(p, "_SUCCESS")))
+PARTITION_PREFIX = "exportTime="
+
+
+def partition_date(partition: str) -> str:
+    """exportTime=20261104[HHMMSS] -> 2026-11-04 (dt=2026-11-04 from older exports still works)."""
+    stamp = os.path.basename(partition).split("=", 1)[1]
+    digits = "".join(ch for ch in stamp if ch.isdigit())
+    return f"{digits[:4]}-{digits[4:6]}-{digits[6:8]}" if len(digits) >= 8 else stamp
+
+
+def latest_partition(export_dir: str) -> str | None:
+    parts = [p for pat in (PARTITION_PREFIX + "*", "dt=*") for p in glob.glob(os.path.join(export_dir, pat))
+             if os.path.exists(os.path.join(p, "_SUCCESS"))]
+    parts.sort(key=lambda p: (partition_date(p), os.path.basename(p)))
     return parts[-1] if parts else None
 
 
@@ -66,28 +81,28 @@ def read_rows(partition: str):
 
 
 async def mark_live(guest_id: str):
-    """Called after an action - remembers which guests have state newer than the dump."""
+    """Called after an action - remembers which guests have state newer than the export."""
     doc = await store.get("lookups", "live_guests") or {"guests": []}
     if guest_id not in doc["guests"]:
         doc["guests"].append(guest_id)
         await store.upsert("lookups", "live_guests", doc)
 
 
-async def load(dump_dir: str | None = None, force=False, kb=True) -> dict:
-    dump_dir = os.path.abspath(dump_dir or config.DUMP_DIR)
-    part = latest_partition(dump_dir)
+async def load(export_dir: str | None = None, force=False, kb=True) -> dict:
+    export_dir = os.path.abspath(export_dir or config.RTCDP_EXPORT_DIR)
+    part = latest_partition(export_dir)
     if not part:
-        log.warning("No complete Databricks partition (dt=*/_SUCCESS) under %s", dump_dir)
-        STATUS.update(state="no_dump", dump_dir=dump_dir)
+        log.warning("No complete Real-Time CDP export (exportTime=*/_SUCCESS) under %s", export_dir)
+        STATUS.update(state="no_export", export_dir=export_dir)
         return STATUS
-    export_date = os.path.basename(part).split("=", 1)[1]
+    export_date = partition_date(part)
     state = await store.get("lookups", "load_state") or {}
     pid = partition_id(part)
     if (state.get("export_date") == export_date and state.get("partition_id") == pid and not force
             and state.get("driver") == store.driver and store.driver == "couchbase"):
         STATE["export_date"] = export_date
         STATUS.update(state="loaded", **state)
-        log.info("Dump %s already loaded", export_date)
+        log.info("Export %s already loaded", export_date)
         pb = await store.get("lookups", "kbdoc::playbook") or {}
         if kb and config.KB_ENABLED and aom.admin_enabled and pb.get("export_date") != export_date:
             # Loaded before AOM was configured (first run) - publish the KB now.
@@ -154,7 +169,7 @@ async def load(dump_dir: str | None = None, force=False, kb=True) -> dict:
                "driver": store.driver, "loaded_at": now_iso()}
     await store.upsert("lookups", "load_state", summary)
     STATUS.update(state="loaded", **summary)
-    log.info("Loaded dump %s: %s rows (%s bookings) in %.1fs", export_date, rows, len(bookings), time.time() - t0)
+    log.info("Loaded Real-Time CDP export %s: %s rows (%s bookings) in %.1fs", export_date, rows, len(bookings), time.time() - t0)
 
     if kb and config.KB_ENABLED and aom.admin_enabled:
         window = PERSONAS + [g for d, g in sorted(planning) if 0 <= d <= config.KB_WINDOW_DAYS and g not in PERSONAS]
@@ -164,9 +179,9 @@ async def load(dump_dir: str | None = None, force=False, kb=True) -> dict:
     return STATUS
 
 
-async def _replace_kb_doc(key: str, title: str, content: str, metadata: dict):
+async def _replace_kb_doc(key: str, title: str, content: str, metadata: dict, source: str = "adobe-rtcdp-export"):
     prev = await store.get("lookups", f"kbdoc::{key}")
-    res = await aom.kb_ingest(title, content, metadata)
+    res = await aom.kb_ingest(title, content, metadata, source=source)
     new_id = res["document"]["document_id"]
     await store.upsert("lookups", f"kbdoc::{key}", {"type": "kb_index", "document_id": new_id, "title": title,
                                                     "export_date": metadata.get("export_date"), "at": now_iso()})
@@ -179,9 +194,13 @@ async def publish_kb(export_date: str, guest_ids: list[str]):
     t0 = time.time()
     STATUS["kb"] = {"state": "publishing", "total": len(guest_ids) + 1, "done": 0, "errors": 0}
     try:
+        entries, aem_mode = await adobe.playbook_entries(export_date)
         playbook_id = await _replace_kb_doc("playbook", f"Guest Services Playbook {export_date}",
-                                            knowledge.playbook_markdown(export_date),
-                                            {"type": "playbook", "export_date": export_date, "pii": False})
+                                            knowledge.playbook_markdown(export_date, entries),
+                                            {"type": "playbook", "export_date": export_date, "pii": False,
+                                             "source": "aem-content-fragments", "aem_mode": aem_mode},
+                                            source="aem-content-fragments")
+        STATUS["kb"]["aem_mode"] = aem_mode
         STATUS["kb"]["done"] += 1
         # Re-point the AOM RAG application at today's playbook document.
         await rag_app.sync(playbook_id)
@@ -199,7 +218,8 @@ async def publish_kb(export_date: str, guest_ids: list[str]):
             try:
                 await _replace_kb_doc(gid, f"Guest profile {gid} {export_date}", knowledge.guest_profile_markdown(p),
                                       {"type": "guest_profile", "guest_id": gid, "export_date": export_date,
-                                       "booking_id": p["reservation"]["booking_id"], "pii": True})
+                                       "booking_id": p["reservation"]["booking_id"], "pii": True,
+                                       "source": "adobe-rtcdp-export"})
                 STATUS["kb"]["done"] += 1
             except AOMError as exc:
                 STATUS["kb"]["errors"] += 1
@@ -212,27 +232,27 @@ async def publish_kb(export_date: str, guest_ids: list[str]):
 
 async def poll_forever():
     while True:
-        await asyncio.sleep(config.DUMP_POLL_SECONDS)
+        await asyncio.sleep(config.RTCDP_POLL_SECONDS)
         try:
-            part = latest_partition(os.path.abspath(config.DUMP_DIR))
-            if part and os.path.basename(part).split("=", 1)[1] != STATE.get("export_date"):
-                log.info("New Databricks partition detected: %s", part)
+            part = latest_partition(os.path.abspath(config.RTCDP_EXPORT_DIR))
+            if part and partition_date(part) != STATE.get("export_date"):
+                log.info("New Real-Time CDP export detected: %s", part)
                 await load()
         except Exception as exc:  # noqa: BLE001
-            log.warning("dump poll failed: %s", exc)
+            log.warning("export poll failed: %s", exc)
 
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir")
+    ap.add_argument("--export-dir", "--dump-dir", dest="export_dir")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--no-kb", action="store_true")
     args = ap.parse_args()
 
     async def run():
         await store.connect()
-        await load(args.dump_dir, force=args.force, kb=False)
+        await load(args.export_dir, force=args.force, kb=False)
         if not args.no_kb and config.KB_ENABLED and aom.admin_enabled:
             state = await store.get("lookups", "load_state")
             await publish_kb(state["export_date"], await _kb_window())

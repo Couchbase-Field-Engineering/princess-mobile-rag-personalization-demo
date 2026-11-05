@@ -72,7 +72,7 @@ def rag_app_definition(playbook_id):
         "name": "Princess Guest Concierge (mobile)",
         "description": ("Princess Cruises mobile app concierge. Playbook questions are answered here from the "
                         "daily Guest Services Playbook. Personal answers use the guest's own profile from the "
-                        "Databricks dump, cached in the guest-context namespace."),
+                        "Adobe Real-Time CDP export, cached in the guest-context namespace."),
         "owner": "Princess Digital Guest Experience",
         # Never enabled without a document scope: unscoped, a support_agent
         # query could retrieve any guest's profile.
@@ -198,7 +198,7 @@ def main():
         print(f"→ Issuing agent identity '{AGENT_NAME}' (role support_agent, {len(TOOLS)} scoped tools)")
         st, body = api.call("POST", "/v1/agents", {
             "name": AGENT_NAME, "role": "support_agent", "owner": "Princess Digital Guest Experience",
-            "description": "Princess Cruises mobile app concierge: personalization, RAG over the daily Databricks guest "
+            "description": "Princess Cruises mobile app concierge: personalization, RAG over the daily Adobe Real-Time CDP guest "
                            "profiles, and guest-service actions (upgrades, excursions, dining, packages, check-in).",
             "allowed_tools": [f"{SERVER_ID}::{t}" for t in TOOLS],
         })

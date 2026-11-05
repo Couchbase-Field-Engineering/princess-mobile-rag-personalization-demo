@@ -1,8 +1,8 @@
 """Reference catalog for the demo: ships, itineraries, stateroom categories,
 shore excursions, specialty dining, packages and spa.
 
-This is the single source of truth shared by the Databricks mock-dump
-generator (databricks/generate_mock_dump.py imports it), the backend's
+This is the single source of truth shared by the mock Real-Time CDP export
+generator (adobe/generate_mock_export.py imports it), the backend's
 personalization engine and the MCP tools. Prices and names are illustrative
 demo values, not live Princess Cruises pricing.
 """

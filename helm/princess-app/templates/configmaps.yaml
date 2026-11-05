@@ -1,5 +1,5 @@
 # Copies of couchbase-init/init.sh, sync-gateway/db-config.json and
-# databricks/generate_mock_dump.py (deploy/k8s/deploy.sh refreshes chart/files/
+# adobe/generate_mock_export.py (deploy/k8s/deploy.sh refreshes chart/files/
 # from the repository before every install).
 apiVersion: v1
 kind: ConfigMap
@@ -11,24 +11,26 @@ data:
 {{ .Files.Get "files/init.sh" | indent 4 }}
   db-config.json: |-
 {{ .Files.Get "files/db-config.json" | indent 4 }}
-  generate_mock_dump.py: |-
-{{ .Files.Get "files/generate_mock_dump.py" | indent 4 }}
-  dump.sh: |-
+  generate_mock_export.py: |-
+{{ .Files.Get "files/generate_mock_export.py" | indent 4 }}
+  export.sh: |-
     #!/bin/sh
-    # Writes today's dt= partition if it isn't there yet, then keeps only the
-    # newest partitions. Run on first start (init container) and daily (CronJob).
+    # Stands in for the Real-Time CDP dataset export destination: writes today's
+    # exportTime= partition if it isn't there yet, then keeps only the newest
+    # partitions. Run on first start (init container) and daily (CronJob).
     set -eu
-    OUT=/data/databricks-dump
-    TODAY=$(TZ="${DUMP_TZ:-UTC}" date +%Y-%m-%d)
+    OUT=/data/adobe-rtcdp-export
+    TODAY=$(TZ="${EXPORT_TZ:-UTC}" date +%Y-%m-%d)
+    STAMP=$(TZ="${EXPORT_TZ:-UTC}" date +%Y%m%d)
     mkdir -p "$OUT"
-    if [ -f "$OUT/dt=$TODAY/_SUCCESS" ] && [ "${FORCE:-0}" != "1" ]; then
-      echo "Partition dt=$TODAY already exported"
+    if [ -f "$OUT/exportTime=$STAMP/_SUCCESS" ] && [ "${FORCE:-0}" != "1" ]; then
+      echo "Partition exportTime=$STAMP already exported"
     else
-      echo "Exporting dt=$TODAY ({{ .Values.dump.targetMb }} MiB) ..."
-      cd /srv && PYTHONPATH=/srv python /scripts/generate_mock_dump.py --export-date "$TODAY" \
-        --target-mb {{ .Values.dump.targetMb }} --parts {{ .Values.dump.parts }} --out "$OUT"
+      echo "Exporting exportTime=$STAMP ({{ .Values.rtcdpExport.targetMb }} MiB) ..."
+      cd /srv && PYTHONPATH=/srv python /scripts/generate_mock_export.py --export-date "$TODAY" \
+        --target-mb {{ .Values.rtcdpExport.targetMb }} --parts {{ .Values.rtcdpExport.parts }} --out "$OUT"
     fi
-    ls -d "$OUT"/dt=* | sort | head -n -{{ .Values.dump.keepPartitions }} | while read -r old; do
+    ls -d "$OUT"/exportTime=* | sort | head -n -{{ .Values.rtcdpExport.keepPartitions }} | while read -r old; do
       echo "Removing $old"; rm -rf "$old"
     done
     ls -la "$OUT"

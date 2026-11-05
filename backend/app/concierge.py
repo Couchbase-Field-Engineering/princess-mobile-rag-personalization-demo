@@ -15,13 +15,15 @@ One turn:
 3. **Personal questions -> Context Caching.** Look the context up in AOM's
    Context Cache (`/v1/context/get`, namespace
    `rag:princess-guest-concierge:guest-context`), then in the Couchbase
-   `ctx::<guest>::<intent>` document. On a miss, assemble it: AOM Knowledge
-   Base retrieval scoped to this guest's profile document and to the
-   playbook, plus live facts from the governed MCP tools (upgrade
-   inventory, excursions at their ports). It is stored in AOM
-   (`/v1/context/set`, with the real build time) and in Couchbase, keyed by
-   the dump date and the profile revision, so the next daily load or any
-   booking the guest makes invalidates it. The Couchbase copy carries the
+   `ctx::<guest>::<intent>` document. On a miss, assemble it: the guest's
+   current Adobe Real-Time CDP profile (Profile Access API: audience
+   memberships, Customer AI scores), AOM Knowledge Base retrieval scoped to
+   this guest's profile document and to the playbook, plus live facts from
+   the governed MCP tools (upgrade inventory, excursions at their ports). It
+   is stored in AOM (`/v1/context/set`, with the real build time - the Adobe
+   round trip included) and in Couchbase, keyed by the export date and the
+   profile revision, so the next daily export or any booking the guest makes
+   invalidates it. The Couchbase copy carries the
    guest's channel, so Sync Gateway puts it on the phone too - which is what
    lets the app answer offline.
 4. **Memory** - recall what this guest told the concierge before (AOM agent
@@ -39,6 +41,7 @@ import re
 import time
 import uuid
 
+from . import adobe
 from . import catalog as C
 from . import config, knowledge, metrics, rag_app, tool_gateway
 from .aom_client import AOMError, aom, current_trace
@@ -147,7 +150,7 @@ def _local_profile_chunks(profile: dict, intent: str) -> list[dict]:
     for s in sections:
         if any(s.startswith(w) for w in want):
             out.append({"title": f"Guest profile {profile['guest_id']}", "content": s[:1200], "score": None,
-                        "document_id": None, "source": "local-dump"})
+                        "document_id": None, "source": "local-export"})
     return out
 
 
@@ -172,8 +175,8 @@ async def _facts(guest_id: str, intent: str) -> dict:
 
 
 def _aom_context_key(guest_id: str, cache_key: str, profile: dict, personal: bool) -> str:
-    """Key in AOM's Context Cache. The dump date and (for personal context)
-    the profile revision are part of the key, so a new daily dump or any
+    """Key in AOM's Context Cache. The export date and (for personal context)
+    the profile revision are part of the key, so a new daily export or any
     booking makes the old entry unreachable at once. Playbook context holds
     no guest data, so every guest shares one entry per intent."""
     if personal:
@@ -193,8 +196,9 @@ async def get_context(guest_id: str, intent: str, profile: dict, personal: bool 
        hit rate and latency avoided show on AOM's Context Cache and RAG
        Applications pages.
     2. On a miss (or with AOM unreachable), the Couchbase `context_cache`
-       document, if it was built from today's dump and the current profile.
-    3. Otherwise assemble: KB retrieval scoped to this guest's profile
+       document, if it was built from today's export and the current profile.
+    3. Otherwise assemble: the guest's current Real-Time CDP profile view
+       (audiences, scores), KB retrieval scoped to this guest's profile
        document and the playbook, plus live facts from the governed MCP
        tools. The result goes to AOM (`/v1/context/set` with the real build
        time as `source_latency_ms`) and to Couchbase, where the guest's
@@ -247,12 +251,15 @@ async def get_context(guest_id: str, intent: str, profile: dict, personal: bool 
     if kb_mode == "skipped":
         kb_mode = pb_mode
     facts = await _facts(guest_id, intent) if personal and intent != "general" else {}
+    # The guest's *current* profile from Adobe Real-Time CDP: audiences and
+    # scores as of now, not as of this morning's export.
+    rtcdp = await adobe.profile_view(guest_id, profile) if personal else None
     build_ms = round((time.perf_counter() - t0) * 1000, 1)
     doc = {
         "type": "context_cache", "guest_id": guest_id, "intent": intent, "personal": personal, "query": query,
         "export_date": profile.get("export_date"), "profile_rev": profile.get("rev", 0),
         "built_at": now_iso(), "build_ms": build_ms, "kb_mode": kb_mode,
-        "kb_profile": kb_profile, "kb_playbook": kb_playbook, "facts": facts,
+        "kb_profile": kb_profile, "kb_playbook": kb_playbook, "facts": facts, "rtcdp": rtcdp,
         "guest_document_id": guest_doc, "playbook_document_id": playbook_doc,
         "aom_key": aom_key, "channels": [guest_channel(guest_id)],
     }
@@ -268,7 +275,7 @@ async def _aom_context_set(aom_key: str, doc: dict, build_ms) -> None:
         return
     value = {k: v for k, v in doc.items() if not k.startswith("_")}
     if not value.get("personal"):
-        if value.get("kb_profile") or value.get("facts"):
+        if value.get("kb_profile") or value.get("facts") or value.get("rtcdp"):
             return  # never share guest data across guests
         for k in ("guest_id", "channels", "guest_document_id"):
             value.pop(k, None)
@@ -320,6 +327,8 @@ def build_prompt(message: str, personal: bool, ctx: dict, profile: dict, memorie
         ft = _facts_text(ctx.get("facts") or {})
         if ft:
             parts.append(ft)
+        if ctx.get("rtcdp"):
+            parts.append("Adobe Real-Time CDP audiences: " + adobe.audiences_text(ctx["rtcdp"]) + ".")
         for m in memories[:3]:
             parts.append("Earlier the guest said: " + m[:300])
     for c in ctx.get("kb_playbook", [])[:3]:
@@ -564,7 +573,10 @@ async def ask(guest_id: str, message: str, session_id: str | None = None) -> dic
             "context": {"status": ctx["_cache"]["status"], "latency_ms": ctx["_cache"]["latency_ms"],
                         "source": ctx["_cache"].get("source"),
                         "built_at": ctx.get("built_at"), "build_ms": ctx.get("build_ms"), "kb_mode": ctx.get("kb_mode"),
-                        "export_date": ctx.get("export_date")},
+                        "export_date": ctx.get("export_date"),
+                        "rtcdp": ({"mode": ctx["rtcdp"].get("mode"), "latency_ms": ctx["rtcdp"].get("latency_ms"),
+                                   "audiences": [m["name"] for m in ctx["rtcdp"].get("segmentMembership", [])]}
+                                  if ctx.get("rtcdp") else None)},
             "memory_recalled": len(memories), "llm": llm, "trace_id": trace_id if aom.enabled else None,
             "governed": aom.enabled, "total_ms": round((time.perf_counter() - t0) * 1000, 1),
             "export_date": STATE.get("export_date"),

@@ -1,0 +1,13 @@
+{
+  "model": "guest-services-playbook-entry",
+  "title": "Guest Services Playbook entry",
+  "fields": [
+    { "name": "section", "type": "enumeration", "values": ["check-in", "staterooms", "packages", "dining", "excursions", "spa", "policies"] },
+    { "name": "question", "type": "single-line text", "required": true },
+    { "name": "answer", "type": "multi-line text", "format": "rich text" },
+    { "name": "keywords", "type": "multi-field text", "note": "drive the offline FAQ match on the phone" },
+    { "name": "order", "type": "number" },
+    { "name": "effectiveFrom", "type": "date" },
+    { "name": "effectiveTo", "type": "date" }
+  ]
+}

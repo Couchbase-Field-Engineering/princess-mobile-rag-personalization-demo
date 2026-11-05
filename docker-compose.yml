@@ -4,7 +4,7 @@
 #   couchbase-init  one-shot: bucket `princess`, scope `pcl`, collections, indexes
 #   sync-gateway    Sync Gateway 4.0 Enterprise (required by Couchbase Lite 4.x) - replicates to Couchbase Lite on the phone
 #   sg-init         one-shot: creates the `princess` SG database (sync functions per collection)
-#   backend         FastAPI + the `pcl-guest-services` MCP server, the daily-dump loader
+#   backend         FastAPI + the `pcl-guest-services` MCP server, the Real-Time CDP export loader
 #                   and the offline-first request worker  (http://localhost:8200)
 #   web             the app in a browser                  (http://localhost:8081)
 #
@@ -88,7 +88,7 @@ services:
       COUCHBASE_CONN: couchbase://couchbase
       COUCHBASE_USERNAME: Administrator
       COUCHBASE_PASSWORD: password123
-      DUMP_DIR: /data/databricks-dump
+      RTCDP_EXPORT_DIR: /data/adobe-rtcdp-export
       SG_ADMIN_URL: http://sync-gateway:4985
       SG_ADMIN_USERNAME: Administrator
       SG_ADMIN_PASSWORD: password123

@@ -31,9 +31,9 @@ def wait(url, tries=80):
 @pytest.fixture(scope="module")
 def stack(tmp_path_factory):
     dump = tmp_path_factory.mktemp("dump")
-    subprocess.run([sys.executable, os.path.join(ROOT, "databricks", "generate_mock_dump.py"), "--export-date",
+    subprocess.run([sys.executable, os.path.join(ROOT, "adobe", "generate_mock_export.py"), "--export-date",
                     "2026-10-09", "--target-mb", "2", "--out", str(dump)], check=True, capture_output=True)
-    env = {**os.environ, "STORE_DRIVER": "memory", "DUMP_DIR": str(dump), "AOM_URL": AOM, "AOM_AGENT_API_KEY": "",
+    env = {**os.environ, "STORE_DRIVER": "memory", "RTCDP_EXPORT_DIR": str(dump), "ADOBE_MOCK_LATENCY_MS": "1,2", "AOM_URL": AOM, "AOM_AGENT_API_KEY": "",
            "AOM_ADMIN_PASSWORD": "Cruise-Demo-2026", "AOM_AUTO_REGISTER": "true", "KB_PROFILE_LIMIT": "10",
            "AOM_MCP_PUBLIC_URL": f"{API}/pcl/mcp", "SG_ADMIN_URL": "", "REQUEST_POLL_SECONDS": "0.3",
            "FAKE_MCP_URL": f"{API}/pcl/mcp", "FAKE_FRESH_AOM": "1"}

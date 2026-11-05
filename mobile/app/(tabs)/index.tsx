@@ -91,7 +91,7 @@ export default function ForYou() {
         )}
         {snap.offers ? (
           <Text style={styles.footnote}>
-            Ranked by {snap.offers.model_version} on Databricks (export {snap.offers.export_date}) and re-ranked live after every booking.
+            Scored by Adobe Customer AI ({snap.offers.model_version}) in Real-Time CDP (export {snap.offers.export_date}) and re-ranked live after every booking.
             Stored on this phone in Couchbase Lite.
           </Text>
         ) : null}

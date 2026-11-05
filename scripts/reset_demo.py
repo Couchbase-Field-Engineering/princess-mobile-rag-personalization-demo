@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Reset the Princess demo to the state of today's Databricks export.
+"""Reset the Princess demo to the state of today's Adobe Real-Time CDP export.
 
 Calls the backend's `POST /api/demo/reset`: for the three personas plus every
 guest who changed something since the load (or the guests you name), it
 removes their requests, chat and cached context, reloads their profile from
-the dump (stateroom, check-in, purchases), releases sold staterooms, re-ranks
+the export (stateroom, check-in, purchases), releases sold staterooms, re-ranks
 offers, deletes their AOM Agent Memory entries and purges the concierge's AOM
 LLM / Context Cache namespaces. Sync Gateway carries the result to the phone;
 reload the app afterwards.
