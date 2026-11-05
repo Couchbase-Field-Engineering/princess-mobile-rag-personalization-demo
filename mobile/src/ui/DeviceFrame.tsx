@@ -15,7 +15,7 @@ import { usePathname } from 'expo-router';
 import { type ReactNode, useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaFrameContext, SafeAreaInsetsContext } from 'react-native-safe-area-context';
-import { API_URL } from '../config';
+import { api } from '../api';
 import { useData } from '../data/DataContext';
 import { theme } from '../theme';
 
@@ -80,6 +80,19 @@ function StatusBarOverlay({ dark, offline, background }: { dark: boolean; offlin
 }
 
 function SidePanel() {
+  const [reset, setReset] = useState<{ busy: boolean; line: string }>({ busy: false, line: '' });
+  const resetDemo = async () => {
+    if (!window.confirm("Reset the demo? Olivia, Carlos and Priya go back to today's export (requests, stateroom, chat, cached context), their AOM memories are deleted and the concierge's AOM caches are purged.")) return;
+    setReset({ busy: true, line: 'Resetting…' });
+    try {
+      const r = await api<{ summary: { guests: number; requests_removed: number; memories_deleted: number }; export_date: string }>(
+        '/api/demo/reset', { method: 'POST', body: {}, timeoutMs: 120000 });
+      setReset({ busy: false, line: `Reset done: ${r.summary.guests} guests back to export ${r.export_date}, ${r.summary.requests_removed} requests removed, ${r.summary.memories_deleted} AOM memories deleted. Reloading…` });
+      setTimeout(() => window.location.assign('/login'), 1200);
+    } catch (e) {
+      setReset({ busy: false, line: `Reset failed: ${(e as Error).message}` });
+    }
+  };
   return (
     <View style={styles.panel}>
       <Text style={styles.kicker}>PRINCESS CRUISES · DEMO</Text>
@@ -105,10 +118,11 @@ function SidePanel() {
         <Ionicons name="book-outline" size={16} color={theme.color.onDark} />
         <Text style={styles.storyText}>The story: Why Couchbase lowers costs</Text>
       </Pressable>
-      <Text style={styles.panelFoot}>
-        Try Profile → "At sea - no signal", then book something.{'\n'}Backend: {API_URL.replace(/^https?:\/\//, '')} ·
-        full-width view: add ?frame=0
-      </Text>
+      <Pressable onPress={resetDemo} disabled={reset.busy} style={[styles.resetBtn, reset.busy && { opacity: 0.6 }]}>
+        <Ionicons name="refresh-outline" size={16} color={theme.color.princess} />
+        <Text style={styles.resetText}>{reset.busy ? 'Resetting…' : 'Reset demo'}</Text>
+      </Pressable>
+      {reset.line ? <Text style={styles.panelFoot}>{reset.line}</Text> : null}
     </View>
   );
 }
@@ -202,5 +216,7 @@ const styles = StyleSheet.create({
   pointBody: { color: theme.color.muted, fontSize: 13, lineHeight: 18, marginTop: 2 },
   storyBtn: { flexDirection: 'row', gap: 8, alignItems: 'center', alignSelf: 'flex-start', backgroundColor: theme.color.accent, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10, marginTop: 4 },
   storyText: { color: theme.color.onDark, fontWeight: '800', fontSize: 14 },
+  resetBtn: { flexDirection: 'row', gap: 8, alignItems: 'center', alignSelf: 'flex-start', backgroundColor: theme.color.surface, borderWidth: 1, borderColor: theme.color.border, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10 },
+  resetText: { color: theme.color.princess, fontWeight: '800', fontSize: 14 },
   panelFoot: { color: theme.color.faint, fontSize: 12, lineHeight: 18, marginTop: 6 },
 });

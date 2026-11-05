@@ -276,9 +276,9 @@ async def ask(req: AskRequest, guest_id: str = Depends(current_guest)):
 # demo: fleet chatbot workload (see workload.py)
 # --------------------------------------------------------------------------
 class WorkloadRequest(BaseModel):
-    guests_per_ship: int = Field(3, ge=1, le=50)
+    guests_per_ship: int = Field(3, ge=1, le=1000)   # 17 ships x this many sessions
     turns_per_guest: int = Field(6, ge=2, le=30)
-    concurrency: int = Field(4, ge=1, le=32)
+    concurrency: int = Field(4, ge=1, le=64)
     ships: list[str] | None = None          # catalog codes, e.g. ["SUN", "STR"]; default: the whole fleet
     seed: int = 7
     repeat_ratio: float = Field(0.5, ge=0, le=1)      # guests who ask their personal question twice (exact hit)

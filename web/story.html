@@ -300,7 +300,9 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
         <div><h3 style="margin-bottom:6px">The whole fleet, at once</h3>
           <p style="margin:0">Replay a real support queue: guests from all 17 Princess ships ask the concierge what passengers ask - check-in, upgrades, excursions, dining, packages, spa, port times, policies, a noisy cabin - through the same AOM RAG app, Context Cache, LLM Cache and Agent Memory path the phone uses. Then watch AOM's <b>LLM Cache</b> and <b>Context Cache</b> pages.</p></div>
         <div style="display:flex;gap:8px;align-items:center">
-          <label style="font-size:13px">guests/ship <input id="wlGuests" type="number" min="1" max="50" value="3" style="width:52px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px"></label>
+          <label style="font-size:13px">guests/ship <input id="wlGuests" type="number" min="1" max="1000" value="3" style="width:64px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px"></label>
+          <label style="font-size:13px">concurrent <input id="wlConc" type="number" min="1" max="64" value="4" style="width:52px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px"></label>
+          <span id="wlEst" style="font-size:12px;color:var(--muted)"></span>
           <button class="btn primary" id="wlRun">Run fleet workload</button>
           <button class="btn" id="wlStop" style="display:none">Stop</button>
           <button class="btn" id="rsRun" title="Personas back to today's export: requests, chat, cached context, stateroom, offers; AOM memories and the concierge's cache namespaces">Reset demo</button>
@@ -401,10 +403,13 @@ function renderWl(w){ if(!w||!w.state||w.state==='idle'){return;}
   $('#wlLine').textContent=running?('Running - '+(w.done_turns||0)+' of '+w.total_turns+' turns…'):('Run '+w.run_id+' '+w.state+' in '+w.seconds+'s. Open AOM → LLM Cache and Context Cache to see it.');}
 async function pollWl(){try{const w=await fetch('/api/demo/workload',{cache:'no-store'}).then(r=>r.json()); renderWl(w); if(w.state==='running'){setTimeout(pollWl,1500);}}catch(e){}}
 $('#wlRun').onclick=async()=>{ $('#wlRun').disabled=true; $('#wlLine').textContent='Starting…';
-  const r=await fetch('/api/demo/workload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({guests_per_ship:+$('#wlGuests').value||3,turns_per_guest:6,concurrency:4})});
+  const g=+$('#wlGuests').value||3, c=+$('#wlConc').value||4;
+  const r=await fetch('/api/demo/workload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({guests_per_ship:g,turns_per_guest:6,concurrency:c,window_days:g>20?150:45})});
   if(!r.ok){$('#wlLine').textContent='Could not start: '+(await r.text()).slice(0,200); $('#wlRun').disabled=false; return;}
   pollWl();};
 $('#wlStop').onclick=async()=>{await fetch('/api/demo/workload',{method:'DELETE'}); pollWl();};
+function wlEstimate(){const g=+$('#wlGuests').value||0, c=+$('#wlConc').value||1; const turns=g*17*6; const secs=Math.round(turns*1.2/c); $('#wlEst').textContent=g?`≈ ${turns.toLocaleString()} turns · ~${secs<120?secs+' s':Math.round(secs/60)+' min'}`:'';}
+$('#wlGuests').oninput=wlEstimate; $('#wlConc').oninput=wlEstimate; wlEstimate();
 $('#rsRun').onclick=async()=>{ if(!confirm('Reset the demo? Personas go back to today\'s export, their AOM memories are deleted and the concierge\'s AOM cache namespaces are purged.')) return;
   $('#rsRun').disabled=true; $('#wlLine').textContent='Resetting…';
   const r=await fetch('/api/demo/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
