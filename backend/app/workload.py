@@ -37,8 +37,10 @@ from __future__ import annotations
 import asyncio
 import datetime as dt
 import logging
+import math
 import random
 import time
+from zoneinfo import ZoneInfo
 
 from . import catalog as C
 from . import concierge, config
@@ -342,7 +344,51 @@ async def _one_turn(guest: dict, turn: dict, session_id: str) -> dict:
     return rec
 
 
-async def _run(sessions: list[dict], concurrency: int, pace_ms: int):
+# A day in a guest-services queue: relative traffic per local hour (0-23).
+# Quiet overnight, a morning ramp, steady afternoon, peak after dinner when
+# guests plan the next day, tailing off late. Used when a run is spread over
+# `duration_hours` so the AOM charts look like a real queue, not a metronome.
+DIURNAL = [0.25, 0.18, 0.15, 0.15, 0.2, 0.35, 0.6, 0.85, 1.0, 1.1, 1.15, 1.15,
+           1.1, 1.05, 1.0, 1.0, 1.1, 1.3, 1.5, 1.6, 1.5, 1.2, 0.8, 0.45]
+WORKLOAD_TZ = ZoneInfo("America/New_York")
+
+
+def _traffic_integral(start: dt.datetime, hours: float) -> float:
+    """Area under the diurnal curve from `start` for `hours` (hour-weights)."""
+    total, t = 0.0, start
+    remaining = hours
+    while remaining > 1e-9:
+        step = min(remaining, 1.0 - (t.minute * 60 + t.second) / 3600.0)
+        total += DIURNAL[t.hour] * step
+        t += dt.timedelta(hours=step)
+        remaining -= step
+    return total
+
+
+class _Pacer:
+    """Holds the fleet to a schedule: by `elapsed` hours the run should have
+    completed total_turns * (traffic so far / traffic over the whole run)."""
+
+    def __init__(self, total_turns: int, duration_hours: float):
+        self.total = total_turns
+        self.hours = duration_hours
+        self.start = dt.datetime.now(WORKLOAD_TZ)
+        self.whole = _traffic_integral(self.start, duration_hours) or 1.0
+
+    def target(self, now: dt.datetime | None = None) -> int:
+        now = now or dt.datetime.now(WORKLOAD_TZ)
+        elapsed = min(self.hours, max(0.0, (now - self.start).total_seconds() / 3600.0))
+        return int(self.total * _traffic_integral(self.start, elapsed) / self.whole)
+
+    async def wait(self, done: int):
+        """Sleep until the schedule allows the next turn (polling, so Stop works)."""
+        while done >= self.target() and not RUN.get("cancel"):
+            if (dt.datetime.now(WORKLOAD_TZ) - self.start).total_seconds() / 3600.0 >= self.hours:
+                return
+            await asyncio.sleep(2)
+
+
+async def _run(sessions: list[dict], concurrency: int, pace_ms: int, duration_hours: float | None = None):
     sem = asyncio.Semaphore(max(1, concurrency))
     by_ship = {s["ship_code"]: _empty_bucket() | {"ship_name": s["ship_name"], "guests": 0} for s in sessions}
     by_use_case: dict[str, dict] = {}
@@ -351,6 +397,9 @@ async def _run(sessions: list[dict], concurrency: int, pace_ms: int):
     recent: list[dict] = []
     RUN.update(by_ship=by_ship, by_use_case=by_use_case, by_path=by_path, total=total, recent=recent, done_turns=0,
                done_guests=0)
+    pacer = _Pacer(RUN["total_turns"], duration_hours) if duration_hours else None
+    if pacer:
+        RUN["ends_at"] = (pacer.start + dt.timedelta(hours=duration_hours)).astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     async def one_guest(s: dict):
         async with sem:
@@ -359,6 +408,10 @@ async def _run(sessions: list[dict], concurrency: int, pace_ms: int):
             for turn in s["turns"]:
                 if RUN.get("cancel"):
                     return
+                if pacer:
+                    await pacer.wait(RUN["done_turns"])
+                    if RUN.get("cancel"):
+                        return
                 rec = await _one_turn(s, turn, session_id)
                 for b in (total, by_ship[s["ship_code"]], by_use_case.setdefault(rec["use_case"], _empty_bucket()),
                           by_path.setdefault(rec["path"], _empty_bucket())):
@@ -390,7 +443,10 @@ async def _run(sessions: list[dict], concurrency: int, pace_ms: int):
 
 
 async def start(guests_per_ship=3, turns_per_guest=6, concurrency=4, ships: list[str] | None = None, seed: int = 7,
-                repeat_ratio=0.5, paraphrase_ratio=0.3, window_days=45, pace_ms=0) -> dict:
+                repeat_ratio=0.5, paraphrase_ratio=0.3, window_days=45, pace_ms=0,
+                duration_hours: float | None = None) -> dict:
+    """`duration_hours` spreads the run over that long (e.g. 24) following the
+    DIURNAL curve; otherwise it runs as fast as `concurrency` allows."""
     global _TASK
     if RUN.get("state") == "running":
         raise RuntimeError("a workload is already running - stop it first (DELETE /api/demo/workload)")
@@ -406,14 +462,17 @@ async def start(guests_per_ship=3, turns_per_guest=6, concurrency=4, ships: list
     RUN.update(state="running", run_id=run_id, started_at=dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                params={"guests_per_ship": guests_per_ship, "turns_per_guest": turns_per_guest, "concurrency": concurrency,
                        "ships": ships or sorted(C.SHIPS), "seed": seed, "repeat_ratio": repeat_ratio,
-                       "paraphrase_ratio": paraphrase_ratio, "window_days": window_days, "pace_ms": pace_ms},
+                       "paraphrase_ratio": paraphrase_ratio, "window_days": window_days, "pace_ms": pace_ms,
+                       "duration_hours": duration_hours},
                total_guests=len(sessions), total_turns=sum(len(s["turns"]) for s in sessions),
                ships_covered=sorted({s["ship_code"] for s in sessions}), fleet_size=len(C.SHIPS),
                aom={"configured": aom.enabled, "url": config.AOM_URL or None, "dashboard_url": config.AOM_DASHBOARD_URL or None,
                     "rag_app": config.RAG_APP_ID, "llm_namespaces": [config.LLM_NAMESPACE_PLAYBOOK, config.LLM_NAMESPACE_PERSONAL],
                     "context_namespace": config.CONTEXT_NAMESPACE},
                export_date=STATE.get("export_date"))
-    _TASK = asyncio.create_task(_run(sessions, concurrency, pace_ms))
+    if duration_hours:
+        RUN["ends_at"] = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=duration_hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    _TASK = asyncio.create_task(_run(sessions, concurrency, pace_ms, duration_hours))
     return status()
 
 
@@ -421,6 +480,9 @@ def status() -> dict:
     out = dict(RUN)
     out.pop("cancel", None)
     if out.get("state") == "running":
+        if out.get("params", {}).get("duration_hours") and out.get("started_at"):
+            started = dt.datetime.strptime(out["started_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+            out["elapsed_hours"] = round((dt.datetime.now(dt.timezone.utc) - started).total_seconds() / 3600, 2)
         # live rates while it runs
         out["total"] = _finish_bucket(dict(out.get("total") or _empty_bucket()))
         out["by_ship"] = {k: _finish_bucket(dict(v)) for k, v in (out.get("by_ship") or {}).items()}

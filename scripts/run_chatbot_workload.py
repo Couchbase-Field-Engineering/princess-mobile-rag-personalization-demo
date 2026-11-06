@@ -65,6 +65,8 @@ def main():
     ap.add_argument("--paraphrase-ratio", type=float, default=0.3)
     ap.add_argument("--window-days", type=int, default=45)
     ap.add_argument("--pace-ms", type=int, default=0)
+    ap.add_argument("--hours", type=float, help="spread the run over this many hours with a day/night traffic curve "
+                    "(e.g. --guests-per-ship 300 --concurrency 4 --hours 24); the script can be Ctrl-C'd, the run continues")
     ap.add_argument("--plan", action="store_true", help="print who would ask what, run nothing")
     ap.add_argument("--stop", action="store_true", help="stop a running workload")
     ap.add_argument("--status", action="store_true", help="show the current/last run and exit")
@@ -99,10 +101,12 @@ def main():
 
     body = {"guests_per_ship": a.guests_per_ship, "turns_per_guest": a.turns, "concurrency": a.concurrency,
             "ships": ships, "seed": a.seed, "repeat_ratio": a.repeat_ratio, "paraphrase_ratio": a.paraphrase_ratio,
-            "window_days": a.window_days, "pace_ms": a.pace_ms}
+            "window_days": a.window_days if not a.hours else max(a.window_days, 150), "pace_ms": a.pace_ms,
+            "duration_hours": a.hours}
     run = call(a.backend, "/api/demo/workload", "POST", body)
     print(f"\nStarted run {run['run_id']}: {run['total_guests']} guests on {len(run['ships_covered'])}/{run['fleet_size']} ships, "
-          f"{run['total_turns']} turns, {a.concurrency} concurrent sessions\n")
+          f"{run['total_turns']} turns, {a.concurrency} concurrent sessions"
+          + (f", paced over {a.hours} h (day/night curve), ends {run.get('ends_at')}" if a.hours else "") + "\n")
     try:
         while run.get("state") == "running":
             time.sleep(1.5)
@@ -113,6 +117,9 @@ def main():
                     f"tokens saved {t.get('tokens_saved', 0):,}  errors {t.get('errors', 0)}   ")
             sys.stdout.write(line); sys.stdout.flush()
     except KeyboardInterrupt:
+        if a.hours:
+            print(f"\nDetached - the run continues on the backend until {run.get('ends_at')}; --status to check, --stop to end it.")
+            return
         print("\nStopping ...")
         run = call(a.backend, "/api/demo/workload", "DELETE")
     print()

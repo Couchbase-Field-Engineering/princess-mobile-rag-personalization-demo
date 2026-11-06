@@ -285,6 +285,7 @@ class WorkloadRequest(BaseModel):
     paraphrase_ratio: float = Field(0.3, ge=0, le=1)  # turns that reword a question (semantic hit)
     window_days: int = Field(45, ge=1, le=150)        # pick guests sailing within this many days
     pace_ms: int = Field(0, ge=0, le=5000)            # pause between a guest's turns
+    duration_hours: float | None = Field(None, gt=0, le=168)  # spread the run over this long, day/night curve
 
 
 @app.post("/api/demo/workload")

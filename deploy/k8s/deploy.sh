@@ -85,6 +85,25 @@ if [ -z "${SKIP_BUILD:-}" ]; then
     build pcl-backend "$ROOT/backend"
     build pcl-web "$ROOT/web"
   fi
+else
+  # SKIP_BUILD: reuse the images Docker already has for $TAG, but still import any
+  # that K3s's containerd is missing (the kubelet garbage-collects images under
+  # disk pressure, and `crictl rmi --prune` removes the rest).
+  want aom && IMAGES+=("couchbase-aom-operations-manager:$TAG" "couchbase-aom-sample-mcp-servers:$TAG" "couchbase-aom-ui:$TAG")
+  want princess && IMAGES+=("pcl-backend:$TAG" "pcl-web:$TAG")
+  PRESENT=$(remote 'sudo k3s crictl images -o json 2>/dev/null' | python3 -c 'import json,sys
+try: d=json.load(sys.stdin)
+except Exception: d={}
+print("\n".join(t for i in d.get("images",[]) for t in i.get("repoTags",[])))' 2>/dev/null || true)
+  MISSING=()
+  for img in "${IMAGES[@]}"; do
+    docker image inspect "$img" >/dev/null 2>&1 || { echo "Docker has no image $img - unset SKIP_BUILD or set TAG"; exit 1; }
+    grep -qx "docker.io/library/$img" <<<"$PRESENT" || MISSING+=("$img")
+  done
+  IMAGES=("${MISSING[@]}")
+  [ ${#IMAGES[@]} -eq 0 ] && echo "All images for tag $TAG are already on mother"
+fi
+if [ ${#IMAGES[@]} -gt 0 ]; then
   say "Copying ${#IMAGES[@]} images to mother and importing them into K3s"
   if [ "$MOTHER" = local ]; then
     docker save "${IMAGES[@]}" | sudo k3s ctr images import -

@@ -59,3 +59,22 @@ def test_workload_runs_the_fleet_and_reports(client):
 def test_unknown_ship_is_rejected(client):
     r = client.post("/api/demo/workload", json={"ships": ["TITANIC"], "window_days": 150})
     assert r.status_code == 400 and "unknown ship" in r.text
+
+
+def test_paced_run_follows_the_schedule_and_can_be_stopped(client):
+    """duration_hours spreads the turns over time: a 17-turn run paced over
+    ~20 s cannot finish in 2 s, and Stop ends it early."""
+    from app import workload
+    # the diurnal integral covers a whole day
+    start = workload.dt.datetime(2026, 11, 5, 0, 0, tzinfo=workload.WORKLOAD_TZ)
+    assert abs(workload._traffic_integral(start, 24) - sum(workload.DIURNAL)) < 1e-6
+    r = client.post("/api/demo/workload", json={"guests_per_ship": 1, "turns_per_guest": 2, "concurrency": 4,
+                                               "window_days": 150, "duration_hours": 20 / 3600})
+    assert r.status_code == 200, r.text
+    assert r.json()["ends_at"]
+    time.sleep(2)
+    run = client.get("/api/demo/workload").json()
+    assert run["state"] == "running" and run["done_turns"] < run["total_turns"]
+    assert run["params"]["duration_hours"] == 20 / 3600 and "elapsed_hours" in run
+    stopped = client.delete("/api/demo/workload").json()
+    assert stopped["state"] == "cancelled"

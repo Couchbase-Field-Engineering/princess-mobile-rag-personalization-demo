@@ -338,6 +338,8 @@ What a passenger asks (`backend/app/workload.py`, `USE_CASES`): check-in, arriva
 * **Personal questions** build a per-guest, per-intent context once (`Context cache: built`); the follow-up in the same intent reuses it (**hit**); `--repeat-ratio` of guests ask the same thing again (**exact LLM hit**, same prompt).
 * **Statements** ("we're vegetarian") go to Agent Memory and are recalled on that guest's later turns.
 
+**Run for 24 hours.** `duration_hours` (the story page's **Run for 24 hours** button: 300 guests per ship, 4 concurrent sessions; or `--hours 24` on the script) paces the run over that long instead of as fast as it can, following a day/night traffic curve (quiet overnight, morning ramp, peak after dinner), so AOM's charts look like a real guest-services queue. The run lives in the backend process: the script can be detached with Ctrl-C and the run continues; `--status` shows progress and `--stop` ends it. A backend restart ends the run.
+
 The run reports per ship, per use case and per cache outcome (`GET /api/demo/workload`), and the story page shows it live. Guests are picked from the loaded export among those sailing within `--window-days` (default 45), lead guests first, so every ship in the catalog gets passengers.
 
 ## Reset the demo

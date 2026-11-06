@@ -304,6 +304,7 @@ table.cmp td small{display:block;color:var(--muted);font-size:12.5px;margin-top:
           <label style="font-size:13px">concurrent <input id="wlConc" type="number" min="1" max="64" value="4" style="width:52px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px"></label>
           <span id="wlEst" style="font-size:12px;color:var(--muted)"></span>
           <button class="btn primary" id="wlRun">Run fleet workload</button>
+          <button class="btn primary" id="wlRun24" title="300 guests per ship, 4 concurrent sessions, paced over 24 hours with a day/night traffic curve">Run for 24 hours</button>
           <button class="btn" id="wlStop" style="display:none">Stop</button>
           <button class="btn" id="rsRun" title="Personas back to today's export: requests, chat, cached context, stateroom, offers; AOM memories and the concierge's cache namespaces">Reset demo</button>
         </div>
@@ -400,12 +401,19 @@ function renderWl(w){ if(!w||!w.state||w.state==='idle'){return;}
   $('#wl_llm').textContent=pct(t.llm_hit_rate); $('#wl_llmd').textContent=(t.llm_exact_hit||0)+' exact + '+(t.llm_semantic_hit||0)+' semantic hits, '+(t.llm_miss||0)+' provider calls';
   $('#wl_ctx').textContent=pct(t.context_hit_rate); $('#wl_ctxd').textContent=(t.context_hit||0)+' hits, '+(t.context_miss||0)+' contexts built';
   $('#wl_tok').textContent=(t.tokens_saved||0).toLocaleString(); $('#wl_tokd').textContent='≈ $'+(t.cost_saved_usd||0).toFixed(4)+' at list price'+(t.errors?' · '+t.errors+' errors':'');
-  $('#wlLine').textContent=running?('Running - '+(w.done_turns||0)+' of '+w.total_turns+' turns…'):('Run '+w.run_id+' '+w.state+' in '+w.seconds+'s. Open AOM → LLM Cache and Context Cache to see it.');}
-async function pollWl(){try{const w=await fetch('/api/demo/workload',{cache:'no-store'}).then(r=>r.json()); renderWl(w); if(w.state==='running'){setTimeout(pollWl,1500);}}catch(e){}}
+  $('#wlRun24').disabled=running;
+  const dh=(w.params||{}).duration_hours;
+  $('#wlLine').textContent=running?('Running - '+(w.done_turns||0)+' of '+w.total_turns+' turns…'+(dh?' paced over '+dh+' h (day/night curve), ends '+new Date(w.ends_at).toLocaleString()+'; '+(w.elapsed_hours||0)+' h elapsed':'')):('Run '+w.run_id+' '+w.state+' in '+w.seconds+'s. Open AOM → LLM Cache and Context Cache to see it.');}
+async function pollWl(){try{const w=await fetch('/api/demo/workload',{cache:'no-store'}).then(r=>r.json()); renderWl(w); if(w.state==='running'){setTimeout(pollWl,(w.params||{}).duration_hours?10000:1500);}}catch(e){}}
 $('#wlRun').onclick=async()=>{ $('#wlRun').disabled=true; $('#wlLine').textContent='Starting…';
   const g=+$('#wlGuests').value||3, c=+$('#wlConc').value||4;
   const r=await fetch('/api/demo/workload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({guests_per_ship:g,turns_per_guest:6,concurrency:c,window_days:g>20?150:45})});
   if(!r.ok){$('#wlLine').textContent='Could not start: '+(await r.text()).slice(0,200); $('#wlRun').disabled=false; return;}
+  pollWl();};
+$('#wlRun24').onclick=async()=>{ if(!confirm('Run the fleet workload for 24 hours? 300 guests per ship (5,100 sessions, ~30,600 turns), 4 concurrent, paced to a day/night traffic curve. The backend must stay up for the whole run.')) return;
+  $('#wlRun24').disabled=true; $('#wlRun').disabled=true; $('#wlLine').textContent='Starting 24-hour run…';
+  const r=await fetch('/api/demo/workload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({guests_per_ship:300,turns_per_guest:6,concurrency:4,duration_hours:24,window_days:150})});
+  if(!r.ok){$('#wlLine').textContent='Could not start: '+(await r.text()).slice(0,200); $('#wlRun24').disabled=false; $('#wlRun').disabled=false; return;}
   pollWl();};
 $('#wlStop').onclick=async()=>{await fetch('/api/demo/workload',{method:'DELETE'}); pollWl();};
 function wlEstimate(){const g=+$('#wlGuests').value||0, c=+$('#wlConc').value||1; const turns=g*17*6; const secs=Math.round(turns*1.2/c); $('#wlEst').textContent=g?`≈ ${turns.toLocaleString()} turns · ~${secs<120?secs+' s':Math.round(secs/60)+' min'}`:'';}
